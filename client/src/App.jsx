@@ -7,7 +7,8 @@ import Navbar from './components/Navbar'
 
 
 function App() {
-  const [user, setUser] = useState(useLoaderData());
+  // const [user, setUser] = useState(useLoaderData());
+  const [user, setUser] = useState("I'm a user");
   return (
     <div className="page-bg">
       <Navbar />

@@ -7,7 +7,7 @@ import EventPage from "./pages/EventPage"
 import LogInPage from "./pages/LogInPage";
 import { userConfirmation } from "./utilities";
 
-const router = createBrowserRouter([
+const router = createBrowserRouter([ 
 {
     path: '/',
     element: <App />,

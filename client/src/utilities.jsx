@@ -10,6 +10,7 @@ export const userLogIn = async (email, password) => {
     password: password,
   });
   if (response.status === 200) {
+    console.log('enter if')
     let { user, token } = response.data;
     localStorage.setItem("token", token);
     api.defaults.headers.common["Authorization"] = `Token ${token}`;
@@ -36,8 +37,10 @@ export const userConfirmation = async () => {
     api.defaults.headers.common["Authorization"] = `Token ${token}`;
     let response = await api.get("signup/info/");
     if (response.status === 200) {
-      return response.data.user;
+    //   return response.data.user;
+        // window.location.href='/';
     }
   }
+
   return null;
 };

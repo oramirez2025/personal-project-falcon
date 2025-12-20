@@ -2,13 +2,14 @@ import axios from "axios";
 import { useState } from "react";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
-import { useOutletContext } from "react-router-dom";
+import { useOutletContext, useNavigate } from "react-router-dom";
 import { userLogIn } from "../utilities";
 
 const LogIn = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { setUser } = useOutletContext();
+  const { user, setUser} = useOutletContext();
+  const navigate=useNavigate();
 
   return (
     <>
@@ -16,9 +17,12 @@ const LogIn = () => {
       <Form
         onSubmit={async (e) => {
           e.preventDefault();
-          const user = (await userLogIn(email, password));
-          setUser(user);
-          console.log(email)
+          const user1 = await userLogIn(email, password);
+          console.log(user)
+          setUser(user1);
+          console.log(user)
+          
+
         }
         
         }
