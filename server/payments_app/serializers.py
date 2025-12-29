@@ -3,7 +3,7 @@ from .models import Payment
 from user_app.serializers import UserAppProfileSerializer
 
 class PaymentSerializer(serializers.ModelSerializer):
-    student = UserAppProfileSerializer(read_only=True)
+    user = UserAppProfileSerializer(read_only=True)
 
     class Meta:
         model = Payment
