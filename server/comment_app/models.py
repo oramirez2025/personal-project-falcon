@@ -1,7 +1,7 @@
 from django.db import models
-
 from event_app.models import Event
-from signup_app.models import MyUsers
+# updated to correct path
+from user_app.models import MyUsers
 
 class Comment(models.Model):
     author = models.ForeignKey(MyUsers, on_delete=models.CASCADE, related_name="comments")

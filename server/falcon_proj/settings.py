@@ -47,14 +47,14 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
-    'signup_app',
+    'user_app',
     'ticket_app',
     'weather_app',
     'comment_app',
     'event_app',
 ]
-
-AUTH_USER_MODEL = 'signup_app.MyUsers'
+# added user app and changed auth path
+AUTH_USER_MODEL = 'user_app.MyUsers'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
