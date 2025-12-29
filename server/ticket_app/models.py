@@ -1,5 +1,5 @@
 from django.db import models
-from userprofile_app.models import Userprofile 
+from user_app.models import MyUsers
 
 
 
@@ -14,6 +14,6 @@ class TicketTemplate(models.Model):
 
 # Purchased ticket
 class Ticket(models.Model):
-    userprofile = models.ForeignKey(Userprofile, on_delete=models.CASCADE, related_name="ticket_purchases")
+    userprofile = models.ForeignKey(MyUsers, on_delete=models.CASCADE, related_name="ticket_purchases")
     ticket = models.ForeignKey(TicketTemplate, on_delete=models.PROTECT)
     quantity = models.PositiveIntegerField()

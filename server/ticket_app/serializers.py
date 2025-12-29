@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import TicketTemplate, Ticket
-from payment_app.serializers import PaymentSerializer
+from payments_app.serializers import PaymentSerializer
 
 class TicketTemplateSerializer(serializers.ModelSerializer):
     class Meta:
