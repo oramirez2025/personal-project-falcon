@@ -3,6 +3,7 @@ from django.conf import settings
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.authentication import TokenAuthentication
 from rest_framework.status import HTTP_303_SEE_OTHER, HTTP_200_OK
 
 import stripe
@@ -22,25 +23,33 @@ class TicketView(APIView):
     # Before they can purchase a ticket user must be authenticated. 
     # POST = CREATE
     # For now left commented out to make request without needing auth oursevles, uncomment when deployed.
-    # permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
     def post(self, request):
-        checkout_session = stripe.checkout.Session.create(
-            line_items=[
-            {
+        line_items = []
+        ticketQtyA = request.data.get("typeA")
+        if (ticketQtyA):
+            line_items.append({
                 "price": "price_1Se4zBPgEHDjnAGo7JXfIGFH",
-                "quantity": 1
-        
-            },
-            {
+                "quantity": ticketQtyA
+            })
+        ticketQtyB = request.data.get("typeB")
+        if (ticketQtyB):
+            line_items.append({
                 "price": "price_1Se53YPgEHDjnAGoOGJoeJhm",
-                "quantity": 1
+                "quantity": ticketQtyB
         
-            },
-            {
+            })
+        ticketQtyC = request.data.get("typeC")
+        if (ticketQtyC):
+            line_items.append({
                 "price": "price_1Se54ZPgEHDjnAGolleqQKtM",
-                "quantity": 1
+                "quantity": ticketQtyC
         
-            }],
+            })
+        # NOTE: Switch PRICE IDS
+        checkout_session = stripe.checkout.Session.create(
+            line_items=line_items,
 
             # The available ways to pay:
             payment_method_types=['card'],
@@ -49,7 +58,7 @@ class TicketView(APIView):
             # usually, when it's a one-time payment, you want to create a customer for that payment
             customer_creation='always',
             # for the success_url, when the purchase goes through, this is where the user is redirected
-            success_url=settings.BASE_URL,
-            cancel_url=settings.BASE_URL
+            success_url="http://localhost:5173/", # should redirect to page showing their ticke they purchased
+            cancel_url="http://localhost:5173/" # should redirect to page to buy tickets 
         )
-        return Response(checkout_session.url, status=HTTP_303_SEE_OTHER)
+        return Response(checkout_session.url, status=HTTP_200_OK)

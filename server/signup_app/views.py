@@ -7,10 +7,12 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import authenticate
 
+
 from rest_framework.status import (
     HTTP_201_CREATED,
     HTTP_404_NOT_FOUND,
     HTTP_204_NO_CONTENT,
+    HTTP_200_OK
 )
 
 # 
@@ -31,13 +33,14 @@ class Log_in(APIView):
         password = request.data.get('password')
         users = authenticate(username=email, password=password)
         if users:
-            token, created = Token.objects.get_or_create(user=users)
+            # don't need second output from get_or_create
+            token, _ = Token.objects.get_or_create(user=users)
+            print("did we make it here?")
             return Response({"token": token.key, "users": users.email})
         else:
             return Response("No user matching credentials", status=HTTP_404_NOT_FOUND)
         
 class Log_out(APIView):
-    authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
 
@@ -53,11 +56,10 @@ class Log_out(APIView):
     
 
 class Info(APIView):
-    authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        return Response({"email": request.user.email})
+        return Response({"email": request.user.email}, status=HTTP_200_OK)
     
 class Master_Sign_Up(APIView):
 

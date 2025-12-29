@@ -2,7 +2,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useOutletContext } from "react-router-dom";
 
 export const api = axios.create({
   baseURL: "http://127.0.0.1:8000/",
@@ -11,12 +11,11 @@ export const api = axios.create({
 const SignUp = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const {setUser} = useOutletContext();
   const navigate = useNavigate()
     const handleClick = async (e) => {
         e.preventDefault()
-        const e_email = e.target.email.value
-        const e_password = e.target.password.value
-        const data = {"email": e_email, "password": e_password}
+        const data = {"email": email, "password": password}
         const response = await axios.post("http://127.0.0.1:8000/signup/new_account/", data);
         console.log(response.data)
         alert("We've Made Your Badass Account");
@@ -24,9 +23,9 @@ const SignUp = () => {
             let { user, token } = response.data;
             localStorage.setItem("token", token);
             api.defaults.headers.common["Authorization"] = `Token ${token}`;
+            setUser(user)
       }     
-        alert(response.data);
-        navigate("/loggedIn")
+        navigate("/")
     
     };
   return (

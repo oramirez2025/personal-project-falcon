@@ -1,25 +1,40 @@
 import { createBrowserRouter } from "react-router-dom";
 import App from "./App";
-import TicketPage from "./pages/TicketPage";
 import HomePage from "./pages/HomePage";
 import SignUpPage from "./pages/SignUpPage";
-import EventPage from "./pages/EventPage"
+import EventsPage from "./pages/EventsPage"
 import LogInPage from "./pages/LogInPage";
 import { userConfirmation } from "./utilities";
+import TicketsPage from "./pages/TicketsPage";
+
+const falconLoader = async () => {
+    const token = localStorage.getItem("token")
+    if (!token) {
+        return null;
+    } else {
+        try {
+            const user = await userConfirmation();
+            return user            
+        } catch (e) {
+            console.error(e)
+            localStorage.removeItem('token')
+            window.location.href = "/"
+            return null
+        }
+    }
+
+}
+
 
 const router = createBrowserRouter([ 
 {
     path: '/',
-    element: <App />,
-    loader: userConfirmation,
+    element: <App/>,
+    loader: falconLoader,
     children: [
         {
             index: true,
             element: <HomePage/>
-        },
-        {   
-            path: 'tickets',
-            element: <TicketPage/>
         },
         {
             path: 'signup',
@@ -27,15 +42,18 @@ const router = createBrowserRouter([
         },
         {
             path: 'events',
-            element: <EventPage/>
+            element: <EventsPage/>
         },
         {
             path: 'logIn',
             element: <LogInPage/>
         },
+        {
+            path: 'tickets',
+            element: <TicketsPage/>
+        },
 
-
-        ]
+    ]
 
 
     

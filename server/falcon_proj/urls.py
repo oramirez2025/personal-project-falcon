@@ -5,6 +5,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path("ticket/", include("ticket_app.urls")),
     path("signup/", include("signup_app.urls")),
+    path("weather/", include("weather_app.urls")),
+    path("event/",include("event_app.urls")),
+    path("comment/",include("comment_app.urls"))
 ]
 
 """

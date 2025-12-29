@@ -4,15 +4,24 @@
 }
 
 .hero-inner {
-  max-width: 1100px;
+  /* max-width: 1800px; */
   margin: 0 auto;
-  height: 520px;
+  height: 820px;
   overflow: hidden;
 }
 
 .hero-inner img {
   width: 100%;
   height: 100%;
+  object-position: 25% 85%;
+  object-fit: cover;
+  display: block; /* removes inline img spacing */
+}
+
+.hero-inner video {
+  width: 100%;
+  height: 100%;
+  object-position: 25% 85%;
   object-fit: cover;
   display: block; /* removes inline img spacing */
 }
@@ -23,8 +32,39 @@
   padding: 0;
   min-height: 100%;
   background-color: rgb(0, 0, 0);
+  color: #dae6db;
   text-align: center;
 }
+
+h2 {
+  padding: 0 rem;
+} /* This is the text of all h2 elements */
+
+.events-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 2rem;
+}
+
+.weather-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 2rem;
+}
+
+.hero-section {
+  min-height: 20vh;
+  background-image: var(--hero-bg);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+
 
 .logo {
   height: 6em;
@@ -55,7 +95,7 @@
 }
 
 .card {
-  padding: 2em;
+  padding: 0em;
 }
 
 .read-the-docs {
@@ -68,8 +108,21 @@
 }
 
 .content {
-  max-width: 1100px;
+  /* max-width: 1100px; */
   margin: 0 auto;
   background-color: #671010;
 }
 
+
+.weathercolor {
+  text-shadow: #c1371b 1px 0 10px;
+  
+}
+
+.navigraph {
+  text-shadow: #9b4a0b 1px 0 10px;
+}
+
+.card {
+  background-color:#fbf6eed3 !important;
+}

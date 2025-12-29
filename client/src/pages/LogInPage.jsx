@@ -9,23 +9,24 @@ const LogIn = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { user, setUser} = useOutletContext();
-  const navigate=useNavigate();
+  const navigate = useNavigate();
 
+  const handleSubmit = async(e) => { 
+      e.preventDefault(); 
+      const loggedIn = await userLogIn(email,password);
+      if (!loggedIn) {
+        alert("Something went wrong with login");
+      } else {
+        setUser(loggedIn);
+        navigate("/");
+
+      }
+  }
   return (
     <>
       <h1>Log In</h1>
       <Form
-        onSubmit={async (e) => {
-          e.preventDefault();
-          const user1 = await userLogIn(email, password);
-          console.log(user)
-          setUser(user1);
-          console.log(user)
-          
-
-        }
-        
-        }
+        onSubmit={(e) => handleSubmit(e)}
       >
         <Form.Group className="mb-3" controlId="formBasicEmail">
           <Form.Label>Email address</Form.Label>

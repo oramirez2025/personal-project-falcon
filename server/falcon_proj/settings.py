@@ -25,7 +25,7 @@ BASE_URL = "http://localhost:8000"
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
-STRIPE_API_KEY =  os.getenv("STRIPE_API_KEY")
+STRIPE_API_KEY =  os.getenv('STRIPE_API_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -49,6 +49,9 @@ INSTALLED_APPS = [
     'corsheaders',
     'signup_app',
     'ticket_app',
+    'weather_app',
+    'comment_app',
+    'event_app',
 ]
 
 AUTH_USER_MODEL = 'signup_app.MyUsers'
@@ -100,7 +103,7 @@ WSGI_APPLICATION = 'falcon_proj.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'falconforge_db'
+        'NAME': 'falconforge_db',
     }
 }
 
@@ -140,3 +143,12 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+
+"""
+    Account: 
+        - a@gmail.com
+        - pass
+
+
+"""
