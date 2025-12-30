@@ -1,9 +1,7 @@
 import stripe
 from falcon_proj import settings
-from .models import Payment
 from ticket_app.models import Ticket
 from django.http import HttpResponse
-from rest_framework import status as s
 from django.views.decorators.csrf import csrf_exempt
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
