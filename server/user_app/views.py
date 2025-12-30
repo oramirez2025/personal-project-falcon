@@ -16,6 +16,11 @@ from rest_framework.status import (
 )
 
 
+# TODO pickup (examine, revamp, create)
+
+
+
+
 class Sign_Up(APIView):
     def post(self, request):
         request.data["username"] = request.data["email"]
