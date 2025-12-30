@@ -1,13 +1,13 @@
 import React, { useState } from "react";
-import { Modal, Form, Button } from "react-bootstrap";
+import { Modal, Button } from "react-bootstrap";
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 import StripeCheckoutForm from "./StripeCheckoutForm";
 import { payForTickets } from "../utilities";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
-// Rough template. Will need changed based off order model and/or naming conventions.
-export default function PaymentModal({ show, onClose,  }) {
+// TO-DO: Rough template. Will need changed based off order model and/or naming conventions.
+export default function PaymentModal({ show, onClose, }) {
     const [loading, setLoading] = useState(false);
     const [clientSecret, setClientSecret] = useState("");
 

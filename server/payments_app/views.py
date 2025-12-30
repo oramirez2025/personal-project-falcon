@@ -7,7 +7,6 @@ from .models import Payment
 from .serializers import PaymentSerializer
 from ticket_app.models import Ticket
 from falcon_proj import settings
-from user_app.views import UserPermissions
 from decimal import Decimal
 from django.shortcuts import get_object_or_404
 
@@ -15,7 +14,7 @@ from django.shortcuts import get_object_or_404
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
-class CreatePaymentIntent(UserPermissions):
+class CreatePaymentIntent(APIView):
     def post(self, request):
 
         ticket_id = request.data.get('ticket_id')
@@ -57,11 +56,11 @@ class CreatePaymentIntent(UserPermissions):
         
 
             
-class ViewPayment(UserPermissions):
+class ViewPayment(APIView):
     def get(self, request):
-        admin = getattr(request.user, "is_admin")
-        if not admin:
-            return Response({'detail': "Only Admin can access this."}, status=s.HTTP_403_FORBIDDEN)
+        staff = getattr(request.user, "is_staff")
+        if not staff:
+            return Response({'detail': "Only staff can access this."}, status=s.HTTP_403_FORBIDDEN)
         payments = Payment.objects.all(
             status="paid"
         )
