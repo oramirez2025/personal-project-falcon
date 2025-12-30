@@ -8,7 +8,7 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.status import HTTP_303_SEE_OTHER, HTTP_200_OK,HTTP_400_BAD_REQUEST
 from .serializers import *
 from .models import TicketTemplate
-from rest_framework.generics import CreateAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView
 from django.db.models import Sum
 from rest_framework.exceptions import ValidationError
 from .models import Ticket
@@ -72,8 +72,7 @@ class TicketView(APIView):
         return Response(checkout_session.url, status=HTTP_200_OK)
 
 
-
-# View user's purchased tickets
+# Purchase ticket
 class TicketPurchasedView(CreateAPIView):
     serializer_class = TicketSerializer
     permission_classes = [IsAuthenticated]
@@ -130,6 +129,16 @@ class TicketPurchasedView(CreateAPIView):
             userprofile=self.request.user,
             ticket=locked_template
         )
+
+class TicketPurchasedListView(ListAPIView):
+    serializer_class = TicketSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Ticket.objects.filter(
+            userprofile=self.request.user
+        ).select_related("ticket")
+
 
 # View all ticket templates
 class TicketTemplatesView(APIView):
