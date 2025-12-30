@@ -16,7 +16,7 @@ def test_ticket_serializer_valid(user, premium_template):
     serializer = TicketSerializer(data=data)
     assert serializer.is_valid(), serializer.errors
 
-    ticket = serializer.save(userprofile=user)
+    ticket = serializer.save(user=user)
 
     assert ticket.quantity == 2
     assert ticket.ticket == premium_template
@@ -38,7 +38,7 @@ def test_cannot_oversell_single_template(
     premium_template,
 ):
     Ticket.objects.create(
-        userprofile=user,
+        user=user,
         ticket=premium_template,
         quantity=3,
     )
@@ -63,7 +63,7 @@ def test_global_premium_limit_enforced(
     premium_template,
 ):
     Ticket.objects.create(
-        userprofile=user,
+        user=user,
         ticket=premium_template,
         quantity=4,
     )

@@ -127,7 +127,7 @@ class TicketPurchasedView(CreateAPIView):
         validate_available_quantity(p=p, u=u, g=g)
 
         serializer.save(
-            userprofile=self.request.user,
+            user=self.request.user,
             ticket=locked_template
         )
 

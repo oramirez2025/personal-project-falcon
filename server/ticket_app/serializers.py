@@ -18,9 +18,10 @@ class TicketTemplateSerializer(serializers.ModelSerializer):
 
 
 class TicketSerializer(serializers.ModelSerializer):
+    user = serializers.PrimaryKeyRelatedField(read_only=True)
     ticket_type = serializers.CharField(max_length=255, source="ticket.ticket_type", read_only=True)
     payment = PaymentSerializer(read_only=True)
     class Meta:
         model = Ticket
-        fields = ['ticket_type', 'quantity', 'ticket', 'payment']   
+        fields = ['id', 'user','ticket_type', 'quantity', 'ticket', 'payment']   
     
