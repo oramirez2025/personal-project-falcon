@@ -46,7 +46,7 @@ def stripe_webhook(request):
                 ticket.status = "confirmed"
                 ticket.save
             else:
-                print(f"Webhook: Payment for lesson {ticket_id} does not exist")
+                print(f"Webhook: Payment for ticket {ticket_id} does not exist")
 
         else:
             print(f"Webhook: Ignoring {event['type']}")

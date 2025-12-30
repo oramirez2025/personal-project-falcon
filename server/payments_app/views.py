@@ -19,7 +19,7 @@ class CreatePaymentIntent(UserPermissions):
     def post(self, request):
 
         ticket_id = request.data.get('ticket_id')
-        ticker = get_object_or_404(Ticket, id=ticket_id)
+        ticket = get_object_or_404(Ticket, id=ticket_id)
 
         if not ticket.user:
             if not hasattr(request.user, 'user'):
