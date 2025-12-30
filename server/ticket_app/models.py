@@ -1,16 +1,22 @@
 from django.db import models
 from user_app.models import MyUsers
+from django.core.exceptions import ValidationError
+
 
 
 
 # Ticket on the frontend
 class TicketTemplate(models.Model):
+    TICKET_TYPE_CHOICES = [
+        ("premium", "Premium"),
+        ("general", "General"),
+        ("upgrade", "Community Lodging Upgrade"),
+    ]
     title = models.CharField(max_length=255)
     description = models.TextField()
     price = models.DecimalField(max_digits=8, decimal_places=2)
-    # Add validator to ensure people don't buy too many tickets and that tickets are available 
+    ticket_type = models.CharField(max_length=20, choices=TICKET_TYPE_CHOICES)
     available_quantity = models.PositiveIntegerField()
-
 
 # Purchased ticket
 class Ticket(models.Model):
