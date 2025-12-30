@@ -20,4 +20,8 @@ class Payment(models.Model):
     
 
     # TO-DO Create Order for tickets/payment
-    # Order should take in user, ticket_type, quantity, status, price_at_purchase, and create_at. 
+    # Order should take in user, ticket_type, quantity, status, price_at_purchase, and create_at.
+    # Could split into two models, order and order item. May work better and display as a nicer receipt. 
+    # One user can own many orders. 
+    # Orders will double as what stripe pays for and as a displayable receipt to the user. 
+    # TO-DO: Look into how to retrieve stripe order id and and put it in the order, if possible. 
