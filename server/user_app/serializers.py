@@ -6,7 +6,6 @@ from .models import MyUsers, UserProfile
 # --if not using sep ser's for comment adapt to use single comment ser--
 from event_app.serializers import EventWishlistSerializer
 # from comment_app.serializers import EventCommentSerializer, MerchandiseReviewSerializer
-from ticket_app.serializers import TicketSerializer
 # from merchandise_app.serializers import MerchandiseWishListSerializer
 
 class UsersSerializer(serializers.ModelSerializer):
@@ -58,7 +57,11 @@ class UserProfileSerializer(serializers.ModelSerializer):
     # )
 
     
-    tickets = TicketSerializer(source='user.tickets', many=True, read_only=True)
+    tickets = serializers.PrimaryKeyRelatedField(
+        source="ticket_purchases",
+        many=True,
+        read_only=True
+    )
 
     class Meta:
         model = UserProfile
