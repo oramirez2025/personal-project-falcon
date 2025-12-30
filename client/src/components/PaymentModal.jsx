@@ -6,7 +6,7 @@ import StripeCheckoutForm from "./StripeCheckoutForm";
 import { payForTickets } from "../utilities";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
-
+// Rough template. Will need changed based off order model and/or naming conventions.
 export default function PaymentModal({ show, onClose,  }) {
     const [loading, setLoading] = useState(false);
     const [clientSecret, setClientSecret] = useState("");
@@ -35,7 +35,7 @@ export default function PaymentModal({ show, onClose,  }) {
                 <Modal.Title>Pay for {ticket.amount} {ticket.ticket_profile} </Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <p><strong>Tickets:</strong> {new ticket.ticket_profile.type}</p>
+                <p><strong>Tickets:</strong> {new ticket.ticket_profile.title}</p>
                 <p><strong>Price:</strong> ${ticket.price}</p>
                 {clientSecret && (
                     <Elements stripe={stripePromise}>
