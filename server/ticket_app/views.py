@@ -4,7 +4,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
-from rest_framework.status import HTTP_303_SEE_OTHER, HTTP_200_OK
+from rest_framework.status import HTTP_303_SEE_OTHER, HTTP_200_OK,HTTP_400_BAD_REQUEST
+from .serializers import *
+from .models import TicketTemplate
 
 import stripe
 
@@ -62,3 +64,19 @@ class TicketView(APIView):
             cancel_url="http://localhost:5173/" # should redirect to page to buy tickets 
         )
         return Response(checkout_session.url, status=HTTP_200_OK)
+
+# View user's purchased tickets
+class TicketsPurchasedView(APIView):
+    permission_classes=[IsAuthenticated]
+    def get(self,request):
+        userprofile = request.user.userprofile
+        purchased_tickets = userprofile.ticket_purchases.all()
+        ser_purchased_tickets = TicketSerializer(purchased_tickets,many=True)
+        return Response(ser_purchased_tickets.data, status=HTTP_200_OK)
+
+# View all ticket templates
+class TicketTemplatesView(APIView):
+    def get(self,request):
+        ticket_templates = TicketTemplate.objects.all()
+        ser_ticket_templates = TicketTemplateSerializer(ticket_templates, many=True)
+        return Response(ser_ticket_templates.data, status=HTTP_200_OK)
