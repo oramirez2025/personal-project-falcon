@@ -57,3 +57,13 @@ class CreatePaymentIntent(UserPermissions):
         
 
             
+class ViewPayment(UserPermissions):
+    def get(self, request):
+        admin = getattr(request.user, "is_admin")
+        if not admin:
+            return Response({'detail': "Only Admin can access this."}, status=s.HTTP_403_FORBIDDEN)
+        payments = Payment.objects.all(
+            status="paid"
+        )
+        ser_payment = PaymentSerializer(payments, many=True)
+        return Response(ser_payment.data, status=s.HTTP_200_OK)

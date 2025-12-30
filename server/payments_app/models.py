@@ -15,4 +15,4 @@ class Payment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.ticket.userprofile} paid for {self.ticket.quantity} {self.ticket.ticket_template} for ${self.amount}"
+        return f"{self.ticket.userprofile.full_name} paid for {self.ticket.quantity} {self.ticket.ticket_template} for ${self.amount}."

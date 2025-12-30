@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'weather_app',
     'comment_app',
     'event_app',
+    'payments_app',
 ]
 # added user app and changed auth path
 AUTH_USER_MODEL = 'user_app.MyUsers'
