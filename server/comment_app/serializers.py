@@ -6,8 +6,12 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = ["id", "author", "parent", "event", "text", "time", "likes"]
-        read_only_fields = ["author"]
+        read_only_fields = ["author", "event","likes"]
 
+
+
+
+# Keep just for testing lol
 class CommentRecursiveSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
