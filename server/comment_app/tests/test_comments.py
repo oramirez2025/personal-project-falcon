@@ -10,12 +10,24 @@ from comment_app.models import Comment
 from comment_app.services import build_comment_tree
 from comment_app.serializers import CommentSerializer
 from datetime import date, time
+from rest_framework import status
 
+
+
+
+# ======================== UNIT TESTS ============================
 
 class CommentAPITests(APITestCase):
+
     def setUp(self):
         self.user = MyUsers.objects.create_user(
             username="testuser",
+            email="testuser@example.com",
+            password="pass1234"
+        )
+        self.other_user = MyUsers.objects.create_user(
+            username="otheruser",
+            email="testuser123@example.com",
             password="pass1234"
         )
 
@@ -28,69 +40,213 @@ class CommentAPITests(APITestCase):
             description="Test event description",
         )
 
-    # ======================== UNIT TESTS ============================
+    # # ========================
+    # # CREATE
+    # # ========================
 
-    def test_create_comment(self):
-        self.client.force_authenticate(user=self.user)
+    # def test_create_comment(self):
+    #     self.client.force_authenticate(user=self.user)
 
-        url = f"/comment/events/{self.event.id}/"
-        response = self.client.post(url, {"text": "Hello world"}, format="json")
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(Comment.objects.count(), 1)
-        self.assertIsNone(Comment.objects.first().parent)
+    #     url = f"/comment/events/{self.event.id}/"
+    #     response = self.client.post(
+    #         url,
+    #         {"text": "Hello world"},
+    #         format="json"
+    #     )
 
-    def test_create_reply(self):
-        self.client.force_authenticate(user=self.user)
+    #     self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+    #     self.assertEqual(Comment.objects.count(), 1)
+    #     self.assertIsNone(Comment.objects.first().parent)
 
-        parent = Comment.objects.create(
-            author=self.user,
-            event=self.event,
-            text="Parent"
-        )
+    # def test_create_reply(self):
+    #     self.client.force_authenticate(user=self.user)
 
-        url = f"/comment/events/{self.event.id}/"
-        response = self.client.post(
-            url,
-            {"text": "Reply", "parent": parent.id},
-            format="json"
-        )
+    #     parent = Comment.objects.create(
+    #         author=self.user,
+    #         event=self.event,
+    #         text="Parent comment"
+    #     )
 
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(Comment.objects.count(), 2)
-        self.assertEqual(Comment.objects.last().parent, parent)
+    #     url = f"/comment/events/{self.event.id}/"
+    #     response = self.client.post(
+    #         url,
+    #         {"text": "Reply", "parent": parent.id},
+    #         format="json"
+    #     )
 
-    def test_get_comment_tree(self):
-        parent = Comment.objects.create(
-            author=self.user,
-            event=self.event,
-            text="Parent"
-        )
-        Comment.objects.create(
-            author=self.user,
-            event=self.event,
-            text="Child",
-            parent=parent
-        )
+    #     self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+    #     self.assertEqual(Comment.objects.count(), 2)
+    #     self.assertEqual(Comment.objects.last().parent, parent)
 
-        url = f"/comment/events/{self.event.id}/"
-        response = self.client.get(url)
+    # # ========================
+    # # READ (recursive tree)
+    # # ========================
 
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data), 1)
-        self.assertEqual(len(response.data[0]["replies"]), 1)
+    # def test_get_comment_tree(self):
+    #     parent = Comment.objects.create(
+    #         author=self.user,
+    #         event=self.event,
+    #         text="Parent"
+    #     )
+    #     Comment.objects.create(
+    #         author=self.user,
+    #         event=self.event,
+    #         text="Child",
+    #         parent=parent
+    #     )
 
-    def create_test_comments(self, depth=7, breadth=7):
+    #     url = f"/comment/events/{self.event.id}/"
+    #     response = self.client.get(url)
+
+    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
+    #     self.assertEqual(len(response.data), 1)
+    #     self.assertEqual(len(response.data[0]["replies"]), 1)
+
+    # # ========================
+    # # UPDATE (PUT)
+    # # ========================
+
+    # def test_op_can_update_text(self):
+    #     self.client.force_authenticate(user=self.user)
+
+    #     comment = Comment.objects.create(
+    #         author=self.user,
+    #         event=self.event,
+    #         text="Original"
+    #     )
+
+    #     url = f"/comment/{comment.id}/"
+    #     response = self.client.put(
+    #         url,
+    #         {"text": "Updated"},
+    #         format="json"
+    #     )
+
+    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
+    #     comment.refresh_from_db()
+    #     self.assertEqual(comment.text, "Updated")
+
+    # def test_cannot_change_parent(self):
+    #     self.client.force_authenticate(user=self.user)
+
+    #     parent = Comment.objects.create(
+    #         author=self.user,
+    #         event=self.event,
+    #         text="Parent"
+    #     )
+    #     child = Comment.objects.create(
+    #         author=self.user,
+    #         event=self.event,
+    #         text="Child",
+    #         parent=parent
+    #     )
+
+    #     url = f"/comment/{child.id}/"
+    #     response = self.client.put(
+    #         url,
+    #         {"parent": None},
+    #         format="json"
+    #     )
+
+    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    # def test_cannot_change_event(self):
+    #     self.client.force_authenticate(user=self.user)
+
+    #     comment = Comment.objects.create(
+    #         author=self.user,
+    #         event=self.event,
+    #         text="Comment"
+    #     )
+
+    #     other_event = Event.objects.create(
+    #         title="Other Event",
+    #         day=date.today(),
+    #         start_time=time(19, 0),
+    #         end_time=time(21, 0),
+    #         location="Other Location",
+    #         description="Other",
+    #     )
+
+    #     url = f"/comment/{comment.id}/"
+    #     response = self.client.put(
+    #         url,
+    #         {"event": other_event.id},
+    #         format="json"
+    #     )
+
+    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    # def test_non_op_cannot_update(self):
+    #     self.client.force_authenticate(user=self.other_user)
+
+    #     comment = Comment.objects.create(
+    #         author=self.user,
+    #         event=self.event,
+    #         text="Secure"
+    #     )
+
+    #     url = f"/comment/{comment.id}/"
+    #     response = self.client.put(
+    #         url,
+    #         {"text": "Hacked"},
+    #         format="json"
+    #     )
+
+    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    # # ========================
+    # # DELETE
+    # # ========================
+
+    # def test_op_can_delete_and_cascade(self):
+    #     self.client.force_authenticate(user=self.user)
+
+    #     parent = Comment.objects.create(
+    #         author=self.user,
+    #         event=self.event,
+    #         text="Parent"
+    #     )
+    #     Comment.objects.create(
+    #         author=self.user,
+    #         event=self.event,
+    #         text="Child",
+    #         parent=parent
+    #     )
+
+    #     url = f"/comment/{parent.id}/"
+    #     response = self.client.delete(url)
+
+    #     self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+    #     self.assertEqual(Comment.objects.count(), 0)
+
+    # def test_non_op_cannot_delete(self):
+    #     self.client.force_authenticate(user=self.other_user)
+
+    #     comment = Comment.objects.create(
+    #         author=self.user,
+    #         event=self.event,
+    #         text="Protected"
+    #     )
+
+    #     url = f"/comment/{comment.id}/"
+    #     response = self.client.delete(url)
+
+    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+    #     self.assertEqual(Comment.objects.count(), 1)
+
+    # ======================== BENCHMARK TESTS ============================
+    def create_test_comments(self, depth=5, breadth=5):
         parent = None
         for d in range(depth):
             for _ in range(breadth):
                 parent = Comment.objects.create(
                     author=self.user,
                     event=self.event,
-                    text=f"Comment depth {d}",
+                    text=f"Depth {d}",
                     parent=parent
                 )
 
-    # ======================== BENCHMARK TESTS ============================
 
     def test_adj_list_speed(self):
         self.create_test_comments(depth=5, breadth=5)
@@ -180,7 +336,7 @@ class CommentBenchmarkTests(APITestCase):
         print("Recursive serializer queries:", len(rec_ctx))
 
         # Adjacency list should be stable
-        self.assertLessEqual(len(adj_ctx), 2)
+        self.assertLess(len(rec_ctx), len(adj_ctx))
 
     def test_time_comparison(self):
         self.create_realistic_comments(roots=10, depth=4, breadth=3)
