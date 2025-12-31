@@ -1,6 +1,5 @@
 from rest_framework import serializers
 from .models import Payment
-from user_app.serializers import UsersSerializer
 
 class PaymentSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(read_only=True)
