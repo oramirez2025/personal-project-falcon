@@ -7,9 +7,8 @@ from django.contrib.auth.models import AbstractUser
 
 class MyUsers(AbstractUser):
     email = models.EmailField(unique=True)
-    # REFACTOR ME. Now we can have users be admins, make, delete, events. 
+    # REFACTOR - can use is_staff to replace this entirely.  
     is_admin = models.BooleanField(default=False)
-    # user can now make use of names for more personalized profile and ticket information
     first_name = models.CharField(max_length=50, null=True, blank=True)
     last_name = models.CharField(max_length=50, null=True, blank=True)
     
@@ -17,10 +16,9 @@ class MyUsers(AbstractUser):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
-    # added properties to make calling easier
-    # added repr str for testing purposes
     @property
     def full_name(self):
+        """Return full name or email if name not set."""
         name = f"{self.first_name or ''} {self.last_name or ''}".strip()
         return name if name else self.email
     
@@ -28,17 +26,55 @@ class MyUsers(AbstractUser):
         return self.full_name if self.full_name else self.email
     
 class UserProfile(models.Model):
-    '''
-    Single query source for React via reverse relationships.
-    '''
-    # Reverse Relationship ref assumptions:
-    # From UserProfile: user.profile → UserProfile inst (OneToOne)
-    # From EventWishlist: user.event_wishlists.all() → QuerySet of EventWishlist
-    # From MerchandiseWishlist: user.merchandise_wishlists.all() → QuerySet of MerchandiseWishlist
-    # From EventComment: user.event_comments.all() → QuerySet of EventComment
-    # From MerchandiseReview: user.merchandise_reviews.all() → QuerySet of MerchandiseReview
-    # From Ticket: user.tickets.all() → QuerySet of Ticket
-    # From Comment: user.comments.all() → QuerySet of Comment (used if ser's not split?)
+    """Single source for queries.
+
+    ***
+
+    <h3>Relationships:</h3>
+        <u>Direct:</u>
+            * user (OneToOne) → MyUsers instance
+            
+        <u>Reverse (accessed via user):</u>
+            * profile.user.profile → UserProfile instance (self-reference)
+            * profile.user.event_wishlists.all() → QuerySet of EventWishlist
+            * profile.user.comments.all() → QuerySet of Comment
+            * profile.user.tickets.all() → QuerySet of Ticket
+            
+        <u>Future (when merchandise app is ready):</u>
+            * profile.user.merchandise_wishlists.all() → QuerySet of MerchandiseWishlist
+            * profile.user.merchandise_reviews.all() → QuerySet of MerchandiseReview
+    
+    ***        
+    
+    <h3> Example Usage:</h3>
+
+        <u>Get user's profile</u>
+        ```python
+        profile = UserProfile.objects.get(user=request.user)
+        ```
+
+        <u>Access user info</u>
+        ```python
+        email = profile.user.email
+        full_name = profile.user.full_name
+        ```
+
+        <u>Access related data via reverse relationships</u>
+        ```python
+        wishlists = profile.user.event_wishlists.all()
+        comments = profile.user.comments.all()
+        tickets = profile.user.tickets.all()
+        ```
+
+        <u>Optimized query for all data</u>
+        ```python
+        profile = UserProfile.objects.select_related('user').prefetch_related(
+            'user__event_wishlists__event',
+            'user__comments__event',
+            'user__tickets__ticket',
+        ).get(user=request.user)
+        ```
+    """
 
     user = models.OneToOneField(
         MyUsers,
@@ -59,5 +95,6 @@ class UserProfile(models.Model):
         return f"{self.user.email or self.user.first_name}'s Profile"
     
     class Meta:
+
         verbose_name = "User Profile"
         verbose_name_plural = "User Profiles"

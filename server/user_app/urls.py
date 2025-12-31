@@ -1,9 +1,23 @@
-from .views import Sign_Up, Info, Log_in, Log_out
 from django.urls import path
+from .views import (
+    Sign_Up,
+    Info,
+    Log_in,
+    Log_out,
+    UserAccountView,
+    AdminPromotionView,
+)
 
 urlpatterns = [
+    # Authentication endpoints
     path('new_account/', Sign_Up.as_view(), name='new_account'),
-    path('info/', Info.as_view(), name='info'),
     path('login/', Log_in.as_view(), name='login'),
-    path('logout/', Log_out.as_view(), name='logout')
+    path('logout/', Log_out.as_view(), name='logout'),
+    path('info/', Info.as_view(), name='info'),
+    
+    # User account/profile endpoint (single source for React)
+    path('account/', UserAccountView.as_view(), name='user_account'),
+    
+    # Admin management endpoint
+    path('admin-stat/', AdminPromotionView.as_view(), name='admin_access'),
 ]
