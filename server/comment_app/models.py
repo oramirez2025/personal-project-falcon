@@ -23,7 +23,7 @@ class Comment(models.Model):
     text = models.TextField()
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="comments")
     
-    likes = models.PositiveIntegerField()
+    likes = models.PositiveIntegerField(default=0)
     
     
     
