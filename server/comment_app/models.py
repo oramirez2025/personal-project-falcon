@@ -4,9 +4,29 @@ from event_app.models import Event
 from user_app.models import MyUsers
 
 class Comment(models.Model):
-    author = models.ForeignKey(MyUsers, on_delete=models.CASCADE, related_name="comments")
+    author = models.ForeignKey(
+        MyUsers, 
+        on_delete=models.CASCADE, 
+        related_name="comments"
+        )
     time = models.DateTimeField(auto_now_add=True)
+    
+    parent = models.ForeignKey(
+        "self", 
+        null=True, 
+        blank=True, 
+        on_delete=models.CASCADE, 
+        related_name="replies"
+    )
+    
+    
     text = models.TextField()
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="comments")
+    
+    likes = models.PositiveIntegerField(default=0)
+    
+    
+    
+    
     def __str__(self):
         return f"{self.author} on {self.event} said {self.text[:50]}..."

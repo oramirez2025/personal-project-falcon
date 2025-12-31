@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
 from .serializers import CommentSerializer
 from .models import Comment
 from django.shortcuts import get_object_or_404
@@ -10,7 +11,11 @@ from rest_framework.status import (
     HTTP_204_NO_CONTENT,
     HTTP_400_BAD_REQUEST,
     HTTP_403_FORBIDDEN,
+    HTTP_401_UNAUTHORIZED
 )
+# from .services import build_comment_tree
+from event_app.models import Event
+
 
 class CommentView(APIView):
     def is_admin(self, user):
@@ -19,24 +24,37 @@ class CommentView(APIView):
     def is_OP(self, user, comment):
         return user.is_authenticated and comment.author == user
 
-    # CREATE (anyone)
-    def post(self, request):
-        comment_ser = CommentSerializer(data=request.data)
-        if comment_ser.is_valid():
-            comment_ser.save(author=request.user)
-            return Response(comment_ser.data, status=HTTP_201_CREATED)
-        return Response(comment_ser.errors, status=HTTP_400_BAD_REQUEST)
-
     # READ (anyone)
-    def get(self, request):
-        comments = Comment.objects.all()
-        comments_ser = CommentSerializer(comments, many=True)
-        return Response(comments_ser.data, status=HTTP_200_OK)
+    def get(self, request, event_id):
+        event = get_object_or_404(Event, id=event_id)
+        parents = (
+            Comment.objects
+            .filter(event=event,parent=None)
+            .select_related("author")
+        )
+        ser = CommentSerializer(parents, many=True)
+        return Response(ser.data, status=HTTP_200_OK)
+
+    # CREATE (authenicated users)
+    def post(self, request, event_id):
+        if request.user.is_authenticated:
+            event = get_object_or_404(Event, id=event_id)
+            ser = CommentSerializer(data=request.data)
+            if ser.is_valid():
+                parent = ser.validated_data.get("parent")
+                if parent and parent.event != event:
+                    return Response({"detail": "Parent and child's events must be match up."}, status=HTTP_400_BAD_REQUEST)
+                ser.save(author=request.user, event=event)
+                return Response(ser.data, status=HTTP_201_CREATED)
+            else:
+                return Response(ser.errors, status=HTTP_400_BAD_REQUEST)
+        else:
+            return Response("Need to signup/login!", status=HTTP_401_UNAUTHORIZED)
 
     # UPDATE (only the OP)
     def put(self, request, id):
         comment = get_object_or_404(Comment, id=id)
-        if not self.is_OP(request.user, comment):
+        if not self.is_OP(request.user, comment) or "parent" in request.data or "event" in request.data:
             return Response({"detail": "Not authorized"}, status=HTTP_403_FORBIDDEN)
         comment_ser = CommentSerializer(comment, data=request.data, partial=True)
         if comment_ser.is_valid():
