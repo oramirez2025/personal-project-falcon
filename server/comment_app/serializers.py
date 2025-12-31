@@ -4,5 +4,5 @@ from .models import Comment
 class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
-        fields = ["author", "event", "text", "time"]
-        read_only_fields = ["author"]
+        fields = ["author", "parent", "event", "text", "time", "likes"]
+        read_only_fields = ["author", "parent"]
