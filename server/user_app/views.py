@@ -142,9 +142,9 @@ class AdminPromotionView(User_Auth):
         
         # Permission check - fail fast
         if action == 'promote' and not request.user.is_admin:
-            return Response({"error": "Only admins can promote users"}, status=HTTP_403_FORBIDDEN)
+            return Response({"error": "Only admins can promote users"}, status=s.HTTP_403_FORBIDDEN)
         if action == 'demote' and not request.user.is_superuser:
-            return Response({"error": "Only superusers can demote admins"}, status=HTTP_403_FORBIDDEN)
+            return Response({"error": "Only superusers can demote admins"}, status=s.HTTP_403_FORBIDDEN)
         
         # Validate and get user
         serializer = AdminPromotionSerializer(data=request.data)
