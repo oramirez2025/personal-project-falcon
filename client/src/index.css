@@ -1,10 +1,12 @@
+/* ============================================
+   TAILWIND DIRECTIVES
+   ============================================ */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /* ============================================
    EXISTING VITE/REACT STYLES (PRESERVED)
-   Wrapped in @layer base to work with Tailwind
    ============================================ */
 @layer base {
   :root {
@@ -20,16 +22,6 @@
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-  }
-
-  a {
-    font-weight: 500;
-    color: #646cff;
-    text-decoration: inherit;
-  }
-  
-  a:hover {
-    color: #535bf2;
   }
 
   body {
@@ -67,15 +59,26 @@
   }
 }
 
+/* Only style links in main content, NOT in nav */
+@layer base {
+  main a,
+  .content a {
+    font-weight: 500;
+    color: #646cff;
+    text-decoration: inherit;
+  }
+  
+  main a:hover,
+  .content a:hover {
+    color: #535bf2;
+  }
+}
+
 /* Light mode styles */
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
     background-color: #ffffff;
-  }
-  
-  a:hover {
-    color: #747bff;
   }
   
   button {

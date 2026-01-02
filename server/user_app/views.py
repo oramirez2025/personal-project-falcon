@@ -13,20 +13,60 @@ from .serializers import (
     AdminPromotionSerializer,
 )
 
+
 class Sign_Up(APIView):
     """
     User registration endpoint.
     Auto creates UserProfile after user creation.
     """
     def post(self, request):
-        request.data["username"] = request.data["email"]   # Set username to email for Django's User model
-        user = MyUsers.objects.create_user(**request.data) # Create user
-        UserProfile.objects.create(user=user)              # Create UserProfile
-        token = Token.objects.create(user=user)            # Create auth token
-        return Response(
-            {'user': user.email, 'token': token.key}, 
-            status=s.HTTP_201_CREATED
-        )
+        try:
+            # Extract only needed fields
+            email = request.data.get('email')
+            password = request.data.get('password')
+            first_name = request.data.get('first_name', '')
+            last_name = request.data.get('last_name', '')
+            
+            # Validate required fields
+            if not email or not password:
+                return Response(
+                    {'error': 'Email and password are required'},
+                    status=s.HTTP_400_BAD_REQUEST
+                )
+            
+            # Check if user already exists
+            if MyUsers.objects.filter(email=email).exists():
+                return Response(
+                    {'error': 'User with this email already exists'},
+                    status=s.HTTP_400_BAD_REQUEST
+                )
+            
+            # TODO verify un req
+            # Create user with explicit fields
+            user = MyUsers.objects.create_user(
+                username=email,  # may not need !!!!
+                email=email,
+                password=password,
+                first_name=first_name,
+                last_name=last_name
+            )
+            
+            # Create UserProfile
+            UserProfile.objects.create(user=user)
+            
+            # Create auth token
+            token = Token.objects.create(user=user)
+            
+            return Response({
+                'user': user.email,  # Changed to 'user' (singular)
+                'token': token.key
+            }, status=s.HTTP_201_CREATED)
+            
+        except Exception as e:
+            return Response(
+                {'error': str(e)},
+                status=s.HTTP_400_BAD_REQUEST
+            )
 
 
 class Log_in(APIView):
@@ -34,21 +74,28 @@ class Log_in(APIView):
     def post(self, request):
         email = request.data.get("email")
         password = request.data.get('password')
+        
+        if not email or not password:
+            return Response(
+                {'error': 'Email and password are required'},
+                status=s.HTTP_400_BAD_REQUEST
+            )
+        
         user = authenticate(username=email, password=password)
         
         if user:
             token, _ = Token.objects.get_or_create(user=user)
             return Response({
                 "token": token.key, 
-                "user": user.email,
+                "user": user.email,  # Changed to 'user' (singular)
                 "is_admin": user.is_admin,
                 "is_staff": user.is_staff,
                 "is_superuser": user.is_superuser
-            })
+            }, status=s.HTTP_200_OK)
         else:
             return Response(
-                "No user matching credentials", 
-                status=s.HTTP_404_NOT_FOUND
+                {'error': 'Invalid email or password'}, 
+                status=s.HTTP_401_UNAUTHORIZED
             )
 
 
@@ -61,17 +108,16 @@ class User_Auth(APIView):
 class Log_out(User_Auth):
     """User logout endpoint."""
     def post(self, request):
-        user = request.user
-        user_data = {
-            "email": user.email,
-            "id": user.id,
-            "username": getattr(user, "username", None),
-        }
-        request.user.auth_token.delete()
-        return Response({
-            "message": "Logged out successfully", 
-            "user": user_data
-        })
+        try:
+            request.user.auth_token.delete()
+            return Response({
+                "message": "Logged out successfully"
+            }, status=s.HTTP_200_OK)
+        except Exception as e:
+            return Response(
+                {'error': str(e)},
+                status=s.HTTP_400_BAD_REQUEST
+            )
 
 
 class Info(User_Auth):
@@ -93,24 +139,16 @@ class UserAccountView(User_Auth):
     :PUT/PATCH: Updates profile information only
     """
     def get(self, request):
-        """
-        Reverse relationship reference:
-        - event_wishlists
-        - comments 
-        - tickets 
-        """
         profile = UserProfile.objects.select_related('user').prefetch_related(
             'user__event_wishlists__event',
             'user__comments__event',
             'user__tickets__ticket',
-            # 'user__merchandise_wishlists__merchandise',  # when merch app implemented
-            # 'user__merchandise_reviews__merchandise',  # when merch app implemented
         ).get(user=request.user)
         serializer = UserProfileSerializer(profile)
         return Response(serializer.data, status=s.HTTP_200_OK)
     
     def update(self, request):
-        """Update user profile information (PUT / PATCH)."""
+        """Update user profile information (handles PUT and PATCH)."""
         profile = request.user.profile
         serializer = UserProfileUpdateSerializer(
             profile, 
@@ -124,27 +162,23 @@ class UserAccountView(User_Auth):
             return Response(full_serializer.data, status=s.HTTP_200_OK)
         return Response(serializer.errors, status=s.HTTP_400_BAD_REQUEST)
     
-    # Alias PUT and PATCH to be same
+    # Alias PUT and PATCH to update handler
     put = patch = update
 
 
 class AdminPromotionView(User_Auth):
     """
-    Admin management endpoint for promoting/demoting users.
-    
-    #### Permissions:
-    - Promote: Requires is_admin
-    - Demote: Requires is_superuser
-    """ 
+    Admin management endpoint - SUPERUSER ONLY.
+    Only superusers can promote/demote admins.
+    """
     def post(self, request):
         """Promote or demote a user."""
-        action = request.data.get('action')
-        
-        # Permission check - fail fast
-        if action == 'promote' and not request.user.is_admin:
-            return Response({"error": "Only admins can promote users"}, status=s.HTTP_403_FORBIDDEN)
-        if action == 'demote' and not request.user.is_superuser:
-            return Response({"error": "Only superusers can demote admins"}, status=s.HTTP_403_FORBIDDEN)
+        # Single permission check
+        if not request.user.is_superuser:
+            return Response(
+                {"error": "Only superusers can manage admins"},
+                status=s.HTTP_403_FORBIDDEN
+            )
         
         # Validate and get user
         serializer = AdminPromotionSerializer(data=request.data)
@@ -152,31 +186,38 @@ class AdminPromotionView(User_Auth):
             return Response(serializer.errors, status=s.HTTP_400_BAD_REQUEST)
         
         target_user = get_object_or_404(MyUsers, email=serializer.validated_data['email'])
+        action = serializer.validated_data['action']
         
-        # Action-specific validation and execution
-        if action == 'promote':
-            if target_user.is_admin:
-                return Response({"message": "User is already an admin"}, status=s.HTTP_200_OK)
-            
-            target_user.is_admin = target_user.is_staff = True
-            target_user.save()
-            return Response({
-                "message": f"{target_user.email} has been promoted to admin",
-                "user": {"email": target_user.email, "is_staff": True, "is_admin": True}
-            }, status=s.HTTP_200_OK)
+        # Prevent self-demotion
+        if action == 'demote' and target_user == request.user:
+            return Response(
+                {"error": "You cannot demote yourself"},
+                status=s.HTTP_403_FORBIDDEN
+            )
         
-        else:  # demote
-            # safety checks
-            if target_user == request.user:
-                return Response({"error": "You cannot demote yourself!"}, status=s.HTTP_403_FORBIDDEN)
-            if not target_user.is_admin:
-                return Response({"message": "Selected user is not an admin."}, status=s.HTTP_200_OK)
-            if target_user.is_superuser:
-                return Response({"error": "Cannot demote a superuser!"}, status=s.HTTP_403_FORBIDDEN)
-            # perform the demotion
-            target_user.is_admin = target_user.is_staff = False
-            target_user.save()
-            return Response({
-                "message": f"{target_user.email} has been demoted from admin",
-                "user": {"email": target_user.email, "is_staff": False, "is_admin": False}
-            }, status=s.HTTP_200_OK)
+        # Check current state
+        if action == 'promote' and target_user.is_admin:
+            return Response(
+                {"message": "User is already an admin"},
+                status=s.HTTP_200_OK
+            )
+        if action == 'demote' and not target_user.is_admin:
+            return Response(
+                {"message": "User is not an admin"},
+                status=s.HTTP_200_OK
+            )
+        
+        # Execute action
+        is_admin = (action == 'promote')
+        target_user.is_admin = target_user.is_staff = is_admin
+        target_user.save()
+        
+        verb = "promoted to" if is_admin else "demoted from"
+        return Response({
+            "message": f"{target_user.email} has been {verb} admin",
+            "user": {
+                "email": target_user.email,
+                "is_staff": is_admin,
+                "is_admin": is_admin
+            }
+        }, status=s.HTTP_200_OK)

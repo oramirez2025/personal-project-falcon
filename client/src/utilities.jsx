@@ -4,48 +4,45 @@ export const api = axios.create({
   baseURL: "http://127.0.0.1:8000/",
 });
 
-
-
 export const userLogIn = async (email, password) => {
-  console.log(email, password)
+  console.log('Login attempt:', email)
   try {
-    let response = await api.post("signup/login/", {
+    let response = await api.post("user/login/", {
       email: email,
       password: password,
     });
-    let {users, token} = response.data;
-    console.log(`user: ${users}, token: ${token}`)
+    
+    // FIXED: Backend returns 'user' (singular), not 'users'
+    let {user, token} = response.data;
+    console.log(`Logged in user: ${user}, token: ${token}`)
+    
     localStorage.setItem("token", token);
     api.defaults.headers.common["Authorization"] = `Token ${token}`;
-    return users;
+    
+    return user;  // Return the user email
 
-  }
-  catch (e) {
-    console.log(e)
+  } catch (e) {
+    console.error('Login error:', e.response?.data || e.message)
     return null;
   }
 };
 
-export const userLogOut = async (onUserUpdate) => {
+export const userLogOut = async () => {
   try {
-    const response = await api.post("signup/logout/");
+    const response = await api.post("user/logout/");
     
     localStorage.removeItem("token");
     delete api.defaults.headers.common["Authorization"];
 
-    alert("Logout request completed");
+    console.log("Logout successful");
     return null;
-
 
   } catch (err) {
     console.error("Logout failed:", err);
     localStorage.removeItem("token");
     delete api.defaults.headers.common["Authorization"];
-
-    alert("Something went wrong during logout.");
   }
 };
-
 
 export const userConfirmation = async () => {
   const token = localStorage.getItem("token");
@@ -55,7 +52,7 @@ export const userConfirmation = async () => {
 
   try {
     const response = await api.get("signup/info/");
-    console.log('user', response.data)
+    console.log('User confirmed:', response.data)
     if (response.status === 200) return response.data;
   } catch (err) {
     console.log("User confirmation failed:", err.response?.status);
@@ -64,7 +61,6 @@ export const userConfirmation = async () => {
     return null;
   }
 };
-
 
 export const stripeCheckout = async (cart) => {
   try {
@@ -89,7 +85,6 @@ export const grabWeather = async () => {
     console.error(e)
   }
 }
-
 
 // ============= EVENTS =============
 
@@ -122,7 +117,6 @@ export const deleteEvent = async(setEvents, id) => {
     console.error(e)
   }
 }
-
 
 export const updateEvent = async(setEvents, id, data) => {
   try{
