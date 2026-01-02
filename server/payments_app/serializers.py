@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Payment
+from .models import Payment, Order, OrderItem
 
 class PaymentSerializer(serializers.ModelSerializer):
     user_id = serializers.IntegerField(source="order.user.id", read_only=True)
@@ -8,27 +8,36 @@ class PaymentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Payment
-        fields = ['id', 'order_id', 'user_id', 'user_email', 'amount', 'stripe_payment_intent_id', 'status', 'created_at']
+        fields = ['id', 'order_id', 'user_id', 'user_email', 'stripe_payment_intent_id', 'status', 'created_at']
         read_only_fields = ['id', 'order_id', 'user_id', 'user_email', 'stripe_payment_intent_id', 'created_at']
 
 class OrderItemSerializer(serializers.ModelSerializer):
-    pass
+    ticket_template_id = serializers.IntegerField(source="ticket_template.id", read_only=True)
+
+    class Meta:
+        model = OrderItem
+        fields = ['id', 'ticket_template', 'title_at_purchase', 'quantity', 'line_total',]
+        read_only_fields = fields
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    pass
-
-
-
-
-    """
-    # Add user details via method field if needed
-    user_email = serializers.SerializerMethodField()
-    user_name = serializers.SerializerMethodField()
+    items = OrderItemSerializer(many=True, read_only=True)
+    user_id = serializers.IntegerField(source='user.id', read_only=True)
+    user_email = serializers.EmailField(source='user.email', read_only=True)
     
-    def get_user_email(self, obj):
-        return obj.ticket.user.email
-    
-    def get_user_name(self, obj):
-        return obj.ticket.user.full_name
-    """
+    # I have these as serializer method fields because the attributes may not exist and be accessible.
+    payment_status = serializers.SerializerMethodField()
+    stripe_payment_intent_id = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Order
+        fields = ["id", "status", "created_at", "user_id", "user_email", "subtotal", "tax", "fees", "total", "items", "payment_status", "stripe_payment_intent_id",]
+        read_only_fields = ['id', 'user_id', 'user_email', 'created_at', 'subtotal', 'items', 'stripe_payment_intent_id']
+
+    def get_payment_status(self, obj):
+        payment = getattr(obj, "payment", None)
+        return payment.status if payment else None
+
+    def get_stripe_payment_intent_id(self, obj):
+        payment = getattr(obj, "payment", None)
+        return payment.stripe_payment_intent_id if payment else None
