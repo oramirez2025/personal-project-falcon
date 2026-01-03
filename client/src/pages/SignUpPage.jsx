@@ -16,7 +16,7 @@ const SignUp = () => {
     const handleClick = async (e) => {
         e.preventDefault()
         const data = {"email": email, "password": password}
-        const response = await axios.post("http://127.0.0.1:8000/signup/new_account/", data);
+        const response = await axios.post("http://127.0.0.1:8000/user/new_account/", data);
         console.log(response.data)
         alert("We've Made Your Badass Account");
         if (response.status === 201) {

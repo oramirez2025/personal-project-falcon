@@ -51,7 +51,7 @@ export const userConfirmation = async () => {
   api.defaults.headers.common["Authorization"] = `Token ${token}`;
 
   try {
-    const response = await api.get("signup/info/");
+    const response = await api.get("user/info/");
     console.log('User confirmed:', response.data)
     if (response.status === 200) return response.data;
   } catch (err) {
