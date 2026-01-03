@@ -1,4 +1,6 @@
 import { Button } from "react-bootstrap";
+import {useState,useEffect} from "react"
+import "axios"
 
 export default function EventCard({
   title,
@@ -10,6 +12,20 @@ export default function EventCard({
   onClickDelete,
   onClickUpdate,
 }) {
+  const [showComments, setShowComments] = useState(false)
+  const [comments, setComments] = useState([])
+  useEffect(() => {
+    const loadComments = async () => {
+      try {
+        const response = await axios.get("", {})
+        setComments(response.data)
+      } catch (e) {
+        console.log(e)
+      }
+    }
+
+    loadComments()
+  }, [comments])
   return (
     <div className="card" style={{ width: "18rem" }}>
       <div className="card-body">
@@ -31,6 +47,30 @@ export default function EventCard({
             <Button variant="primary" onClick={onClickUpdate}>
                 Edit Event
             </Button>
+        </>
+        <>
+
+          <Button onClick={() => setShowComments(prev => !prev)}>Open Comment Section</Button>
+          {
+            showComments ?  
+            <div>
+              <h1>Comment Section: </h1>
+              {comments.map((id,author, time, likes, text) => {
+              <CommentCard
+                key={id}
+                author={author}
+                time={time}
+                likes={likes}
+                text={text}
+              />
+            }
+              )
+                }
+              <Button> Add a comment!</Button>
+            </div>
+            : <></>
+      
+          }
         </>
       </div>
     </div>
