@@ -127,3 +127,45 @@ export const updateEvent = async(setEvents, id, data) => {
     console.error(e)
   }
 }
+
+// ============= COMMENTS =============
+
+export const fetchComments = async (setComments, event) => {
+  try {
+    const response = await api.get(`comment/events/${event}`)
+    setComments(response.data)
+  }
+  catch (e) {
+    console.error(e)
+  }
+}
+
+export const createComments = async (setComments,event,data) => {
+  try {
+    await api.post(`comment/event/${event}`,data)
+    fetchComments(setComments)
+  }
+  catch (e) {
+    console.error(e)
+  }
+}
+
+export const deleteComment = async(setComments, id) => {
+  try{
+    await api.delete(`comment/${id}/`)
+    setComments(prev => prev.filter(c => c.id !== id))
+  }
+  catch (e) {
+    console.error(e)
+  }
+}
+
+export const updateComment = async(setComments, id, data) => {
+  try{
+    await api.put(`comment/${id}/`, data)
+    fetchComments(setComments)
+  }
+  catch (e) {
+    console.error(e)
+  }
+}

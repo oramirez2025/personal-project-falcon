@@ -1,5 +1,6 @@
 import { Button } from "react-bootstrap";
 import {useState,useEffect} from "react"
+import CreateCommentModal from "./CreateCommentModal";
 import "axios"
 
 export default function EventCard({
@@ -13,7 +14,16 @@ export default function EventCard({
   onClickUpdate,
 }) {
   const [showComments, setShowComments] = useState(false)
+  const [showCreateCommentModal, setCreateCommentModal] = useState(false)
   const [comments, setComments] = useState([])
+  const handleSave = async (data) => {
+    await createEvents(setEvents, data);
+  };
+
+
+  const handleClose = () => setCreateCommentModal(false);
+  const handleShow = () => setCreateCommentModal(true);
+
   useEffect(() => {
     const loadComments = async () => {
       try {
@@ -66,7 +76,12 @@ export default function EventCard({
             }
               )
                 }
-              <Button> Add a comment!</Button>
+              <Button onClick={handleShow}> Add a comment!</Button>
+              <CreateCommentModal
+                show={showCreateCommentModal}
+                handleClose={handleClose}
+                handleSave={handleSave}
+              />
             </div>
             : <></>
       
