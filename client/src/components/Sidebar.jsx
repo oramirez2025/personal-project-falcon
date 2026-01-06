@@ -34,28 +34,8 @@ export default function Sidebar({ user, setUser }) {
         />
       )}
 
-      {/* Sidebar + Toggle Button (slide together) */}
-      <motion.nav
-        initial={false}
-        animate={{ x: isOpen ? 0 : -260 }}
-        transition={{ type: "tween", duration: 0.3 }}
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          bottom: 0,
-          width: '260px',
-          background: 'linear-gradient(180deg, #1c1917 0%, #0c0a09 100%)',
-          borderRight: '2px solid #b91c1c',
-          zIndex: 50,
-          display: 'flex',
-          flexDirection: 'column',
-          padding: '20px 0',
-          overflowY: 'auto',
-        }}
-      >
-        {/* Toggle Button - positioned on right edge of sidebar */}
-        <Box
+      <Box
+          float="left"
           as="button"
           onClick={() => setIsOpen(!isOpen)}
           position="absolute"
@@ -69,6 +49,52 @@ export default function Sidebar({ user, setUser }) {
           borderRadius="8px"
           fontSize="20px"
           cursor="pointer"
+          _hover={{ bg: "#292524", color: "#fbbf24", borderColor: "#fbbf24" }}
+        >
+          {isOpen ? '✕' : '☰'}
+        </Box>
+
+
+      {/* Sidebar + Toggle (slide together) */}
+      <motion.nav
+        initial={false}
+        animate={{ x: isOpen ? 0 : -260 }}
+        transition={{ type: "tween", duration: 0.3 }}
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          bottom: 0,
+          width: '260px',
+          background: 'linear-gradient(180deg, #1c1917 0%, #0c0a09 100%)',
+          borderRight: '2px solid #b91c1c',
+          zIndex: "50",
+          display: 'flex',
+          flexDirection: 'column',
+          padding: '20px 0',
+        }}
+      >
+        {/* Toggle Button */}
+        <Box
+          as="button"
+          onClick={() => setIsOpen(!isOpen)}
+          position="absolute"
+          top="100px"
+          right="-51.1px"
+          w="3rem"
+          h="5rem"
+          bg="#1c1917"
+          color="#d6d3d1"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          border="1px solid #44403c"
+          roundedBottomRight="8px"
+          roundedTopRight="8px"
+          fontSize="20px"
+          cursor="pointer"
+          zIndex="25"
+          transform="translateY(-50%)"
           _hover={{ bg: "#292524", color: "#fbbf24", borderColor: "#fbbf24" }}
         >
           {isOpen ? '✕' : '☰'}
