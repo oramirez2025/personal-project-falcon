@@ -62,9 +62,11 @@ export const userConfirmation = async () => {
   }
 };
 
-export const stripeCheckout = async (cart) => {
+// ============= PAYMENTS =============
+
+export const createOrder = async (cart) => {
   try {
-    const response = await api.post("ticket/purchase/", cart)
+    const response = await api.post("payments/orders/create/", cart)
     console.log(response)
     return response.data;
   } catch(err) {
@@ -72,6 +74,21 @@ export const stripeCheckout = async (cart) => {
     return "/tickets"
   }
 }
+
+export const payForOrder = async (orderId) => {
+  try {
+    const response = await api.post(`payments/create-intent/`, {
+      order_id: orderId,
+    });
+    return response.data 
+  } catch (err) {
+    console.log("Error paying for order.");
+    throw err;
+  }
+};
+
+
+// ============= PAYMENTS =============
 
 export const grabWeather = async () => {
   try {

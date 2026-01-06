@@ -2,19 +2,21 @@ import React, { useState } from "react";
 import { Modal, Button } from "react-bootstrap";
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
-import StripeCheckoutForm from "./StripeCheckoutForm";
-import { payForTickets } from "../utilities";
+import { payForOrder } from "../utilities";
+import StripeCheckoutForm from "./StripeCheckoutForm"
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
-// TO-DO: Rough template. Will need changed based off order model and/or naming conventions.
-export default function PaymentModal({ show, onClose, }) {
+
+export default function PaymentModal({ show, onClose, order }) {
     const [loading, setLoading] = useState(false);
     const [clientSecret, setClientSecret] = useState("");
+    
 
     const initializePayment = async () => {
+        if (!order.id) return;
         setLoading(true);
         try {
-            const paymentData = await payForTickets(ticket.id, { amount: ticket.price });
+            const paymentData = await payForOrder(order.id);
             setClientSecret(paymentData.client_secret);
         } catch (err) {
             console.error(err);
@@ -32,16 +34,16 @@ export default function PaymentModal({ show, onClose, }) {
             onShow={initializePayment}
         >
             <Modal.Header closeButton>
-                <Modal.Title>Pay for {ticket.amount} {ticket.ticket_profile} </Modal.Title>
+                <Modal.Title>Pay for {order.id} </Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <p><strong>Tickets:</strong> {new ticket.ticket_profile.title}</p>
-                <p><strong>Price:</strong> ${ticket.price}</p>
+                <p><strong>Tickets:</strong> {order.id}</p>
+                <p><strong>Price:</strong> ${order.id}</p>
                 {clientSecret && (
                     <Elements stripe={stripePromise}>
                         <StripeCheckoutForm
                             clientSecret={clientSecret}
-                            paymentId={ticket.paymentId}
+                            paymentId={order.paymentId}
                             onSuccess={onClose}
                         />
                     </Elements>
