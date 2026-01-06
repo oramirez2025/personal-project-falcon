@@ -116,7 +116,7 @@ h2 {
 
 
 .weathercolor {
-  text-shadow: #1fbf7a 1px 0 10px;
+  text-shadow: white 1px 0 10px;
   
 }
 
@@ -125,7 +125,7 @@ h2 {
 }
 
 .card {
-  background-color:#295ead !important;
+  background-color:rgb(53, 89, 231) !important;
   border: #29ad57;
 }
 

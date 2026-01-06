@@ -65,7 +65,7 @@ export default function EventsPage() {
       </Button> */}
       <Button
           onClick={handleShow}
-          style={{ backgroundColor: "", borderColor: "#87cefa", color: "black" }}
+          style={{ backgroundColor: "black", borderColor: "black", color: "white" }}
         >
           Add an Event
         </Button>
