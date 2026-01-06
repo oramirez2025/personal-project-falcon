@@ -2,16 +2,16 @@ import { useState } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 
 export default function CreateCommentModal({ show, handleClose, handleSave }) {
-  const [image, setImage] = useState("");
+  // const [image, setImage] = useState("");
   const [text, setText] = useState("");
-  const [parent, setParent] = useState(null)
+  // const [parent, setParent] = useState(null)
 
   const onSave = () => {
     handleSave({
       text,
     });
 
-    setImage("");
+    // setImage("");
     setText("");
 
     handleClose();
