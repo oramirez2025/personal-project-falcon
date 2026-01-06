@@ -34,27 +34,6 @@ export default function Sidebar({ user, setUser }) {
         />
       )}
 
-      <Box
-          float="left"
-          as="button"
-          onClick={() => setIsOpen(!isOpen)}
-          position="absolute"
-          top="20px"
-          right="-54px"
-          w="44px"
-          h="44px"
-          bg="#1c1917"
-          color="#d6d3d1"
-          border="1px solid #44403c"
-          borderRadius="8px"
-          fontSize="20px"
-          cursor="pointer"
-          _hover={{ bg: "#292524", color: "#fbbf24", borderColor: "#fbbf24" }}
-        >
-          {isOpen ? '✕' : '☰'}
-        </Box>
-
-
       {/* Sidebar + Toggle (slide together) */}
       <motion.nav
         initial={false}
@@ -80,21 +59,23 @@ export default function Sidebar({ user, setUser }) {
           onClick={() => setIsOpen(!isOpen)}
           position="absolute"
           top="100px"
-          right="-51.1px"
-          w="3rem"
+          right="-32px"
+          w="2rem"
           h="5rem"
+          aspectRatio="portrait"
           bg="#1c1917"
           color="#d6d3d1"
           display="flex"
           alignItems="center"
           justifyContent="center"
-          border="1px solid #44403c"
+          borderTop='2px solid #b91c1c'
+          borderRight='2px solid #b91c1c'
+          borderBottom='2px solid #b91c1c'
           roundedBottomRight="8px"
           roundedTopRight="8px"
           fontSize="20px"
           cursor="pointer"
-          zIndex="25"
-          transform="translateY(-50%)"
+          transform="translateY"
           _hover={{ bg: "#292524", color: "#fbbf24", borderColor: "#fbbf24" }}
         >
           {isOpen ? '✕' : '☰'}
@@ -119,8 +100,8 @@ export default function Sidebar({ user, setUser }) {
           </Text>
           
           <SidebarLink to="/" onClick={closeSidebar}>Home</SidebarLink>
-          <SidebarLink to="/events" onClick={closeSidebar}>Events</SidebarLink>
-          {user && <SidebarLink to="/tickets" onClick={closeSidebar}>Tickets</SidebarLink>}
+          <SidebarLink to="/tickets" onClick={closeSidebar}>Tickets</SidebarLink>
+          {user && <SidebarLink to="/profile" onClick={closeSidebar}>User Profile</SidebarLink>}
         </Box>
 
         {/* External Links */}
