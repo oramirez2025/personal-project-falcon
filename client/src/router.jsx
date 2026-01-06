@@ -1,6 +1,6 @@
 import { createBrowserRouter } from "react-router-dom";
 import App from "./App";
-import HomePage from "./pages/HomePage";
+import UserProfile from "./pages/UserProfile";
 import SignUpPage from "./pages/SignUpPage";
 import EventsPage from "./pages/EventsPage"
 import LogInPage from "./pages/LogInPage";
@@ -34,7 +34,7 @@ const router = createBrowserRouter([
     children: [
         {
             index: true,
-            element: <HomePage/>
+            element: <EventsPage/>
         },
         {
             path: 'signup',
@@ -52,7 +52,10 @@ const router = createBrowserRouter([
             path: 'tickets',
             element: <TicketsPage/>
         },
-
+        {
+            path: 'profile',
+            element: <UserProfile/>
+        },
     ]
 
 
