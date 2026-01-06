@@ -4,10 +4,10 @@ import { Modal, Button, Form } from "react-bootstrap";
 export default function CreateCommentModal({ show, handleClose, handleSave }) {
   const [image, setImage] = useState("");
   const [text, setText] = useState("");
+  const [parent, setParent] = useState(null)
 
   const onSave = () => {
     handleSave({
-      image,
       text,
     });
 
@@ -25,25 +25,13 @@ export default function CreateCommentModal({ show, handleClose, handleSave }) {
 
       <Modal.Body>
         <Form>
-          <Form.Group className="mb-3" controlId="commentImage">
-            <Form.Label>Image</Form.Label>
-            {/* Place holder right now. Need to replace with input for images (maybe upload button) */}
-            <Form.Control
-              type="text"
-              placeholder="Upload an image"
-              value={title}
-              onChange={(e) => setImage(e.target.value)}
-              autoFocus
-            />
-          </Form.Group>
-
           <Form.Group className="mb-3" controlId="eventText">
             <Form.Label>Text</Form.Label>
             <Form.Control
               as="textarea"
               rows={3}
               placeholder="Enter text"
-              value={description}
+              value={text}
               onChange={(e) => setText(e.target.value)}
             />
           </Form.Group>

@@ -2,8 +2,11 @@ import { Button } from "react-bootstrap";
 import {useState,useEffect} from "react"
 import CreateCommentModal from "./CreateCommentModal";
 import "axios"
+import { createComments, deleteComment, fetchComments, updateComment } from "../utilities";
+import CommentCard from "./CommentCard";
 
 export default function EventCard({
+  id,
   title,
   day,
   start_time,
@@ -16,26 +19,33 @@ export default function EventCard({
   const [showComments, setShowComments] = useState(false)
   const [showCreateCommentModal, setCreateCommentModal] = useState(false)
   const [comments, setComments] = useState([])
-  const handleSave = async (data) => {
-    await createEvents(setEvents, data);
-  };
 
 
   const handleClose = () => setCreateCommentModal(false);
   const handleShow = () => setCreateCommentModal(true);
 
+  
   useEffect(() => {
-    const loadComments = async () => {
-      try {
-        const response = await axios.get("", {})
-        setComments(response.data)
-      } catch (e) {
-        console.log(e)
-      }
-    }
+    fetchComments(setComments,id);
+    console.log("here are the comments: ", comments)
+  },[]);
 
-    loadComments()
-  }, [comments])
+  
+  
+  const handleSave = async (data) => {
+    await createComments(setComments, id, data);
+  };
+
+  // const handleUpdate = async (id, data) => {
+  //   await updateComment(setComments, id, data);
+  // };
+
+  // const handleDelete = async (id) => {
+  //   await deleteComment(setComments, id);
+  // };
+
+  console.log(`AS OF NOW SHOW COMMENTS IS ${showComments}`)
+  
   return (
     <div className="card" style={{ width: "18rem" }}>
       <div className="card-body">
@@ -65,17 +75,17 @@ export default function EventCard({
             showComments ?  
             <div>
               <h1>Comment Section: </h1>
-              {comments.map((id,author, time, likes, text) => {
-              <CommentCard
-                key={id}
-                author={author}
-                time={time}
-                likes={likes}
-                text={text}
-              />
-            }
-              )
-                }
+              {comments.map((comment) => 
+                <CommentCard
+                  key={comment.id}
+                  author={comment.author}
+                  time={comment.time}
+                  likes={comment.likes} 
+                  text={comment.text}
+                />
+                  
+                )
+              }
               <Button onClick={handleShow}> Add a comment!</Button>
               <CreateCommentModal
                 show={showCreateCommentModal}

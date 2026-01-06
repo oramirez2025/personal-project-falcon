@@ -132,7 +132,7 @@ export const updateEvent = async(setEvents, id, data) => {
 
 export const fetchComments = async (setComments, event) => {
   try {
-    const response = await api.get(`comment/events/${event}`)
+    const response = await api.get(`comment/events/${event}/`)
     setComments(response.data)
   }
   catch (e) {
@@ -142,8 +142,8 @@ export const fetchComments = async (setComments, event) => {
 
 export const createComments = async (setComments,event,data) => {
   try {
-    await api.post(`comment/event/${event}`,data)
-    fetchComments(setComments)
+    await api.post(`comment/events/${event}/`,data)
+    fetchComments(setComments,event)
   }
   catch (e) {
     console.error(e)
