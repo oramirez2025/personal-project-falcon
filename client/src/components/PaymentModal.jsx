@@ -40,11 +40,12 @@ export default function PaymentModal({ show, onClose, order }) {
       onOpenChange={(e) => {
         if (!e.open) onClose();
       }}
+      preventScroll={false}
     >
       <Dialog.Content
-        maxH='90VH'
-        overflow="auto"
-        mt="auto"
+        maxH='90vh'
+        overflowY="auto"
+        mt="-8vh"
         mb="auto"
       >
         <Dialog.Header>

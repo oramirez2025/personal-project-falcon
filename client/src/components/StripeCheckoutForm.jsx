@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
-import { redirect } from "react-router-dom";
 
 export default function StripeCheckoutForm({ clientSecret, userId, onSuccess }) {
     const stripe = useStripe();
@@ -16,7 +15,7 @@ export default function StripeCheckoutForm({ clientSecret, userId, onSuccess }) 
 
         try {
 
-            const { error, paymentIntent } = await stripe.confirmCardPayment({
+            const { error, paymentIntent } = await stripe.confirmPayment({
                 elements,
                 redirect: "if_required"
             });
