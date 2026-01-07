@@ -3,7 +3,7 @@ import TicketCard from "../components/TicketCard"
 import Button from "react-bootstrap/esm/Button";
 import { useNavigate } from "react-router-dom";
 import Card from "../components/Card";
-import { SimpleGrid } from "@chakra-ui/react";
+import { Box, Grid, SimpleGrid } from "@chakra-ui/react";
 import { createOrder, payForOrder } from "../utilities";
 import PaymentModal from "../components/PaymentModal";
 

@@ -64,6 +64,7 @@ class CreatePaymentIntent(User_Auth):
         intent = stripe.PaymentIntent.create(
             amount=int(order.total * 100),
             currency="usd",
+            automatic_payment_methods={'enabled': True},
             metadata={"order_id": str(order.id), 'user_id': str(request.user.id)},
         )
         Payment.objects.create(
