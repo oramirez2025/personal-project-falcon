@@ -6,6 +6,7 @@ import EventsPage from "./pages/EventsPage"
 import LogInPage from "./pages/LogInPage";
 import { userConfirmation } from "./utilities";
 import TicketsPage from "./pages/TicketsPage";
+import QuestionsAnswersPage from "./pages/QuestionAnswerPage";
 
 const falconLoader = async () => {
     const token = localStorage.getItem("token")
@@ -56,6 +57,10 @@ const router = createBrowserRouter([
             path: 'profile',
             element: <UserProfile/>
         },
+        {
+            path: 'questions',
+            element: <QuestionsAnswersPage/>
+        }
     ]
 
 

@@ -101,6 +101,7 @@ export default function Sidebar({ user, setUser }) {
 
           <SidebarLink to="/" onClick={closeSidebar}>Home</SidebarLink>
           <SidebarLink to="/tickets" onClick={closeSidebar}>Tickets</SidebarLink>
+          <SidebarLink to="/questions" onclick={closeSidebar}>FAQ</SidebarLink>
           {user && <SidebarLink to="/profile" onClick={closeSidebar}>User Profile</SidebarLink>}
         </Box>
 
