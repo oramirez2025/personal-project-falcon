@@ -23,7 +23,7 @@ export default function EventCard({
   const [editingComment, setEditingComment] = useState(null);
   const [showEdit, setShowEdit] = useState(false);
   const [comments, setComments] = useState([])
-
+  console.log(user)
 
   const handleClose = () => setCreateCommentModal(false);
   const handleShow = () => setCreateCommentModal(true);
@@ -50,10 +50,20 @@ export default function EventCard({
 
   // =============== COMMENTS ===============
 
-  // const onClickLike = async (comment_id, data) => {
+  const onClickLike = async (comment_id, prev_likes) => {
+    console.log(prev_likes)
+    if (prev_likes.includes(user.id)) {
+      prev_likes = prev_likes.filter(p => p !== user.id)
+      console.log("PREVLIKES", prev_likes)
+      await updateComment(setComments, id, comment_id, {"likes" : prev_likes})
+    } else {
+      prev_likes = [...prev_likes, user.id]
+      console.log("what: ", prev_likes)
+      await updateComment(setComments, id, comment_id, {"likes" : prev_likes})
+    }
 
 
-  // }
+  }
 
   // console.log(`HERE ARE MY COMMENTS ${comments[1].likes.length}`)
   return (
@@ -109,6 +119,7 @@ export default function EventCard({
                     setEditingComment(comment)
                     setShowEdit(true)
                   }}
+                  onClickLike={() => onClickLike(comment.id, comment.likes)}
                   isOP={user?.id === comment.author}
                   isAdmin={user?.is_admin}
                   isLoggedIn={!!user}

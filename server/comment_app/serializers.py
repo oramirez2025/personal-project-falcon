@@ -6,7 +6,7 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = ["id", "author", "parent", "event", "text", "time", "likes", "replies"]
-        read_only_fields = ["author", "event", "likes"]
+        read_only_fields = ["author", "event"]
     # Recursively grab the replies of the comment
     def get_replies(self, curr_comment):
         replies = curr_comment.replies.all().order_by("time")

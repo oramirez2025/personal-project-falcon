@@ -23,8 +23,6 @@ export default function CommentCard({
                     isOP ? (
                         <>
                             <Button onClick={onClickUpdate}>Edit Comment</Button>
-                            <Button> Like Button </Button>
-                            <Button> Reply? </Button>
                         </>
                     ) : <></>
                 }

@@ -54,11 +54,17 @@ class CommentView(APIView):
     # UPDATE (only the OP)
     def put(self, request, id):
         comment = get_object_or_404(Comment, id=id)
-        if not self.is_OP(request.user, comment) or "parent" in request.data or "event" in request.data:
+        # print("text" in request and not self.is_OP(request.user, comment), ("parent" in request.data or "event" in request.data),("likes" in request and not request.user.is_authenticated) )
+        if (("text" in request.data and not self.is_OP(request.user, comment)) 
+            or 
+        ("parent" in request.data or "event" in request.data) 
+            or 
+        (("likes" in request.data and not request.user.is_authenticated))):
             return Response({"detail": "Not authorized"}, status=HTTP_403_FORBIDDEN)
         comment_ser = CommentSerializer(comment, data=request.data, partial=True)
         if comment_ser.is_valid():
             comment_ser.save()
+            print(request.data, comment_ser.data)
             return Response(comment_ser.data, status=HTTP_200_OK)
         return Response(comment_ser.errors, status=HTTP_400_BAD_REQUEST)
 

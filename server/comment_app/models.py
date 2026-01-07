@@ -31,6 +31,7 @@ class Comment(models.Model):
     likes = ArrayField(
         models.IntegerField(validators=[validate_id]),
         null=True,
+        blank=True,
         default=list
     )
     
