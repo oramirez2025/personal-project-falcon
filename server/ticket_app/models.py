@@ -19,8 +19,14 @@ class TicketTemplate(models.Model):
     ticket_type = models.CharField(max_length=20, choices=TICKET_TYPE_CHOICES)
     available_quantity = models.PositiveIntegerField()
 
+    def __str__(self):
+        return f"There are {self.available_quantity} {self.ticket_type} tickets left."
+
 # Purchased ticket
 class Ticket(models.Model):
     user = models.ForeignKey(MyUsers, on_delete=models.CASCADE, related_name="tickets")
-    ticket = models.ForeignKey(TicketTemplate, on_delete=models.PROTECT)
+    ticket_template = models.ForeignKey(TicketTemplate, on_delete=models.PROTECT)
     quantity = models.PositiveIntegerField(validators=[v.MinValueValidator(1)])
+
+    def __str__(self):
+        return f"{self.user.full_name} had {self.quantity} {self.ticket_template.ticket_type} tickets."

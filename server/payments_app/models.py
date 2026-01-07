@@ -62,6 +62,9 @@ class OrderItem(models.Model):
     unit_price_at_purchase = models.DecimalField(max_digits=8, decimal_places=2)
     line_total = models.DecimalField(max_digits=8, decimal_places=2)
 
+    def __str__(self):
+        return f"{self.unit_price_at_purchase} for {self.quantity} {self.ticket_template.ticket_type} tickets."
+
 # title_at_purchase = ticket_template.title
 # unit_price_at_purchase = ticket_template.price
 # line_total = unit_price_at_purchase * quantity
