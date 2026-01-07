@@ -1,33 +1,31 @@
-import { useState, useEffect} from 'react'
-import './index.css'
-import './App.css'
-import { Outlet, useLoaderData } from 'react-router-dom'
-import NavBar from './components/NavBar'
+import { useState, useEffect } from 'react'
+// import './index.css'
+// import './App.css'
+import { Outlet } from 'react-router-dom'
+import Sidebar from './components/Sidebar'
 import { userConfirmation } from './utilities'
-
+import { Box } from '@chakra-ui/react'
 
 function App() {
-  const [user, setUser] = useState(null);
-  // for each rerender, confirm that the user is logged in 
+  const [user, setUser] = useState(null)
+
   useEffect(() => {
     const restoreUser = async () => {
-      const confirmedUser = await userConfirmation();
-      setUser(confirmedUser);
-    };
-    restoreUser();
-  }, []);
+      const confirmedUser = await userConfirmation()
+      setUser(confirmedUser)
+    }
+    restoreUser()
+  }, [])
+
   return (
-    <>
-      <div className="page-bg">
-        <NavBar user={user} setUser={setUser}/>
-        <main className="content">
-          <Outlet context={{ user, setUser }} />
-        </main>
-      </div>
-    </>
+    <Box minH="100vh" bg="#0c0a09">
+      <Sidebar user={user} setUser={setUser} />
+      
+      <Box as="main" p="20px" maxW="1200px" mx="auto">
+        <Outlet context={{ user, setUser }} />
+      </Box>
+    </Box>
   )
 }
-
-
 
 export default App
