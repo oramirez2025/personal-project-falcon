@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
+import { PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
 
 export default function StripeCheckoutForm({ clientSecret, userId, onSuccess }) {
     const stripe = useStripe();
@@ -14,20 +14,11 @@ export default function StripeCheckoutForm({ clientSecret, userId, onSuccess }) 
         setProcessing(true);
 
         try {
-            const cardElement = elements.getElement(CardElement);
-            if (!cardElement) {
-                alert("Payment form is not ready. Please try again.");
-                return;
-            }
 
-            const { error, paymentIntent } = await stripe.confirmCardPayment(
-                clientSecret,
-                {
-                    payment_method: {
-                        card: cardElement,
-                    },
-                }
-            );
+            const { error, paymentIntent } = await stripe.confirmPayment({
+                elements,
+                redirect: "if_required"
+            });
 
             if (error) {
                 alert(error.message || "Payment failed.");
@@ -47,9 +38,9 @@ export default function StripeCheckoutForm({ clientSecret, userId, onSuccess }) 
 
     return (
         <form onSubmit={handleSubmit}>
-            <CardElement />
+            <PaymentElement />
 
-            <button type="submit" disabled={!stripe || processing}>
+            <button type="submit" disabled={!stripe || !elements || processing} style={{ marginTop: 12}}>
                 {processing ? "Processing..." : "Pay"}
             </button>
         </form>

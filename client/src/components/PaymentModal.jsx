@@ -1,13 +1,11 @@
-import React, { useState } from "react";
-import { Modal, Button } from "react-bootstrap";
+import React, { useState, useEffect } from "react";
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 import { payForOrder } from "../utilities";
 import StripeCheckoutForm from "./StripeCheckoutForm"
+import { Dialog, Button } from '@chakra-ui/react'
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
-console.log("VITE_STRIPE_PUBLISHABLE_KEY =", import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
-
 
 export default function PaymentModal({ show, onClose, order }) {
     const [loading, setLoading] = useState(false);
@@ -29,33 +27,66 @@ export default function PaymentModal({ show, onClose, order }) {
         }
     };
 
-    return (
-        <Modal
-            show={show}
-            onHide={onClose}
-            onShow={initializePayment}
-        >
-            <Modal.Header closeButton>
-                <Modal.Title>Pay for {order.id} </Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-                <p><strong>Tickets:</strong> {order.id}</p>
-                <p><strong>Price:</strong> ${order.id}</p>
-                {clientSecret && (
-                    <Elements stripe={stripePromise}>
-                        <StripeCheckoutForm
-                            clientSecret={clientSecret}
-                            paymentId={order.paymentId}
-                            onSuccess={onClose}
-                        />
-                    </Elements>
-                )}
+    useEffect(() => {
+        if (show && order.id) {
+            initializePayment();
+        }
+    }, [show, order.id]);
 
-                {loading && <p>Loading payment form...</p>}
-            </Modal.Body>
-            <Modal.Footer>
-                <Button variant="secondary" onClick={onClose}>Cancel</Button>
-            </Modal.Footer>
-        </Modal>
-    );
+  
+    return (
+    <Dialog.Root
+      open={show}
+      onOpenChange={(e) => {
+        if (!e.open) onClose();
+      }}
+      preventScroll={false}
+    >
+      <Dialog.Content
+        maxH='90vh'
+        overflowY="auto"
+        mt="-8vh"
+        mb="auto"
+      >
+        <Dialog.Header>
+          <Dialog.Title>Pay for Order #{order?.id}</Dialog.Title>
+          <Dialog.CloseTrigger />
+        </Dialog.Header>
+
+        <Dialog.Body>
+          <p>
+            <strong>Tickets:</strong>
+          </p>
+          <ul>
+            {(order?.items ?? []).map((item) => (
+              <li key={item.id}>
+                {item.title_at_purchase} × {item.quantity}
+              </li>
+            ))}
+          </ul>
+
+          <p style={{ marginTop: "0.5rem" }}>
+            <strong>Total:</strong> ${order?.total}
+          </p>
+
+          {loading && <p>Loading payment form...</p>}
+
+          {clientSecret && (
+            <Elements
+              stripe={stripePromise}
+              options={{ clientSecret }}
+            >
+              <StripeCheckoutForm onSuccess={onClose} />
+            </Elements>
+          )}
+        </Dialog.Body>
+
+        <Dialog.Footer>
+          <Button variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+        </Dialog.Footer>
+      </Dialog.Content>
+    </Dialog.Root>
+  );
 }
