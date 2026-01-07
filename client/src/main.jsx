@@ -5,9 +5,10 @@ import { createRoot } from 'react-dom/client'
 import router from './router.jsx'
 import "bootstrap/dist/css/bootstrap.min.css";
 import { RouterProvider } from 'react-router-dom';
-import { ChakraProvider, createSystem, defaultConfig } from "@chakra-ui/react";
+import { ChakraProvider, createSystem } from "@chakra-ui/react";
+import { theme } from './theme.js';
 
-const system = createSystem(defaultConfig);
+const system = createSystem(theme);
 
 
 createRoot(document.getElementById('root')).render(

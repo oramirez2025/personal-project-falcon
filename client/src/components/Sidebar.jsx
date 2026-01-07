@@ -7,7 +7,7 @@ import logo from '../assets/FFF_Symbol_128.png'
 
 export default function Sidebar({ user, setUser }) {
   const navigate = useNavigate()
-  const [isOpen, setIsOpen] = useState(true)
+  const [isOpen, setIsOpen] = useState(false)
 
   const handleLogout = async () => {
     await userLogOut()
