@@ -60,9 +60,9 @@ export default function EventsPage() {
 
       <h2>Events</h2>
 
-      <Button variant="primary" onClick={handleShow}>
-        Add an Event
-      </Button>
+      {
+        user?.is_staff ? <Button variant="primary" onClick={handleShow}> Add an Event </Button> : <></> 
+      }
 
       <CreateEventModal
         show={show}
@@ -93,6 +93,7 @@ export default function EventsPage() {
               setEditingEvent(event);
               setShowEdit(true);
             }}
+            user={user}
           />
         ))}
       </div>

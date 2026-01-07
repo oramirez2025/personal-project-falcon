@@ -30,7 +30,8 @@ class Comment(models.Model):
     # List of user_ids of those who liked this comment
     likes = ArrayField(
         models.IntegerField(validators=[validate_id]),
-        null=True
+        null=True,
+        default=list
     )
     
     def __str__(self):

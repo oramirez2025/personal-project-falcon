@@ -4,6 +4,7 @@ import CreateCommentModal from "./CreateCommentModal";
 import "axios"
 import { createComments, deleteComment, fetchComments, updateComment } from "../utilities";
 import CommentCard from "./CommentCard";
+import EditCommentModal from "./EditCommentModal";
 
 export default function EventCard({
   id,
@@ -15,9 +16,12 @@ export default function EventCard({
   description,
   onClickDelete,
   onClickUpdate,
+  user
 }) {
   const [showComments, setShowComments] = useState(false)
   const [showCreateCommentModal, setCreateCommentModal] = useState(false)
+  const [editingComment, setEditingComment] = useState(null);
+  const [showEdit, setShowEdit] = useState(false);
   const [comments, setComments] = useState([])
 
 
@@ -36,16 +40,22 @@ export default function EventCard({
     await createComments(setComments, id, data);
   };
 
-  // const handleUpdate = async (id, data) => {
-  //   await updateComment(setComments, id, data);
-  // };
+  const handleUpdate = async (comment_id, data) => {
+    await updateComment(setComments, id, comment_id, data);
+  };
 
-  // const handleDelete = async (id) => {
-  //   await deleteComment(setComments, id);
-  // };
+  const handleDelete = async (id) => {
+    await deleteComment(setComments, id);
+  };
 
-  console.log(`AS OF NOW SHOW COMMENTS IS ${showComments}`)
-  
+  // =============== COMMENTS ===============
+
+  // const onClickLike = async (comment_id, data) => {
+
+
+  // }
+
+  // console.log(`HERE ARE MY COMMENTS ${comments[1].likes.length}`)
   return (
     <div className="card" style={{ width: "18rem" }}>
       <div className="card-body">
@@ -60,17 +70,28 @@ export default function EventCard({
         </h6>
 
         <p className="card-text">{description}</p>
-        <>
-            <Button variant="secondary" onClick={onClickDelete}>
-                Delete Event
-            </Button>
-            <Button variant="primary" onClick={onClickUpdate}>
-                Edit Event
-            </Button>
-        </>
+        {
+          user?.isAdmin ? (
+                            <>
+                              <Button variant="secondary" onClick={onClickDelete}>
+                                  Delete Event
+                              </Button>
+                              <Button variant="primary" onClick={onClickUpdate}>
+                                  Edit Event
+                              </Button>
+                            </>) : <></>
+        }
         <>
 
           <Button onClick={() => setShowComments(prev => !prev)}>Open Comment Section</Button>
+          
+          <EditCommentModal
+            show={showEdit}
+            handleClose={() => setShowEdit(false)}
+            comment={editingComment}
+            handleUpdate={handleUpdate}
+          
+          />
           {
             showComments ?  
             <div>
@@ -78,15 +99,26 @@ export default function EventCard({
               {comments.map((comment) => 
                 <CommentCard
                   key={comment.id}
+                  id={comment.id}
                   author={comment.author}
                   time={comment.time}
-                  likes={comment.likes} 
+                  likes={comment.likes.length} 
                   text={comment.text}
+                  onClickDelete={() => handleDelete(comment.id)}
+                  onClickUpdate={() => {
+                    setEditingComment(comment)
+                    setShowEdit(true)
+                  }}
+                  isOP={user?.id === comment.author}
+                  isAdmin={user?.is_admin}
+                  isLoggedIn={!!user}
                 />
                   
                 )
               }
-              <Button onClick={handleShow}> Add a comment!</Button>
+              {
+                user ? <Button onClick={handleShow}> Add a comment!</Button> : <></>
+              }
               <CreateCommentModal
                 show={showCreateCommentModal}
                 handleClose={handleClose}

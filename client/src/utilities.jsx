@@ -88,7 +88,7 @@ export const payForOrder = async (orderId) => {
 };
 
 
-// ============= PAYMENTS =============
+// ============= WEATHER =============
 
 export const grabWeather = async () => {
   try {
@@ -177,10 +177,11 @@ export const deleteComment = async(setComments, id) => {
   }
 }
 
-export const updateComment = async(setComments, id, data) => {
-  try{
+export const updateComment = async(setComments, event, id, data) => {
+  try {
+    console.log(`event=${event} | id=${id}`)
     await api.put(`comment/${id}/`, data)
-    fetchComments(setComments)
+    fetchComments(setComments, event)
   }
   catch (e) {
     console.error(e)
