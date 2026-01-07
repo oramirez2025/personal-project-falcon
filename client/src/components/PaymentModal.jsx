@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { Modal, Button } from "react-bootstrap";
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 import { payForOrder } from "../utilities";
 import StripeCheckoutForm from "./StripeCheckoutForm"
+import {   Dialog, Button, } from '@chakra-ui/react'
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 console.log("VITE_STRIPE_PUBLISHABLE_KEY =", import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
@@ -30,15 +30,34 @@ export default function PaymentModal({ show, onClose, order }) {
     };
 
     return (
-        <Modal
+
+        // <Modal
+        //     show={show}
+        //     onHide={onClose}
+        //     onShow={initializePayment}
+        // >
+        //     <ModalOverlay/>
+        //     <ModalContent>
+        //         <ModalHeader>
+        //             {order.total}
+        //         </ModalHeader>
+        //     </ModalContent>
+
+        // </Modal>
+
+
+
+
+
+        <Dialog.Root
             show={show}
             onHide={onClose}
             onShow={initializePayment}
         >
-            <Modal.Header closeButton>
-                <Modal.Title>Pay for {order.id} </Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
+            <Dialog.Header closeButton>
+                <Dialog.Title>Pay for {order.id} </Dialog.Title>
+            </Dialog.Header>
+            <Dialog.Body>
                 <p><strong>Tickets:</strong> {order.id}</p>
                 <p><strong>Price:</strong> ${order.id}</p>
                 {clientSecret && (
@@ -52,10 +71,10 @@ export default function PaymentModal({ show, onClose, order }) {
                 )}
 
                 {loading && <p>Loading payment form...</p>}
-            </Modal.Body>
-            <Modal.Footer>
+            </Dialog.Body>
+            <Dialog.Footer>
                 <Button variant="secondary" onClick={onClose}>Cancel</Button>
-            </Modal.Footer>
-        </Modal>
+            </Dialog.Footer>
+        </Dialog.Root>
     );
 }
