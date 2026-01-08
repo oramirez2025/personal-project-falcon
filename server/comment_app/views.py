@@ -17,6 +17,13 @@ from rest_framework.status import (
 from event_app.models import Event
 
 
+class ACommentView(APIView):
+    def get(self,request,comment_id):
+        comment = get_object_or_404(Comment, id=comment_id)
+        ser = CommentSerializer(comment)
+        return Response(ser.data, status=HTTP_200_OK)
+
+
 class CommentView(APIView):
     def is_admin(self, user):
         return user.is_authenticated and getattr(user, "is_admin", False)
@@ -44,7 +51,15 @@ class CommentView(APIView):
                 parent = ser.validated_data.get("parent")
                 if parent and parent.event != event:
                     return Response({"detail": "Parent and child's events must be match up."}, status=HTTP_400_BAD_REQUEST)
-                ser.save(author=request.user, event=event)
+                comment = ser.save(author=request.user, event=event)
+                if parent:
+                    print(parent.replies)
+                    # also, add this newly created comment as a reply to the parent's comment
+                    parent.replies.add(comment)
+                    # parent.replies.save()
+
+
+
                 return Response(ser.data, status=HTTP_201_CREATED)
             else:
                 return Response(ser.errors, status=HTTP_400_BAD_REQUEST)
