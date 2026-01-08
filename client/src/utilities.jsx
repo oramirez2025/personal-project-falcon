@@ -22,8 +22,7 @@ export const userLogIn = async (email, password) => {
     return user;  // Return the user email
 
   } catch (e) {
-    console.error('Login error:', e.response?.data || e.message)
-    return null;
+    throw e;
   }
 };
 
@@ -41,6 +40,7 @@ export const userLogOut = async () => {
     console.error("Logout failed:", err);
     localStorage.removeItem("token");
     delete api.defaults.headers.common["Authorization"];
+    throw err
   }
 };
 
