@@ -20,9 +20,7 @@ export default function EditCommentModal({
 
 
   const onUpdate = () => {
-    handleUpdate(comment.id, {
-      text: text
-    });
+    handleUpdate(text);
 
     handleClose();
   };

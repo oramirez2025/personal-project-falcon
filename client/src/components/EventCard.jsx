@@ -1,8 +1,7 @@
 import { Button } from "react-bootstrap";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import CommentCard from "./CommentCard";
 import CreateCommentModal from "./CreateCommentModal";
-import EditCommentModal from "./EditCommentModal";
 import {
   fetchComments,
   createComments,
@@ -25,52 +24,146 @@ export default function EventCard({
   const [comments, setComments] = useState([]);
   const [showComments, setShowComments] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
+  const wsRef = useRef(null);
 
+  const updateCommentRecursive = (comments, updated) =>
+  comments.map((c) =>
+    c.id === updated.id
+      ? { ...c, ...updated }
+      : { ...c, replies: updateCommentRecursive(c.replies || [], updated) }
+  );
+
+  // ======================
+  // Initial fetch + socket
+  // ======================
   useEffect(() => {
+    if (!showComments) return;
     fetchComments(setComments, id);
-  }, [id]);
+  }, [showComments, id]);
 
-  // =========================
-  // Comment Handlers
-  // =========================
+useEffect(() => {
+  if (!showComments) return;
 
+  let socket;
+
+  const connect = () => {
+    socket = new WebSocket(`ws://localhost:8001/ws/comments/${id}/`);
+    wsRef.current = socket;
+
+    socket.onopen = () => {
+      console.log("✅ WebSocket connected to event", id);
+    };
+
+    socket.onmessage = (e) => {
+      try {
+        const { type, comment } = JSON.parse(e.data);
+
+        setComments((prev) => {
+          switch (type) {
+            case "new_comment":
+              return comment.parent
+                ? addReply(prev, comment.parent, comment)
+                : [...prev, comment];
+
+            case "update_comment":
+              return updateCommentRecursive(prev, comment);
+
+            case "delete_comment":
+              return deleteRecursive(prev, comment.id);
+
+            default:
+              return prev;
+          }
+        });
+      } catch (err) {
+        console.error("❌ WS parse error", err);
+      }
+    };
+
+    socket.onclose = () => {
+      console.warn("🔌 WS closed, reconnecting...");
+      setTimeout(connect, 1000);
+    };
+
+    socket.onerror = () => socket.close();
+  };
+
+  connect();
+  return () => socket?.close();
+}, [showComments, id]);
+
+
+  
+
+  // ======================
+  // Tree helpers
+  // ======================
+  const addReply = (comments, parentId, reply) =>
+    comments.map((c) =>
+      c.id === parentId
+        ? { ...c, replies: [...(c.replies || []), reply] }
+        : { ...c, replies: addReply(c.replies || [], parentId, reply) }
+    );
+
+  const updateCommentText = (comments, commentId, newText) =>
+    comments.map((c) =>
+      c.id === commentId
+        ? { ...c, text: newText }
+        : { ...c, replies: updateCommentText(c.replies || [], commentId, newText) }
+    );
+
+  const toggleLike = (comments, commentId, userId) =>
+    comments.map((c) =>
+      c.id === commentId
+        ? {
+            ...c,
+            likes: c.likes.includes(userId)
+              ? c.likes.filter((u) => u !== userId)
+              : [...c.likes, userId],
+          }
+        : { ...c, replies: toggleLike(c.replies || [], commentId, userId) }
+    );
+
+  const deleteRecursive = (comments, commentId) =>
+    comments
+      .filter((c) => c.id !== commentId)
+      .map((c) => ({
+        ...c,
+        replies: deleteRecursive(c.replies || [], commentId),
+      }));
+
+  // ======================
+  // Handlers
+  // ======================
   const handleCreate = async (data) => {
-    await createComments(setComments, id, data);
+    await createComments(id, data);
+
   };
 
   const handleReply = async (parentId, data) => {
-    await createComments(setComments, id, {
-      ...data,
-      parent: parentId,
-    });
+    await createComments(id, { ...data, parent: parentId });
   };
 
-  const handleUpdate = async (commentId, data) => {
-    await updateComment(setComments, id, commentId, data);
+  const handleEdit = async (commentId, newText) => {
+    await updateComment(null, id, commentId, { text: newText });
+  };
+
+  const handleLike = async (commentId) => {
+    await updateComment(null, id, commentId, { like: true });
   };
 
   const handleDelete = async (commentId) => {
-    await deleteComment(setComments, commentId);
+    await deleteComment(null, commentId);
   };
 
-  const handleLike = async (commentId, likes) => {
-    const updatedLikes = likes.includes(user.id)
-      ? likes.filter((u) => u !== user.id)
-      : [...likes, user.id];
-
-    await updateComment(setComments, id, commentId, { likes: updatedLikes });
-  };
-
-
+  // ======================
+  // Render
+  // ======================
   return (
     <div className="card mb-3">
       <div className="card-body">
         <h5>{title}</h5>
-
-        <p>
-          {day} · {start_time} – {end_time}
-        </p>
-
+        <p>{day} · {start_time} – {end_time}</p>
         <p>@ {location}</p>
         <p>{description}</p>
 
@@ -88,7 +181,7 @@ export default function EventCard({
         <Button
           size="sm"
           variant="secondary"
-          onClick={() => setShowComments((prev) => !prev)}
+          onClick={() => setShowComments((p) => !p)}
         >
           {showComments ? "Hide Comments" : "Show Comments"}
         </Button>
@@ -101,13 +194,13 @@ export default function EventCard({
             {comments.map((comment) => (
               <CommentCard
                 key={comment.id}
-                {...comment}
+                comment={comment}
                 depth={0}
                 user={user}
-                onDelete={handleDelete}
-                onUpdate={handleUpdate}
-                onReply={handleReply}
+                onEdit={handleEdit}
                 onLike={handleLike}
+                onDelete={handleDelete}
+                onReply={handleReply}
               />
             ))}
 

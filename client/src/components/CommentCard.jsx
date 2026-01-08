@@ -4,20 +4,16 @@ import CreateCommentModal from "./CreateCommentModal";
 import EditCommentModal from "./EditCommentModal";
 
 export default function CommentCard({
-  id,
-  author,
-  time,
-  text,
-  likes = [],
-  replies = [],
+  comment,
   depth = 0,
   user,
-
   onDelete,
-  onUpdate,
+  onEdit,
   onReply,
   onLike,
 }) {
+  const { id, author, time, text, likes = [], replies = [] } = comment;
+
   const [showReply, setShowReply] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
 
@@ -36,16 +32,18 @@ export default function CommentCard({
         wordBreak: "break-word",
       }}
     >
+      {/* Author and Timestamp */}
       <p>
         <strong>{author}</strong> · {time}
       </p>
 
+      {/* Comment Text */}
       <p>{text}</p>
 
-      {/* ACTION BUTTONS */}
+      {/* Action Buttons */}
       <div style={{ display: "flex", gap: "0.5em", flexWrap: "wrap" }}>
         {isLoggedIn && (
-          <Button size="sm" variant="outline-secondary" onClick={() => onLike(id, likes)}>
+          <Button size="sm" variant="outline-secondary" onClick={() => onLike(id)}>
             Like ({likes.length})
           </Button>
         )}
@@ -69,7 +67,7 @@ export default function CommentCard({
         )}
       </div>
 
-      {/* MODALS */}
+      {/* Reply Modal */}
       <CreateCommentModal
         show={showReply}
         handleClose={() => setShowReply(false)}
@@ -79,25 +77,26 @@ export default function CommentCard({
         }}
       />
 
+      {/* Edit Modal */}
       <EditCommentModal
         show={showEdit}
         handleClose={() => setShowEdit(false)}
         comment={{ id, text }}
-        handleUpdate={(data) => {
-          onUpdate(id, data);
+        handleUpdate={(newText) => {
+          onEdit(id, newText); 
           setShowEdit(false);
         }}
       />
 
-      {/* REPLIES */}
+      {/* Recursive Replies */}
       {replies.map((reply) => (
         <CommentCard
           key={reply.id}
-          {...reply}
+          comment={reply}
           depth={depth + 1}
           user={user}
           onDelete={onDelete}
-          onUpdate={onUpdate}
+          onEdit={onEdit}
           onReply={onReply}
           onLike={onLike}
         />

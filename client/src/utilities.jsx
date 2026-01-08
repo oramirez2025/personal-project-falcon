@@ -157,33 +157,39 @@ export const fetchComments = async (setComments, event) => {
   }
 }
 
-export const createComments = async (setComments,event,data) => {
+export const createComments = async (eventId, data) => {
   try {
-    await api.post(`comment/events/${event}/`,data)
-    fetchComments(setComments,event)
+    const response = await api.post(`comment/events/${eventId}/`, data);
+    return response.data;
+  } catch (e) {
+    console.error(e);
+    return null;
   }
-  catch (e) {
-    console.error(e)
-  }
-}
+};
 
-export const deleteComment = async(setComments, id) => {
-  try{
-    await api.delete(`comment/${id}/`)
-    setComments(prev => prev.filter(c => c.id !== id))
-  }
-  catch (e) {
-    console.error(e)
-  }
-}
 
-export const updateComment = async(setComments, event, id, data) => {
+export const deleteRecursive = (comments, id) => {
+  return comments
+    .filter(c => c.id !== id)
+    .map(c => ({
+      ...c,
+      replies: deleteRecursive(c.replies || [], id),
+    }));
+};
+
+
+export const deleteComment = async (_setComments, id) => {
   try {
-    console.log(`event=${event} | id=${id}`)
-    await api.put(`comment/${id}/`, data)
-    fetchComments(setComments, event)
-  }
-  catch (e) {
-    console.error(e)
+    await api.delete(`comment/${id}/`);
+  } catch (e) {
+    console.error(e);
   }
 }
+export const updateComment = async (_setComments, _event, id, data) => {
+  try {
+    const response = await api.put(`comment/${id}/`, data);
+    return response.data; 
+  } catch (e) {
+    console.error(e);
+  }
+};

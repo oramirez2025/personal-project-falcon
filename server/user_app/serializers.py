@@ -12,10 +12,11 @@ class UsersSerializer(serializers.ModelSerializer):
     """Basic - for reg/auth"""
     class Meta:
         model = MyUsers
-        fields = ['email', 'password', 'first_name', 'last_name']
+        fields = ['id','email', 'password', 'first_name', 'last_name']
         extra_kwargs = {
             'password' : {'write_only': True}
         }
+        read_only=['id']
 
 
 class AdminPromotionSerializer(serializers.Serializer):
