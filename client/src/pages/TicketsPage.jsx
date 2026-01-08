@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react"
-import TicketCard from "../components/TicketCard"
-import Button from "react-bootstrap/esm/Button";
+import TicketCard , {Card,Button} from "../components/TicketCard"
+// import Button from "react-bootstrap/esm/Button";
 import { useNavigate } from "react-router-dom";
-import Card from "../components/Card";
+// import Card from "../components/Card";
 import { SimpleGrid } from "@chakra-ui/react";
 import { createOrder, payForOrder } from "../utilities";
 import PaymentModal from "../components/PaymentModal";
+
 
 function TicketsPage() {
     const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -44,8 +45,11 @@ function TicketsPage() {
             <TicketCard title={"Master Ticket"} price="$600.00" setTicketQty = {setTicketC}
             description={'All General Admission perks + A private chamber on-site (your sanctuary between sessions)'}/>
         </SimpleGrid>
-        <Button variant="primary" type="button" onClick={() => handleClick()}>
+        {/* <Button variant="danger" type="button" onClick={() => handleClick()}>
             Submit Order
+        </Button> */}
+        <Button onClick={handleClick}>
+          Submit Order
         </Button>
 
 
@@ -69,3 +73,5 @@ function TicketsPage() {
 }
 
 export default TicketsPage;
+
+

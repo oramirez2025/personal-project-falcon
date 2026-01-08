@@ -144,3 +144,29 @@ export const updateEvent = async(setEvents, id, data) => {
     console.error(e)
   }
 }
+
+
+
+// Get User Profile
+export const getUserProfile = async () => {
+  try {
+    const response = await api.get("user/account/");
+    return response.data;
+  } catch (err) {
+    console.error("Failed to fetch user profile:", err);
+    return null;
+  }
+};
+
+
+
+// Update User Profile
+export const updateUserProfile = async (data) => {
+  try {
+    const response = await api.put("user/account/", data);
+    return response.data;
+  } catch (err) {
+    console.error("Failed to update user profile:", err.response?.data || err);
+    return null;
+  }
+};
