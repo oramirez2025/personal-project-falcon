@@ -1,16 +1,18 @@
 import React, { useState } from "react";
 import { PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
-import { decrementTickets } from "../utilities";
+import { showErrorToast } from "./ui/showErrorToast";
+import { showSuccessToast } from "./ui/showSuccessToast";
 
-export default function StripeCheckoutForm({ clientSecret, userId, onSuccess, order }) {
+export default function StripeCheckoutForm({ clientSecret, userId, onSuccess }) {
     const stripe = useStripe();
     const elements = useElements();
     const [processing, setProcessing] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (processing) return;
+
         if (!stripe || !elements) return;
+
         setProcessing(true);
 
         try {
@@ -21,16 +23,15 @@ export default function StripeCheckoutForm({ clientSecret, userId, onSuccess, or
             });
 
             if (error) {
-                alert(error.message || "Payment failed.");
+                showErrorToast("Payment", error.message || "Payment failed.");
                 return;
             }
 
             if (paymentIntent?.status === "succeeded") {
-                alert("Payment successful!");
-                decrementTickets(order.id)
+                showSuccessToast("Payment", "Payment successful!");
                 onSuccess?.(paymentIntent);
             } else {
-                alert(`Payment status: ${paymentIntent?.status ?? "unknown"}`);
+                showErrorToast("Payment", `Payment status: ${paymentIntent?.status ?? "unknown"}`);
             }
         } finally {
             setProcessing(false);

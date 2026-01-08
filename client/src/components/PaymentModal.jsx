@@ -4,9 +4,10 @@ import { loadStripe } from "@stripe/stripe-js";
 import { payForOrder } from "../utilities";
 import StripeCheckoutForm from "./StripeCheckoutForm"
 import { Dialog, Button } from '@chakra-ui/react'
+import { showSuccessToast } from "./ui/showSuccessToast";
+import { showErrorToast } from "./ui/showErrorToast";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
-
 export default function PaymentModal({ show, onClose, order }) {
     const [loading, setLoading] = useState(false);
     const [clientSecret, setClientSecret] = useState("");
