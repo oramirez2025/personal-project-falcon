@@ -1,16 +1,16 @@
 import React, { useState } from "react";
 import { PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
+import { decrementTickets } from "../utilities";
 
-export default function StripeCheckoutForm({ clientSecret, userId, onSuccess }) {
+export default function StripeCheckoutForm({ clientSecret, userId, onSuccess, order }) {
     const stripe = useStripe();
     const elements = useElements();
     const [processing, setProcessing] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
+        if (processing) return;
         if (!stripe || !elements) return;
-
         setProcessing(true);
 
         try {
@@ -27,6 +27,7 @@ export default function StripeCheckoutForm({ clientSecret, userId, onSuccess }) 
 
             if (paymentIntent?.status === "succeeded") {
                 alert("Payment successful!");
+                decrementTickets(order.id)
                 onSuccess?.(paymentIntent);
             } else {
                 alert(`Payment status: ${paymentIntent?.status ?? "unknown"}`);

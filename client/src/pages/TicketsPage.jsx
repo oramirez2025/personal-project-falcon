@@ -49,10 +49,6 @@ function TicketsPage() {
         </Button>
 
 
-        <SimpleGrid columns={{ base: 1, md: 3}} spacing="6">
-            <Card  className="rounded-sm" title="Card title"/>
-        </SimpleGrid>
-
         
             {showPaymentModal && order && (
                 <PaymentModal

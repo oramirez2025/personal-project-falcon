@@ -76,7 +76,7 @@ export default function PaymentModal({ show, onClose, order }) {
               stripe={stripePromise}
               options={{ clientSecret }}
             >
-              <StripeCheckoutForm onSuccess={onClose} />
+              <StripeCheckoutForm order={order} onSuccess={onClose} />
             </Elements>
           )}
         </Dialog.Body>
