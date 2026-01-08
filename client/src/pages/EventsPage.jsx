@@ -1,12 +1,27 @@
 import { useEffect, useState } from "react";
-import { Box, Button, Heading, Container, Flex, Grid } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Heading,
+  Container,
+  Grid,
+  VStack,
+  HStack,
+} from "@chakra-ui/react";
+
 import CreateEventModal from "../components/CreateEventModal";
 import EditEventModal from "../components/EditEventModal";
-import EventCard from "../components/EventCard";
-import { fetchEvents, createEvents, deleteEvent, updateEvent, userConfirmation } from "../utilities";
-import HeroicHall from "../assets/HeroicHall.jpeg";
+import DaySection from "../components/DaySection";
 import WeatherCard from "../components/WeatherCard";
 import CountdownTimer from "../components/CountdownTimer";
+import TicketsPage from "./TicketsPage";
+
+import {
+  fetchEvents,
+  userConfirmation,
+} from "../utilities";
+
+import HeroicHall from "../assets/HeroicHall.jpeg";
 
 export default function EventsPage() {
   const [events, setEvents] = useState([]);
@@ -27,91 +42,80 @@ export default function EventsPage() {
     restoreUser();
   }, []);
 
-  const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
-
-  const handleSave = async (data) => {
-    await createEvents(setEvents, data);
-  };
-
-  const handleUpdate = async (id, data) => {
-    await updateEvent(setEvents, id, data);
-  };
-
-  const handleDelete = async (id) => {
-    await deleteEvent(setEvents, id);
-  };
+  const eventsByDay = events.reduce((acc, event) => {
+    const day = event.day;
+    if (!acc[day]) acc[day] = [];
+    acc[day].push(event);
+    return acc;
+  }, {});
 
   return (
     <Box>
+      {/* Hero */}
       <Box
         bgImage={`url(${HeroicHall})`}
         bgSize="cover"
         bgPosition="center"
-        bgRepeat="no-repeat"
         minH="45vh"
         display="flex"
         alignItems="center"
-        justifyContent="center"
-        px={4}
       >
         <Grid
           templateColumns={{ base: "1fr", md: "1fr 1fr" }}
           gap={6}
           w="100%"
           maxW="1200px"
-          alignItems="center"
+          mx="auto"
+          px={4}
         >
-          <Box display="flex" justifyContent={{ base: "center", md: "flex-start" }}>
-            <WeatherCard />
-          </Box>
-          <Box display="flex" justifyContent={{ base: "center", md: "flex-end" }}>
+          <WeatherCard />
+          <Box textAlign={{ base: "center", md: "right" }}>
             <CountdownTimer />
           </Box>
         </Grid>
       </Box>
 
-      <Container maxW="container.xl" py={8}>
-        <Heading as="h2" size="xl" mb={6} color="white">
-          Events
-        </Heading>
+      {/* Tickets */}
+      <TicketsPage/>
+      {/* Events */}
+      <Container maxW="container.xl" py={10}>
+        <VStack align="stretch" spacing={10}>
+          {/* Header */}
+          <HStack justify="space-between">
+            <Heading size="xl" color="white">
+              Events
+            </Heading>
 
-        <Button bg="gray.500" size="lg" onClick={handleShow} mb={6}>
-          Add an Event
-        </Button>
+            {user?.is_staff && (
+              <Button bg="gray.500" size="lg" onClick={() => setShow(true)}>
+                Add an Event
+              </Button>
+            )}
+          </HStack>
 
-        <CreateEventModal
-          show={show}
-          handleClose={handleClose}
-          handleSave={handleSave}
-        />
+          {/* Modals */}
+          <CreateEventModal
+            show={show}
+            handleClose={() => setShow(false)}
+            handleSave={(data) => createEvents(setEvents, data)}
+          />
 
-        <EditEventModal
-          show={showEdit}
-          handleClose={() => setShowEdit(false)}
-          event={editingEvent}
-          handleUpdate={handleUpdate}
-        />
+          <EditEventModal
+            show={showEdit}
+            handleClose={() => setShowEdit(false)}
+            event={editingEvent}
+            handleUpdate={(id, data) => updateEvent(setEvents, id, data)}
+          />
 
-        <Flex wrap="wrap" gap={6}>
-          {events.map((event) => (
-            <EventCard
-              key={event.id}
-              id={event.id}
-              title={event.title}
-              day={event.day}
-              start_time={event.start_time}
-              end_time={event.end_time}
-              location={event.location}
-              description={event.description}
-              onClickDelete={() => handleDelete(event.id)}
-              onClickUpdate={() => {
-                setEditingEvent(event);
-                setShowEdit(true);
-              }}
+          {/* Days */}
+          {Object.entries(eventsByDay).map(([day, dayEvents]) => (
+            <DaySection
+              key={day}
+              day={day}
+              events={dayEvents}
             />
           ))}
-        </Flex>
+        </VStack>
       </Container>
     </Box>
   );

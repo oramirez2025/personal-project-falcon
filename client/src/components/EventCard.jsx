@@ -1,4 +1,10 @@
-import { Button } from "react-bootstrap";
+import {
+  Heading,
+  Text,
+  Stack,
+  Separator,
+} from "@chakra-ui/react";
+import BaseCard from "./BaseCard";
 
 export default function EventCard({
   title,
@@ -7,32 +13,26 @@ export default function EventCard({
   end_time,
   location,
   description,
-  onClickDelete,
-  onClickUpdate,
 }) {
   return (
-    <div className="card" style={{ width: "18rem" }}>
-      <div className="card-body">
-        <h5 className="card-title">{title}</h5>
+    <BaseCard>
+      <Stack spacing={3}>
+        <Heading size="md">{title}</Heading>
 
-        <h6 className="card-subtitle mb-2 text-muted">
-          Day: {day} | {start_time} to {end_time}
-        </h6>
+        <Text fontSize="sm" color="gray.400">
+          {day} · {start_time} – {end_time}
+        </Text>
 
-        <h6 className="card-subtitle mb-2 text-muted">
-          @ {location}
-        </h6>
+        <Text fontSize="sm" color="gray.400">
+          📍 {location}
+        </Text>
 
-        <p className="card-text">{description}</p>
-        <>
-            <Button variant="secondary" onClick={onClickDelete}>
-                Delete Event
-            </Button>
-            <Button variant="primary" onClick={onClickUpdate}>
-                Edit Event
-            </Button>
-        </>
-      </div>
-    </div>
+        <Separator />
+
+        <Text fontSize="sm" noOfLines={4}>
+          {description}
+        </Text>
+      </Stack>
+    </BaseCard>
   );
 }
