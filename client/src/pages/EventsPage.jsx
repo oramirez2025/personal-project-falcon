@@ -109,6 +109,7 @@ export default function EventsPage() {
                 setEditingEvent(event);
                 setShowEdit(true);
               }}
+              user={user}
             />
           ))}
         </Flex>
