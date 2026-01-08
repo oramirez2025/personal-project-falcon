@@ -7,7 +7,7 @@ import logo from '../assets/FFF_Symbol_128.png'
 
 export default function Sidebar({ user, setUser }) {
   const navigate = useNavigate()
-  const [isOpen, setIsOpen] = useState(true)
+  const [isOpen, setIsOpen] = useState(false)
 
   const handleLogout = async () => {
     await userLogOut()
@@ -98,9 +98,10 @@ export default function Sidebar({ user, setUser }) {
           <Text fontSize="11px" color="#78716c" textTransform="uppercase" letterSpacing="2px" px="12px" mb="8px">
             Navigate
           </Text>
-          
+
           <SidebarLink to="/" onClick={closeSidebar}>Home</SidebarLink>
           <SidebarLink to="/tickets" onClick={closeSidebar}>Tickets</SidebarLink>
+          <SidebarLink to="/questions" onclick={closeSidebar}>FAQ</SidebarLink>
           {user && <SidebarLink to="/profile" onClick={closeSidebar}>User Profile</SidebarLink>}
         </Box>
 
@@ -109,7 +110,7 @@ export default function Sidebar({ user, setUser }) {
           <Text fontSize="11px" color="#78716c" textTransform="uppercase" letterSpacing="2px" px="12px" mb="8px">
             Realms
           </Text>
-          
+
           <ExternalLink href="https://falcons-forge-shop.fourthwall.com/">Merchandise</ExternalLink>
           <ExternalLink href="https://marketplace.roll20.net/browse/publisher/1785/falconforgefantasy">Roll20</ExternalLink>
           <ExternalLink href="https://startplaying.games/gm/falconforgefantasy">StartPlaying</ExternalLink>

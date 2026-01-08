@@ -9,9 +9,9 @@ from django.core import validators as v
 # Ticket on the frontend
 class TicketTemplate(models.Model):
     TICKET_TYPE_CHOICES = [
-        ("premium", "Premium"),
         ("general", "General"),
-        ("upgrade", "Community Lodging Upgrade"),
+        ("community", "Community"),
+        ("master", "Master"),
     ]
     title = models.CharField(max_length=255)
     description = models.TextField()

@@ -64,6 +64,7 @@ class CreatePaymentIntent(User_Auth):
         intent = stripe.PaymentIntent.create(
             amount=int(order.total * 100),
             currency="usd",
+            automatic_payment_methods={'enabled': True},
             metadata={"order_id": str(order.id), 'user_id': str(request.user.id)},
         )
         Payment.objects.create(
@@ -102,18 +103,18 @@ class CreateOrder(User_Auth):
             except(TypeError, ValueError):
                 return 0
         general = to_integer(cart.get("typeA"))
-        premium = to_integer(cart.get("typeB"))
-        upgrade = to_integer(cart.get("typeC"))
+        community = to_integer(cart.get("typeB"))
+        master = to_integer(cart.get("typeC"))
 
-        if general <= 0 and premium <= 0 and upgrade <= 0:
+        if general <= 0 and community <= 0 and master <= 0:
             return Response({
                 "detail": "Cart is empty"}, status=s.HTTP_400_BAD_REQUEST)
          
         order = Order.objects.create(user=user, status="pending")
         type_map = {
             'general': general,
-            'premium': premium,
-            'upgrade': upgrade
+            'community': community,
+            'master': master
         }
         templates = {
             t.ticket_type: t
