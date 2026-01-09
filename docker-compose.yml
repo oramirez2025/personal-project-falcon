@@ -1,0 +1,57 @@
+services:
+  server:
+    build: ./server
+    container_name: django_server
+    command: uvicorn falcon_proj.asgi:application --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ./server:/app
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - redis
+
+  client:
+    build: ./client
+    container_name: react_client
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    env_file:
+      - .env
+    depends_on:
+      - server
+
+  db:
+    image: postgres:16
+    container_name: postgres_db
+    environment:
+      POSTGRES_DB: falconforge_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
+  stripe:
+    image: stripe/stripe-cli:latest
+    container_name: stripe_cli
+    command: listen --forward-to http://server:8000/payments/stripe-webhook/
+    env_file:
+      - .env
+    depends_on:
+      - server
+
+
+volumes:
+  postgres_data:
