@@ -22,7 +22,7 @@ function App() {
       <Toaster toaster={toaster}/>
       <Sidebar user={user} setUser={setUser} />
       
-      <Box as="main" p="20px" maxW="1200px" mx="auto">
+      <Box>
         <Outlet context={{ user, setUser }} />
       </Box>
     </Box>

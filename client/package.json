@@ -13,6 +13,7 @@
     "@chakra-ui/react": "^3.30.0",
     "@chakra-ui/system": "^2.6.2",
     "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
     "@stripe/react-stripe-js": "^5.4.1",
     "@stripe/stripe-js": "^8.6.1",
     "axios": "^1.13.2",
