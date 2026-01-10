@@ -71,7 +71,7 @@ export const createOrder = async (cart) => {
     return response.data;
   } catch(err) {
     console.error("something went wrong", err);
-    return "/tickets"
+    throw err;
   }
 }
 

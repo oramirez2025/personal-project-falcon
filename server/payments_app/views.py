@@ -28,40 +28,76 @@ class CreatePaymentIntent(User_Auth):
         order = get_object_or_404(Order, id=order_id, user=request.user)
 
         if order.status == 'paid':
-            return Response({"detail": 'Order already paid for.'})
+            return Response({"detail": 'Order already paid for.'}, status=s.HTTP_400_BAD_REQUEST)
         
-        items = list(order.items.select_related("ticket_template"))
-
-        for item in items:
-            tt = TicketTemplate.objects.select_for_update().get(
-                id=item.ticket_template.id
-            )
-
-            if item.quantity > tt.available_quantity:
-                raise ValidationError("Not enough tickets available for {tt.ticket_type}.")
-            
-            tt.available_quantity -= item.quantity
-            # Recall: community lodging is an upgrade of the general ticket; thus, we need to also reduce the availability of general tickets 
-            if tt.ticket_type == "community":
-                general = TicketTemplate.objects.select_for_update().get(ticket_type="general")
-                if item.quantity > general.available_quantity:
-                    raise ValidationError(
-                        "Not enough general tickets available for community lodging."
+        # Check if we already have a valid payment intent for this order
+        existing_payment = Payment.objects.filter(order=order).first()
+        
+        if existing_payment and existing_payment.stripe_payment_intent_id:
+            try:
+                existing_intent = stripe.PaymentIntent.retrieve(existing_payment.stripe_payment_intent_id)
+                
+                # If intent is still usable, return it (don't create a new one)
+                if existing_intent.status in ['requires_payment_method', 'requires_confirmation', 'requires_action']:
+                    return Response(
+                        {
+                            "client_secret": existing_intent.client_secret,
+                            "order_id": order.id,
+                        },
+                        status=s.HTTP_200_OK
                     )
-                general.available_quantity -= item.quantity
-                general.save()
-            tt.save()
+                
+                # If intent succeeded, order is paid
+                if existing_intent.status == 'succeeded':
+                    order.status = 'paid'
+                    order.save()
+                    return Response({"detail": "Order already paid."}, status=s.HTTP_400_BAD_REQUEST)
+                    
+            except stripe.error.StripeError as e:
+                # Intent doesn't exist or other Stripe error - we'll create a new one below
+                print(f"Stripe error retrieving intent: {e}")
+        
+        # Only decrement tickets if this is a NEW payment attempt (no existing payment)
+        if not existing_payment:
+            items = list(order.items.select_related("ticket_template"))
+
+            for item in items:
+                tt = TicketTemplate.objects.select_for_update().get(
+                    id=item.ticket_template.id
+                )
+
+                if item.quantity > tt.available_quantity:
+                    raise ValidationError(f"Not enough tickets available for {tt.ticket_type}.")
+                
+                tt.available_quantity -= item.quantity
+                # Recall: community lodging is an upgrade of the general ticket
+                if tt.ticket_type == "community":
+                    general = TicketTemplate.objects.select_for_update().get(ticket_type="general")
+                    if item.quantity > general.available_quantity:
+                        raise ValidationError(
+                            "Not enough general tickets available for community lodging."
+                        )
+                    general.available_quantity -= item.quantity
+                    general.save()
+                tt.save()
+
+        # Create new Stripe payment intent
         intent = stripe.PaymentIntent.create(
             amount=int(order.total * 100),
             currency="usd",
             automatic_payment_methods={'enabled': True},
             metadata={"order_id": str(order.id), 'user_id': str(request.user.id)},
         )
-        Payment.objects.create(
+        
+        # Use update_or_create to avoid duplicate key errors
+        Payment.objects.update_or_create(
             order=order,
-            stripe_payment_intent_id=intent.id,
-            status="pending"
+            defaults={
+                'stripe_payment_intent_id': intent.id,
+                'status': 'pending'
+            }
         )
+            
         return Response(
             {
                 "client_secret": intent.client_secret,
@@ -76,7 +112,7 @@ class ViewPayment(APIView):
         staff = getattr(request.user, "is_staff")
         if not staff:
             return Response({'detail': "Only staff can access this."}, status=s.HTTP_403_FORBIDDEN)
-        payments = Payment.objects.all(
+        payments = Payment.objects.filter(
             status="paid"
         )
         ser_payment = PaymentSerializer(payments, many=True)
@@ -163,5 +199,3 @@ class CreateOrder(User_Auth):
             }, 
             status=s.HTTP_201_CREATED
         )
-        
-        
