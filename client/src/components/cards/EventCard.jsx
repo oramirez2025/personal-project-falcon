@@ -22,11 +22,11 @@ export default function EventCard({
       <Stack spacing={3}>
         <Heading size="md">{title}</Heading>
 
-        <Text fontSize="sm" color="gray.400">
-          {day} · {start_time} – {end_time}
+        <Text fontSize="sm" color="text.muted">
+          {day} · {start_time} - {end_time}
         </Text>
 
-        <Text fontSize="sm" color="gray.400">
+        <Text fontSize="sm" color="text.muted">
           📍 {location}
         </Text>
 

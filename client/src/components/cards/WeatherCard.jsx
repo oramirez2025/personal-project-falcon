@@ -28,30 +28,30 @@ export default function WeatherCard() {
         <Heading size="md">Weather</Heading>
 
         {/* Current temp */}
-        <Heading size="2xl" color="red.400">
+        <Heading size="2xl" color="forge.red.400">
           {currTemp !== null ? `${currTemp}°` : "--"}
         </Heading>
 
         {/* Feels like */}
-        <Text color="gray.400">
+        <Text color="text.muted">
           Feels like{" "}
-          <Text as="span" color="white">
+          <Text as="span" color="text.primary">
             {feelsLikeTemp !== null ? `${feelsLikeTemp}°` : "--"}
           </Text>
         </Text>
 
         {/* High / Low */}
         <HStack spacing={4}>
-          <Text color="gray.400">
+          <Text color="text.muted">
             H{" "}
-            <Text as="span" color="white">
+            <Text as="span" color="text.primary">
               {maxTemp !== null ? `${maxTemp}°` : "--"}
             </Text>
           </Text>
 
-          <Text color="gray.400">
+          <Text color="text.muted">
             L{" "}
-            <Text as="span" color="white">
+            <Text as="span" color="text.primary">
               {minTemp !== null ? `${minTemp}°` : "--"}
             </Text>
           </Text>

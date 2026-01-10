@@ -10,8 +10,8 @@ export default function BaseCard({
       h="100%"
       display="flex"
       flexDirection="column"
-      bg="gray.800"
-      color="white"
+      bg="bg.card"
+      color="text.primary"
       borderRadius="lg"
       p={5}
       boxShadow="md"

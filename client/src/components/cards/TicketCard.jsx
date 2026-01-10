@@ -1,36 +1,46 @@
-import { Heading, Text, VStack, Input } from "@chakra-ui/react";
-import { MotionBox } from "../Motion";
-import BaseCard from "./BaseCard";
+import { Heading, Text, VStack, Input, HStack, Box } from "@chakra-ui/react"
+import { MotionBox } from "../Motion"
+import { cardHover } from "../animations/fffAnimations"
+import BaseCard from "./BaseCard"
+import { inputStyles } from "../../theme"
 
+/*
+  Uses cardHover animation from fffAnimations
+  Uses shared inputStyles from theme.js
+  Accepts optional icon prop (lucide-react component)
+ */
 export default function TicketCard({
   title,
+  icon,
   price,
   setTicketQty,
   description,
 }) {
   return (
     <MotionBox
+      {...cardHover}
       h="100%"
-      whileHover={{ y: -4 }}
-      whileTap={{ scale: 0.98 }}
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      spacing={6}
-      transition={{ duration: 0.25, ease: "easeOut" }}
     >
       <BaseCard hoverable={false}>
         <VStack align="stretch" spacing={4}>
-          {/* Title + description */}
+          {/* Title + icon + description */}
           <VStack align="start" spacing={2} minH="72px">
-            <Heading size="md">{title}</Heading>
-            <Text color="gray.400" fontSize="sm">
+            <HStack spacing={2}>
+              {icon && (
+                <Box color="forge.gold.400">
+                  {icon}
+                </Box>
+              )}
+              <Heading size="md">{title}</Heading>
+            </HStack>
+            <Text color="text.muted" fontSize="sm">
               {description}
             </Text>
           </VStack>
 
           {/* Price + quantity */}
           <VStack align="start" spacing={1}>
-            <Heading size="sm" color="red.600">
+            <Heading size="sm" color="forge.red.400">
               {price}
             </Heading>
 
@@ -39,14 +49,12 @@ export default function TicketCard({
               min={0}
               max={10}
               size="sm"
-              bg="gray.700"
-              borderColor="gray.600"
-              _focus={{ borderColor: "red.400" }}
+              {...inputStyles}
               onChange={(e) => setTicketQty(Number(e.target.value))}
             />
           </VStack>
         </VStack>
       </BaseCard>
     </MotionBox>
-  );
+  )
 }

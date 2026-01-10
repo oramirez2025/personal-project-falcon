@@ -6,6 +6,57 @@ fontLink.href = 'https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;60
 fontLink.rel = 'stylesheet'
 document.head.appendChild(fontLink)
 
+// ============================================
+// SHARED STYLE OBJECTS (for spreading into components)
+// ============================================
+
+// Standard input styling - use with {...inputStyles}
+export const inputStyles = {
+    bg: "bg.input",
+    borderColor: "border.default",
+    color: "text.primary",
+    _placeholder: { color: "text.muted" },
+    _hover: { borderColor: "border.focus" },
+    _focus: {
+        borderColor: "border.focus",
+        boxShadow: "0 0 0 1px var(--chakra-colors-forge-gold-500)",
+    },
+}
+
+// Modal/Dialog input styling (uses direct forge tokens)
+export const modalInputStyles = {
+    bg: "forge.stone.900",
+    borderColor: "forge.stone.700",
+    color: "forge.tan.100",
+    _placeholder: { color: "forge.stone.500" },
+    _hover: { borderColor: "forge.gold.500" },
+    _focus: {
+        borderColor: "forge.gold.500",
+        boxShadow: "0 0 0 1px var(--chakra-colors-forge-gold-500)",
+    },
+}
+
+// Primary button styling - use with {...primaryButtonStyles}
+export const primaryButtonStyles = {
+    bg: "button.primary.bg",
+    color: "button.primary.text",
+    _hover: {
+        bg: "button.primary.hover",
+        boxShadow: "0 0 20px rgba(245, 158, 11, 0.3)",
+    },
+}
+
+// Outline button for modals/dialogs
+export const outlineButtonStyles = {
+    variant: "outline",
+    borderColor: "forge.stone.700",
+    color: "forge.tan.300",
+    _hover: {
+        bg: "forge.stone.700",
+        borderColor: "forge.tan.400",
+    },
+}
+
 // This extends the default theme from Chakra
 export const theme = defineConfig({
     ...defaultConfig,
@@ -89,6 +140,52 @@ export const theme = defineConfig({
                         900: { value: "#0f0f0f" },
                     },
                 },
+            },
+        },
+        semanticTokens: {
+            colors: {
+                // Background colors
+                'bg.primary': { value: '{colors.forge.stone.900}' },
+                'bg.secondary': { value: '{colors.forge.stone.800}' },
+                'bg.tertiary': { value: '{colors.forge.stone.700}' },
+                'bg.card': { value: '{colors.forge.stone.800}' },
+                'bg.input': { value: '{colors.forge.stone.900}' },
+                
+                // Text colors
+                'text.primary': { value: '{colors.forge.tan.100}' },
+                'text.secondary': { value: '{colors.forge.tan.300}' },
+                'text.muted': { value: '{colors.forge.stone.400}' },
+                'text.accent': { value: '{colors.forge.gold.400}' },
+                
+                // Border colors
+                'border.default': { value: '{colors.forge.stone.700}' },
+                'border.accent': { value: '{colors.forge.red.700}' },
+                'border.focus': { value: '{colors.forge.gold.500}' },
+                
+                // Button/Interactive colors
+                'button.primary.bg': { value: '{colors.forge.red.700}' },
+                'button.primary.hover': { value: '{colors.forge.gold.600}' },
+                'button.primary.text': { value: '{colors.forge.tan.50}' },
+                
+                // Secondary button colors
+                'button.secondary.bg': { value: 'transparent' },
+                'button.secondary.border': { value: '{colors.forge.stone.700}' },
+                'button.secondary.text': { value: '{colors.forge.tan.300}' },
+                'button.secondary.hoverBg': { value: '{colors.forge.stone.700}' },
+                'button.secondary.hoverBorder': { value: '{colors.forge.tan.400}' },
+                
+                // Modal colors
+                'modal.bg': { value: '{colors.forge.stone.800}' },
+                'modal.border': { value: '{colors.forge.red.700}' },
+                'modal.title': { value: '{colors.forge.tan.100}' },
+                'modal.label': { value: '{colors.forge.tan.300}' },
+                'modal.closeTrigger': { value: '{colors.forge.tan.400}' },
+            },
+            shadows: {
+                // Focus ring shadow
+                'focus.ring': { value: '0 0 0 1px {colors.forge.gold.500}' },
+                // Button glow on hover
+                'button.glow': { value: '0 0 20px rgba(245, 158, 11, 0.3)' },
             },
         },
     },

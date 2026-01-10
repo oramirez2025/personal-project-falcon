@@ -1,4 +1,20 @@
 import { useState, useEffect } from 'react';
+import { Box, Heading, HStack, VStack, Text } from '@chakra-ui/react';
+import { MotionBox, MotionHeading } from './Motion';
+import { fadeInUp } from './animations/fffAnimations';
+
+// Pulse animation for event-time heading
+const pulseAnimation = {
+  animate: {
+    scale: [1, 1.05, 1],
+    opacity: [1, 0.8, 1],
+  },
+  transition: {
+    duration: 2,
+    repeat: Infinity,
+    ease: "easeInOut"
+  }
+};
 
 /**
  * CountdownTimer component displays a countdown to August 14th
@@ -65,100 +81,79 @@ export default function CountdownTimer() {
     return () => clearInterval(interval);
   }, []);
 
-  // During event period: show event message
+  // During event period: show event message with pulse animation
   if (isEventTime) {
     return (
-      <div className="countdown-container" style={styles.container}>
-        <h1 style={styles.eventMessage}>So it begins</h1>
-      </div>
+      <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" p={8} textAlign="center">
+        <MotionHeading 
+          {...pulseAnimation}
+          size="3xl" 
+          fontWeight="bold" 
+          color="text.primary"
+        >
+          So it begins
+        </MotionHeading>
+      </Box>
     );
   }
 
   // Before calculation completes: show loading state
   if (!timeRemaining) {
     return (
-      <div className="countdown-container" style={styles.container}>
-        <p>Loading...</p>
-      </div>
+      <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" p={8}>
+        <Text color="text.secondary">Loading...</Text>
+      </Box>
     );
   }
 
   // Main countdown display: show days, hours, minutes, seconds
   return (
-    <div className="countdown-container" style={styles.container}>
-      <h2 style={styles.title}>Countdown to August 14th</h2>
-      <div style={styles.timeDisplay}>
-        <div style={styles.timeUnit}>
-          <span style={styles.timeValue}>{timeRemaining.days}</span>
-          <span style={styles.timeLabel}>Days</span>
-        </div>
-        <div style={styles.timeUnit}>
-          <span style={styles.timeValue}>{timeRemaining.hours}</span>
-          <span style={styles.timeLabel}>Hours</span>
-        </div>
-        <div style={styles.timeUnit}>
-          <span style={styles.timeValue}>{timeRemaining.minutes}</span>
-          <span style={styles.timeLabel}>Minutes</span>
-        </div>
-        <div style={styles.timeUnit}>
-          <span style={styles.timeValue}>{timeRemaining.seconds}</span>
-          <span style={styles.timeLabel}>Seconds</span>
-        </div>
-      </div>
-    </div>
+    <MotionBox {...fadeInUp} display="flex" flexDirection="column" alignItems="center" justifyContent="center" p={8} textAlign="center">
+      <Heading size="xl" mb={8} fontWeight="bold" color="text.primary">
+        Countdown to August 14th
+      </Heading>
+      
+      <HStack spacing={8} flexWrap="wrap" justifyContent="center">
+        {/* Days */}
+        <VStack minW="80px">
+          <Text fontSize="5xl" fontWeight="bold" color="forge.gold.500">
+            {timeRemaining.days}
+          </Text>
+          <Text fontSize="md" color="text.muted" textTransform="uppercase" mt={2}>
+            Days
+          </Text>
+        </VStack>
+
+        {/* Hours */}
+        <VStack minW="80px">
+          <Text fontSize="5xl" fontWeight="bold" color="forge.gold.500">
+            {timeRemaining.hours}
+          </Text>
+          <Text fontSize="md" color="text.muted" textTransform="uppercase" mt={2}>
+            Hours
+          </Text>
+        </VStack>
+
+        {/* Minutes */}
+        <VStack minW="80px">
+          <Text fontSize="5xl" fontWeight="bold" color="forge.gold.500">
+            {timeRemaining.minutes}
+          </Text>
+          <Text fontSize="md" color="text.muted" textTransform="uppercase" mt={2}>
+            Minutes
+          </Text>
+        </VStack>
+
+        {/* Seconds */}
+        <VStack minW="80px">
+          <Text fontSize="5xl" fontWeight="bold" color="forge.gold.500">
+            {timeRemaining.seconds}
+          </Text>
+          <Text fontSize="md" color="text.muted" textTransform="uppercase" mt={2}>
+            Seconds
+          </Text>
+        </VStack>
+      </HStack>
+    </MotionBox>
   );
 }
-
-// Inline styles for the countdown timer component
-const styles = {
-  // Main container: centers content with padding
-  container: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '2rem',
-    textAlign: 'center',
-  },
-  // Countdown title styling
-  title: {
-    fontSize: '2rem',
-    marginBottom: '2rem',
-    fontWeight: 'bold',
-    color: '#e2e8f0',
-  },
-  // Event message shown during Aug 14-16
-  eventMessage: {
-    fontSize: '3rem',
-    fontWeight: 'bold',
-    color: '#2d3748',
-    animation: 'pulse 2s infinite',
-  },
-  // Wrapper for all time units (days, hours, minutes, seconds)
-  timeDisplay: {
-    display: 'flex',
-    gap: '2rem',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-  },
-  // Individual time unit container (holds value and label)
-  timeUnit: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    minWidth: '80px',
-  },
-  // Numeric value styling (e.g., "365")
-  timeValue: {
-    fontSize: '3rem',
-    fontWeight: 'bold',
-    color: '#2b6cb0',
-  },
-  // Label styling (e.g., "DAYS")
-  timeLabel: {
-    fontSize: '1rem',
-    color: '#718096',
-    textTransform: 'uppercase',
-    marginTop: '0.5rem',
-  },
-};

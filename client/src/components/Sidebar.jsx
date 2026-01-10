@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
-import { motion } from 'motion/react'
 import { Box, Flex, Text, Image } from '@chakra-ui/react'
+import { Drawer } from '@chakra-ui/react'
+import { Menu, X, ExternalLink as ExternalLinkIcon } from 'lucide-react'
 import { userLogOut } from '../utilities'
 import logo from '../assets/FFF_Symbol_128.png'
 import { showErrorToast } from './ui/showErrorToast'
@@ -18,7 +19,6 @@ export default function Sidebar({ user, setUser }) {
       navigate("/")
       setIsOpen(false)
       showSuccessToast("Log Out", "Log out successful!")
-
     }
     catch (err) {
       showErrorToast("Log Out", err.response?.data.error || "Something went wrong :(")
@@ -29,165 +29,192 @@ export default function Sidebar({ user, setUser }) {
 
   return (
     <>
-      {/* Backdrop */}
-      {isOpen && (
-        <Box
-          position="fixed"
-          top={0}
-          left={0}
-          right={0}
-          bottom={0}
-          bg="blackAlpha.700"
-          zIndex={40}
-          onClick={closeSidebar}
-        />
-      )}
-
-      {/* Sidebar + Toggle (slide together) */}
-      <motion.nav
-        initial={false}
-        animate={{ x: isOpen ? 0 : -260 }}
-        transition={{ type: "tween", duration: 0.3 }}
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          bottom: 0,
-          width: '260px',
-          background: 'linear-gradient(180deg, #1c1917 0%, #0c0a09 100%)',
-          borderRight: '2px solid #b91c1c',
-          zIndex: "50",
-          display: 'flex',
-          flexDirection: 'column',
-          padding: '20px 0',
+      {/* Animated Toggle Button - Moves with drawer */}
+      <Box
+        as="button"
+        onClick={() => setIsOpen(!isOpen)}
+        position="fixed"
+        top="100px"
+        left={isOpen ? "260px" : "0px"}
+        w="2rem"
+        h="5rem"
+        bg="forge.stone.800"
+        color="forge.tan.200"
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        borderTop="2px solid"
+        borderRight="2px solid"
+        borderBottom="2px solid"
+        borderColor="forge.red.700"
+        roundedBottomRight="8px"
+        roundedTopRight="8px"
+        cursor="pointer"
+        zIndex={1500}
+        transition="left 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
+        _hover={{ 
+          bg: "forge.stone.700", 
+          color: "forge.gold.400", 
+          borderColor: "forge.gold.400" 
         }}
+        aria-label={isOpen ? "Close menu" : "Open menu"}
       >
-        {/* Toggle Button */}
-        <Box
-          as="button"
-          onClick={() => setIsOpen(!isOpen)}
-          position="absolute"
-          top="100px"
-          right="-32px"
-          w="2rem"
-          h="5rem"
-          aspectRatio="portrait"
-          bg="#1c1917"
-          color="#d6d3d1"
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-          borderTop='2px solid #b91c1c'
-          borderRight='2px solid #b91c1c'
-          borderBottom='2px solid #b91c1c'
-          roundedBottomRight="8px"
-          roundedTopRight="8px"
-          fontSize="20px"
-          cursor="pointer"
-          transform="translateY"
-          _hover={{ bg: "#292524", color: "#fbbf24", borderColor: "#fbbf24" }}
-        >
-          {isOpen ? '✕' : '☰'}
-        </Box>
-        {/* Logo */}
-        <Link to="/" onClick={closeSidebar} style={{ textDecoration: 'none' }}>
-          <Flex align="center" gap="12px" px="20px" py="10px" mb="20px">
-            <Image src={logo} alt="FalconForge" w="48px" h="48px" />
-            <Text color="#d6d3d1" fontWeight="600" fontSize="16px">
-              FalconForge Fantasy
-            </Text>
-          </Flex>
-        </Link>
+        {isOpen ? <X size={20} /> : <Menu size={20} />}
+      </Box>
 
-        {/* Divider */}
-        <Box h="1px" bg="#44403c" mx="20px" mb="16px" />
-
-        {/* Nav Section */}
-        <Box px="12px" mb="16px">
-          <Text fontSize="11px" color="#78716c" textTransform="uppercase" letterSpacing="2px" px="12px" mb="8px">
-            Navigate
-          </Text>
-
-          <SidebarLink to="/" onClick={closeSidebar}>Home</SidebarLink>
-          <SidebarLink to="/tickets" onClick={closeSidebar}>Tickets</SidebarLink>
-          <SidebarLink to="/questions" onclick={closeSidebar}>FAQ</SidebarLink>
-          {user && <SidebarLink to="/profile" onClick={closeSidebar}>User Profile</SidebarLink>}
-        </Box>
-
-        {/* External Links */}
-        <Box px="12px" mb="16px">
-          <Text fontSize="11px" color="#78716c" textTransform="uppercase" letterSpacing="2px" px="12px" mb="8px">
-            Realms
-          </Text>
-
-          <ExternalLink href="https://falcons-forge-shop.fourthwall.com/">Merchandise</ExternalLink>
-          <ExternalLink href="https://marketplace.roll20.net/browse/publisher/1785/falconforgefantasy">Roll20</ExternalLink>
-          <ExternalLink href="https://startplaying.games/gm/falconforgefantasy">StartPlaying</ExternalLink>
-        </Box>
-
-        {/* Spacer */}
-        <Box flex="1" />
-
-        {/* Auth Section */}
-        <Box px="12px" pt="16px" borderTop="1px solid #292524">
-          {user ? (
-            <Box
-              as="button"
-              onClick={handleLogout}
-              display="block"
-              w="100%"
-              p="12px 16px"
-              bg="transparent"
-              color="#d6d3d1"
-              border="1px solid #44403c"
-              borderRadius="8px"
-              fontSize="14px"
-              cursor="pointer"
-              textAlign="center"
-              _hover={{ bg: "#292524", color: "#fbbf24", borderColor: "#fbbf24" }}
-            >
-              Logout
+      {/* Chakra Drawer for Sidebar */}
+      <Drawer.Root 
+        open={isOpen} 
+        onOpenChange={(e) => setIsOpen(e.open)}
+        placement="left"
+      >
+        <Drawer.Backdrop bg="rgba(0, 0, 0, 0.7)" />
+        <Drawer.Positioner>
+          <Drawer.Content
+            maxW="260px"
+            bg="linear-gradient(180deg, #1f1f1f 0%, #0f0f0f 100%)"
+            borderRight="2px solid"
+            borderColor="forge.red.700"
+          >
+            {/* Logo Header */}
+            <Box py={4} px={5}>
+              <Link to="/" onClick={closeSidebar} style={{ textDecoration: 'none' }}>
+                <Flex align="center" gap="12px">
+                  <Image src={logo} alt="FalconForge" w="48px" h="48px" />
+                  <Text color="forge.tan.200" fontWeight="600" fontSize="16px">
+                    FalconForgeFantasy
+                  </Text>
+                </Flex>
+              </Link>
             </Box>
-          ) : (
-            <Flex direction="column" gap="8px">
-              <Link to="/login" onClick={closeSidebar} style={{ textDecoration: 'none' }}>
+
+            {/* Divider */}
+            <Box h="1px" bg="forge.stone.700" mx="20px" mb="16px" />
+
+            <Drawer.Body px={3}>
+              {/* Nav Section */}
+              <Box mb="16px">
+                <Text 
+                  fontSize="11px" 
+                  color="forge.stone.500" 
+                  textTransform="uppercase" 
+                  letterSpacing="2px" 
+                  px="12px" 
+                  mb="8px"
+                >
+                  Navigate
+                </Text>
+
+                <SidebarLink to="/" onClick={closeSidebar}>Home</SidebarLink>
+                <SidebarLink to="/tickets" onClick={closeSidebar}>Tickets</SidebarLink>
+                <SidebarLink to="/questions" onClick={closeSidebar}>FAQ</SidebarLink>
+                {user && <SidebarLink to="/profile" onClick={closeSidebar}>User Profile</SidebarLink>}
+              </Box>
+
+              {/* External Links */}
+              <Box mb="16px">
+                <Text 
+                  fontSize="11px" 
+                  color="forge.stone.500" 
+                  textTransform="uppercase" 
+                  letterSpacing="2px" 
+                  px="12px" 
+                  mb="8px"
+                >
+                  Realms
+                </Text>
+
+                <ExternalLink href="https://falcons-forge-shop.fourthwall.com/">Merchandise</ExternalLink>
+                <ExternalLink href="https://marketplace.roll20.net/browse/publisher/1785/falconforgefantasy">Roll20</ExternalLink>
+                <ExternalLink href="https://startplaying.games/gm/falconforgefantasy">StartPlaying</ExternalLink>
+              </Box>
+            </Drawer.Body>
+
+            <Drawer.Footer 
+              px={3} 
+              pt="16px" 
+              borderTop="1px solid" 
+              borderColor="forge.stone.700"
+              flexDirection="column"
+              gap="8px"
+            >
+              {user ? (
                 <Box
+                  as="button"
+                  onClick={handleLogout}
+                  w="100%"
                   p="12px 16px"
                   bg="transparent"
-                  color="#d6d3d1"
-                  border="1px solid #44403c"
+                  color="forge.tan.200"
+                  border="1px solid"
+                  borderColor="forge.stone.700"
                   borderRadius="8px"
                   fontSize="14px"
+                  cursor="pointer"
                   textAlign="center"
-                  _hover={{ bg: "#292524", color: "#fbbf24", borderColor: "#fbbf24" }}
+                  transition="all 0.2s"
+                  _hover={{ 
+                    bg: "forge.stone.700", 
+                    color: "forge.gold.400", 
+                    borderColor: "forge.gold.400" 
+                  }}
                 >
-                  Login
+                  Logout
                 </Box>
-              </Link>
-              <Link to="/signup" onClick={closeSidebar} style={{ textDecoration: 'none' }}>
-                <Box
-                  p="12px 16px"
-                  bg="#b91c1c"
-                  color="#fef2f2"
-                  border="1px solid #991b1b"
-                  borderRadius="8px"
-                  fontSize="14px"
-                  fontWeight="600"
-                  textAlign="center"
-                  _hover={{ bg: "#d97706", borderColor: "#b45309" }}
-                >
-                  Join the Quest
-                </Box>
-              </Link>
-            </Flex>
-          )}
-        </Box>
-      </motion.nav>
+              ) : (
+                <>
+                  <Link to="/login" onClick={closeSidebar} style={{ textDecoration: 'none', width: '100%' }}>
+                    <Box
+                      w="100%"
+                      p="12px 16px"
+                      bg="transparent"
+                      color="forge.tan.200"
+                      border="1px solid"
+                      borderColor="forge.stone.700"
+                      borderRadius="8px"
+                      fontSize="14px"
+                      textAlign="center"
+                      transition="all 0.2s"
+                      _hover={{ 
+                        bg: "forge.stone.700", 
+                        color: "forge.gold.400", 
+                        borderColor: "forge.gold.400" 
+                      }}
+                    >
+                      Login
+                    </Box>
+                  </Link>
+                  <Link to="/signup" onClick={closeSidebar} style={{ textDecoration: 'none', width: '100%' }}>
+                    <Box
+                      w="100%"
+                      p="12px 16px"
+                      bg="forge.red.700"
+                      color="forge.tan.50"
+                      border="1px solid"
+                      borderColor="forge.red.800"
+                      borderRadius="8px"
+                      fontSize="14px"
+                      fontWeight="600"
+                      textAlign="center"
+                      transition="all 0.2s"
+                      _hover={{ 
+                        bg: "forge.gold.600", 
+                        borderColor: "forge.gold.700" 
+                      }}
+                    >
+                      Join the Quest
+                    </Box>
+                  </Link>
+                </>
+              )}
+            </Drawer.Footer>
+          </Drawer.Content>
+        </Drawer.Positioner>
+      </Drawer.Root>
     </>
   )
 }
 
-// Simple nav link component
 function SidebarLink({ to, onClick, children }) {
   return (
     <NavLink to={to} onClick={onClick} style={{ textDecoration: 'none' }}>
@@ -196,11 +223,16 @@ function SidebarLink({ to, onClick, children }) {
           p="12px 16px"
           m="2px 0"
           borderRadius="8px"
-          color={isActive ? "#fbbf24" : "#a8a29e"}
+          color={isActive ? "forge.gold.400" : "forge.stone.400"}
           bg={isActive ? "rgba(185, 28, 28, 0.2)" : "transparent"}
-          borderLeft={isActive ? "3px solid #fbbf24" : "3px solid transparent"}
+          borderLeft={isActive ? "3px solid" : "3px solid transparent"}
+          borderLeftColor={isActive ? "forge.gold.400" : "transparent"}
           fontSize="14px"
-          _hover={{ bg: "#292524", color: "#fbbf24" }}
+          transition="all 0.2s"
+          _hover={{ 
+            bg: "forge.stone.700", 
+            color: "forge.gold.400" 
+          }}
         >
           {children}
         </Box>
@@ -209,7 +241,6 @@ function SidebarLink({ to, onClick, children }) {
   )
 }
 
-// External link component
 function ExternalLink({ href, children }) {
   return (
     <Box
@@ -217,15 +248,22 @@ function ExternalLink({ href, children }) {
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      display="block"
+      display="flex"
+      alignItems="center"
+      gap="6px"
       p="10px 16px"
       m="2px 0"
       borderRadius="8px"
-      color="#78716c"
+      color="forge.stone.500"
       fontSize="13px"
-      _hover={{ bg: "#292524", color: "#fbbf24" }}
+      transition="all 0.2s"
+      _hover={{ 
+        bg: "forge.stone.700", 
+        color: "forge.gold.400" 
+      }}
     >
-      {children} ↗
+      {children}
+      <ExternalLinkIcon size={12} />
     </Box>
   )
 }

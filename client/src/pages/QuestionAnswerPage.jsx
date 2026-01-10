@@ -1,105 +1,56 @@
-import { Box, Heading, Text, Separator, Container, } from "@chakra-ui/react"
-import { MotionBox } from "../components/Motion";
+import { Container, Heading, Stack, Separator } from "@chakra-ui/react"
+import { MotionBox } from "../components/Motion"
+import { staggerContainer, staggerItem } from "../components/animations/fffAnimations"
+import FAQCard from "../components/cards/FaqCard"
 
+/*
+FAQ Page - Now uses reusable FAQCard component
+Added staggered entrance animations
+*/
 export default function QuestionsAnswersPage() {
+    const faqs = [
+        {
+            question: "Question:",
+            answer: "Answer: Lorem ipsum dolor sit amet, consectetur adipisicing elit. Officiis ex dolorem porro ratione distinctio culpa alias quasi harum, sed obcaecati aut nostrum quam voluptates suscipit veritatis ab, odio molestias at."
+        },
+        {
+            question: "Question:",
+            answer: "Answer: Lorem ipsum dolor sit amet, consectetur adipisicing elit. Officiis ex dolorem porro ratione distinctio culpa alias quasi harum, sed obcaecati aut nostrum quam voluptates suscipit veritatis ab, odio molestias at."
+        },
+        {
+            question: "Question:",
+            answer: "Answer: Lorem ipsum dolor sit amet, consectetur adipisicing elit. Officiis ex dolorem porro ratione distinctio culpa alias quasi harum, sed obcaecati aut nostrum quam voluptates suscipit veritatis ab, odio molestias at."
+        },
+        {
+            question: "Question:",
+            answer: "Answer: Lorem ipsum dolor sit amet, consectetur adipisicing elit. Officiis ex dolorem porro ratione distinctio culpa alias quasi harum, sed obcaecati aut nostrum quam voluptates suscipit veritatis ab, odio molestias at."
+        },
+    ]
+
     return (
-        <Container>
+        <Container maxW="container.lg" py={10}>
+            <Heading
+                color="forge.red.500"
+                textDecoration="underline"
+                mb={8}
+                textAlign="center"
+            >
+                Frequently Asked Questions
+            </Heading>
 
-            <Heading color='#b91c1c' textDecoration={'underline'}>Frequently Asked Questions</Heading>
-
-            <MotionBox 
-                className="rounded-xl"
-                bg="white"
-                borderRadius="lg"
-                border = '2px solid #b91c1c'
-                rounded ='10px'
-                boxShadow="md"
-                margin="10"
-                p="6"
-                whileHover={{y:-4}}
-                whileTap={{scale:0.98}}
-                initial={{opacity:0, y:12}}
-                animate={{opacity:1, y:0}}
-                transition={{duration:0.25, ease:"easeOut"}}
-                >
-                    <Box>
-                        <Text color='blackAlpha.800' textDecoration={'underline'}>Question:</Text>
-                        <Text color='blackAlpha.800'>Answer: Lorem ipsum dolor sit amet, consectetur adipisicing elit. Officiis ex dolorem porro ratione distinctio culpa alias quasi harum, sed obcaecati aut nostrum quam voluptates suscipit veritatis ab, odio molestias at.</Text>
-                    </Box>
-                </MotionBox>
-
-                <Separator/>
-
-
-            <MotionBox 
-                className="rounded-xl"
-                bg="white"
-                borderRadius="lg"
-                border = '2px solid #b91c1c'
-                rounded ='10px'
-                boxShadow="md"
-                margin="10"
-                p="6"
-                whileHover={{y:-4}}
-                whileTap={{scale:0.98}}
-                initial={{opacity:0, y:12}}
-                animate={{opacity:1, y:0}}
-                transition={{duration:0.25, ease:"easeOut"}}
-                >
-                    <Box>
-                        <Text color='blackAlpha.800' textDecoration={'underline'}>Question:</Text>
-                        <Text color='blackAlpha.800'>Answer: Lorem ipsum dolor sit amet, consectetur adipisicing elit. Officiis ex dolorem porro ratione distinctio culpa alias quasi harum, sed obcaecati aut nostrum quam voluptates suscipit veritatis ab, odio molestias at.</Text>
-                    </Box>
-                </MotionBox>
-
-                <Separator/>
-
-            <MotionBox 
-                className="rounded-xl"
-                bg="white"
-                borderRadius="lg"
-                border = '2px solid #b91c1c'
-                rounded ='10px'
-                boxShadow="md"
-                margin="10"
-                p="6"
-                whileHover={{y:-4}}
-                whileTap={{scale:0.98}}
-                initial={{opacity:0, y:12}}
-                animate={{opacity:1, y:0}}
-                transition={{duration:0.25, ease:"easeOut"}}
-                >
-                    <Box>
-                        <Text color='blackAlpha.800' textDecoration={'underline'}>Question:</Text>
-                        <Text color='blackAlpha.800'>Answer: Lorem ipsum dolor sit amet, consectetur adipisicing elit. Officiis ex dolorem porro ratione distinctio culpa alias quasi harum, sed obcaecati aut nostrum quam voluptates suscipit veritatis ab, odio molestias at.</Text>
-                    </Box>
-                </MotionBox>
-
-                <Separator/>
-
-
-            <MotionBox 
-                className="rounded-xl"
-                bg="white"
-                borderRadius="lg"
-                border = '2px solid #b91c1c'
-                rounded ='10px'
-                boxShadow="md"
-                margin="10"
-                p="6"
-                whileHover={{y:-4}}
-                whileTap={{scale:0.98}}
-                initial={{opacity:0, y:12}}
-                animate={{opacity:1, y:0}}
-                transition={{duration:0.25, ease:"easeOut"}}
-                >
-                    <Box>
-                        <Text color='blackAlpha.800' textDecoration={'underline'}>Question:</Text>
-                        <Text color='blackAlpha.800'>Answer: Lorem ipsum dolor sit amet, consectetur adipisicing elit. Officiis ex dolorem porro ratione distinctio culpa alias quasi harum, sed obcaecati aut nostrum quam voluptates suscipit veritatis ab, odio molestias at.</Text>
-                    </Box>
-                </MotionBox>
-
-                <Separator/>
+            <MotionBox
+                variants={staggerContainer}
+                initial="hidden"
+                animate="visible"
+            >
+                <Stack spacing={6} divider={<Separator />}>
+                    {faqs.map((faq, index) => (
+                        <MotionBox key={index} variants={staggerItem}>
+                            <FAQCard question={faq.question} answer={faq.answer} />
+                        </MotionBox>
+                    ))}
+                </Stack>
+            </MotionBox>
         </Container>
     )
-};
+}
