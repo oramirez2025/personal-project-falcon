@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { showErrorToast } from "./ui/showErrorToast";
 import { showSuccessToast } from "./ui/showSuccessToast";
 import { decrementTickets } from "../utilities";
 import { Button } from "@chakra-ui/react"
 
-export default function StripeCheckoutForm({ clientSecret, userId, onSuccess, order }) {
+export default function StripeCheckoutForm({ onSuccess, order }) {
     const stripe = useStripe();
     const elements = useElements();
     const [processing, setProcessing] = useState(false);
