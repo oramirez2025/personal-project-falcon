@@ -5,7 +5,7 @@ from rest_framework.exceptions import ValidationError
 class TicketTemplateSerializer(serializers.ModelSerializer):
     class Meta:
         model = TicketTemplate
-        fields = ['title', 'description', 'price', 'available_quantity']
+        fields = ['title', 'description', 'price', 'available_quantity', 'is_active']
 
     def validate(self,data):
         num_tickets_templates = len(TicketTemplate.TICKET_TYPE_CHOICES)
@@ -21,5 +21,5 @@ class TicketSerializer(serializers.ModelSerializer):
     ticket_type = serializers.CharField(max_length=255, source="ticket.ticket_type", read_only=True)
     class Meta:
         model = Ticket
-        fields = ['id', 'user','ticket_type', 'quantity', 'ticket', 'payment']   
+        fields = ['id', 'user','ticket_type', 'quantity', 'ticket', 'payment',]   
     

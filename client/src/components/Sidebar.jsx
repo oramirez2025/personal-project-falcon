@@ -4,16 +4,25 @@ import { motion } from 'motion/react'
 import { Box, Flex, Text, Image } from '@chakra-ui/react'
 import { userLogOut } from '../utilities'
 import logo from '../assets/FFF_Symbol_128.png'
+import { showErrorToast } from './ui/showErrorToast'
+import { showSuccessToast } from './ui/showSuccessToast'
 
 export default function Sidebar({ user, setUser }) {
   const navigate = useNavigate()
   const [isOpen, setIsOpen] = useState(false)
 
   const handleLogout = async () => {
-    await userLogOut()
-    setUser(null)
-    navigate("/")
-    setIsOpen(false)
+    try {
+      await userLogOut()
+      setUser(null)
+      navigate("/")
+      setIsOpen(false)
+      showSuccessToast("Log Out", "Log out successful!")
+
+    }
+    catch (err) {
+      showErrorToast("Log Out", err.response?.data.error || "Something went wrong :(")
+    }
   }
 
   const closeSidebar = () => setIsOpen(false)

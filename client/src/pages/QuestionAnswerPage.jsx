@@ -5,7 +5,7 @@ export default function QuestionsAnswersPage() {
     return (
         <Container>
 
-            <Heading color='#b91c1c' textDecoration={'underline'}>Questions and Answers</Heading>
+            <Heading color='#b91c1c' textDecoration={'underline'}>Frequently Asked Questions</Heading>
 
             <MotionBox 
                 className="rounded-xl"

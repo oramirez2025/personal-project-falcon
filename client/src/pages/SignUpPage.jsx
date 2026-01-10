@@ -1,8 +1,10 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
-import Button from "react-bootstrap/Button";
+import { useState } from "react";
+import { Button } from "@chakra-ui/react";
 import Form from "react-bootstrap/Form";
 import { useNavigate, useOutletContext } from "react-router-dom";
+import { showSuccessToast } from "../components/ui/showSuccessToast";
+import { showErrorToast } from "../components/ui/showErrorToast";
 
 export const api = axios.create({
   baseURL: "http://127.0.0.1:8000/",
@@ -11,55 +13,58 @@ export const api = axios.create({
 const SignUp = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const {setUser} = useOutletContext();
-  const navigate = useNavigate()
-    const handleClick = async (e) => {
-        e.preventDefault()
-        const data = {"email": email, "password": password}
-        const response = await axios.post("http://127.0.0.1:8000/user/new_account/", data);
-        console.log(response.data)
-        alert("We've Made Your Badass Account");
-        if (response.status === 201) {
-            let { user, token } = response.data;
-            localStorage.setItem("token", token);
-            api.defaults.headers.common["Authorization"] = `Token ${token}`;
-            setUser(user)
-      }     
-        navigate("/")
-    
-    };
+  const { setUser } = useOutletContext();
+  const navigate = useNavigate();
+
+  const handleClick = async (e) => {
+    e.preventDefault();
+
+    try {
+      const data = { email, password };
+      const response = await axios.post(
+        "http://127.0.0.1:8000/user/new_account/",
+        data
+      );
+
+      const { user, token } = response.data;
+
+      localStorage.setItem("token", token);
+      api.defaults.headers.common["Authorization"] = `Token ${token}`;
+
+      showSuccessToast("Sign up","We've Made Your Badass Account");
+      setUser(user);
+      navigate("/");
+    } catch (err) {
+      showErrorToast("Sign up", err.response?.data.error || "Something went wrong :(");
+    }
+  };
+
   return (
     <>
       <h1>SignUp</h1>
-      <Form onSubmit= {(e) => handleClick(e)}>
-        <Form.Group className="mb-3" controlId="formBasicEmail">
+
+      <Form onSubmit={handleClick}>
+        <Form.Group className="mb-3">
           <Form.Label>Email Address</Form.Label>
           <Form.Control
-            onChange={(e) => setEmail(e.target.value)}
             value={email}
             type="email"
+            onChange={(e) => setEmail(e.target.value)}
             placeholder="Enter email"
-            name="email"
           />
-          <Form.Text className="text-muted">
-            We'll never share your email with anyone else.
-          </Form.Text>
         </Form.Group>
-        <Form.Group className="mb-3" controlId="formBasicPassword">
+
+        <Form.Group className="mb-3">
           <Form.Label>Password</Form.Label>
           <Form.Control
-            onChange={(e) => setPassword(e.target.value)}
             value={password}
             type="password"
+            onChange={(e) => setPassword(e.target.value)}
             placeholder="Password"
-            name = "password"
           />
         </Form.Group>
-        
-        <Button variant="primary" type="submit">
-          Submit
-        </Button>
-        
+
+        <Button type="submit">Submit</Button>
       </Form>
     </>
   );

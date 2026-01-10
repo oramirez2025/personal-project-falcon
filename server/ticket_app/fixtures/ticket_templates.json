@@ -1,0 +1,50 @@
+[
+  {
+    "model": "ticket_app.tickettemplate",
+    "pk": 1,
+    "fields": {
+      "title": "General Admission 🎟️",
+      "description": "3 Days of TTRPGs, Tavern Feasts, Mixed Potions, Rare Merch, and Heroic Gift Bags.",
+      "price": "250.00",
+      "ticket_type": "general",
+      "available_quantity": 100,
+      "is_active": true
+    }
+  },
+  {
+    "model": "ticket_app.tickettemplate",
+    "pk": 2,
+    "fields": {
+      "title": "Community Ticket 📜",
+      "description": "All General Admission perks + Shared On-Site Stay (hostel-style lodging included).",
+      "price": "400.00",
+      "ticket_type": "community",
+      "available_quantity": 100,
+      "is_active": true
+    }
+  },
+  {
+    "model": "ticket_app.tickettemplate",
+    "pk": 3,
+    "fields": {
+      "title": "Master Upgrade 🎫",
+      "description": "All General Admission perks + A private chamber on-site (your sanctuary between sessions).",
+      "price": "600.00",
+      "ticket_type": "master",
+      "available_quantity": 100,
+      "is_active": true
+    }
+  },
+  {
+    "model": "ticket_app.tickettemplate",
+    "pk": 4,
+    "fields": {
+      "title": "Defunct Ticket (Hidden)",
+      "description": "Not for sale; used for testing inactive/legacy ticket states.",
+      "price": "0.00",
+      "ticket_type": "defunct",
+      "available_quantity": 0,
+      "is_active": false
+    }
+  }
+]

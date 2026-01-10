@@ -1,5 +1,5 @@
 import { Box, Heading, Text } from "@chakra-ui/react";
-import { MotionBox } from "./Motion";
+import { MotionBox } from "../Motion";
 
 export default function Card({ title, description, price }) {
     return(

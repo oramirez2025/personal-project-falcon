@@ -38,12 +38,12 @@ class CreatePaymentIntent(User_Auth):
             )
 
             if item.quantity > tt.available_quantity:
-                raise ValidationError("Not enough tickets available.")
+                raise ValidationError("Not enough tickets available for {tt.ticket_type}.")
             
             tt.available_quantity -= item.quantity
             # Recall: community lodging is an upgrade of the general ticket; thus, we need to also reduce the availability of general tickets 
-            if tt.title == "community lodging":
-                general = TicketTemplate.objects.select_for_update().get(title="general")
+            if tt.ticket_type == "community":
+                general = TicketTemplate.objects.select_for_update().get(ticket_type="general")
                 if item.quantity > general.available_quantity:
                     raise ValidationError(
                         "Not enough general tickets available for community lodging."
@@ -51,16 +51,6 @@ class CreatePaymentIntent(User_Auth):
                 general.available_quantity -= item.quantity
                 general.save()
             tt.save()
-            OrderItem.objects.create(
-                order=order,
-                ticket_template=tt,
-                quantity=item.quantity,
-                title_at_purchase=tt.title, 
-                unit_price_at_purchase=tt.price,
-                line_total=tt.price*item.quantity,
-            )
-        order.recalculate_totals()
-        order.save()
         intent = stripe.PaymentIntent.create(
             amount=int(order.total * 100),
             currency="usd",
@@ -118,8 +108,12 @@ class CreateOrder(User_Auth):
         }
         templates = {
             t.ticket_type: t
-            for t in TicketTemplate.objects.filter(ticket_type__in=type_map.keys())
+            for t in TicketTemplate.objects.filter(
+                ticket_type__in=type_map.keys(),
+                is_active=True
+            )
         }
+
         created_items = []
         for ticket_type, qty in type_map.items():
             if qty <= 0:
