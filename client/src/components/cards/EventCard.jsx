@@ -5,8 +5,11 @@ import {
   Separator,
 } from "@chakra-ui/react";
 import BaseCard from "./BaseCard";
+import { Button } from "@chakra-ui/react";
+import { Link } from "react-router-dom";
 
 export default function EventCard({
+  id,
   title,
   day,
   start_time,
@@ -32,6 +35,9 @@ export default function EventCard({
         <Text fontSize="sm" noOfLines={4}>
           {description}
         </Text>
+        <Button as={Link} to={`/events/${id}`}>
+          Find Out More
+        </Button>
       </Stack>
     </BaseCard>
   );
