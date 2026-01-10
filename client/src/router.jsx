@@ -7,6 +7,7 @@ import LogInPage from "./pages/LogInPage";
 import { userConfirmation } from "./utilities";
 import TicketsPage from "./pages/TicketsPage";
 import QuestionsAnswersPage from "./pages/QuestionAnswerPage";
+import EventForumPage from "./pages/EventForumPage";
 
 const falconLoader = async () => {
     const token = localStorage.getItem("token")
@@ -26,7 +27,6 @@ const falconLoader = async () => {
 
 }
 
-
 const router = createBrowserRouter([ 
 {
     path: '/',
@@ -43,7 +43,13 @@ const router = createBrowserRouter([
         },
         {
             path: 'events',
-            element: <EventsPage/>
+            element: <EventsPage/>,
+            children: [
+                {
+                path: ":eventId",
+                element: <EventForumPage/>,
+                }
+            ]
         },
         {
             path: 'logIn',
