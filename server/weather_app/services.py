@@ -11,8 +11,8 @@ def fetchWeather():
 	# The order of variables in hourly or daily is important to assign them correctly below
 	url = "https://api.open-meteo.com/v1/forecast"
 	params = {
-		"latitude": 52.52,
-		"longitude": 13.41,
+		"latitude": 40.93,
+		"longitude": -73.89,
 		"daily": ["temperature_2m_max", "temperature_2m_min"],
 		"current": ["temperature_2m", "apparent_temperature"],
 		"forecast_days": 1,

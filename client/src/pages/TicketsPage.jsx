@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { SimpleGrid, VStack, Button, Heading } from "@chakra-ui/react";
 import TicketCard from "../components/cards/TicketCard";
-import PaymentModal from "../components/PaymentModal";
+import PaymentDrawer from "../components/PaymentDrawer";
 import { createOrder } from "../utilities";
 
+
 export default function TicketsPage() {
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showPaymentDrawer, setShowPaymentDrawer] = useState(false);
   const [order, setOrder] = useState(null);
   const [ticketA, setTicketA] = useState(0);
   const [ticketB, setTicketB] = useState(0);
@@ -17,7 +18,7 @@ export default function TicketsPage() {
     try {
       const createdOrder = await createOrder(cart);
       setOrder(createdOrder);
-      setShowPaymentModal(true);
+      setShowPaymentDrawer(true);
     } catch {
       alert("Something went wrong with the payment.");
     }
@@ -59,11 +60,11 @@ export default function TicketsPage() {
         Continue to Payment
       </Button>
 
-      {showPaymentModal && order && (
-        <PaymentModal
-          show={showPaymentModal}
+      {showPaymentDrawer && order && (
+        <PaymentDrawer
+          show={showPaymentDrawer}
           onClose={() => {
-            setShowPaymentModal(false);
+            setShowPaymentDrawer(false);
             setOrder(null);
           }}
           order={order}
