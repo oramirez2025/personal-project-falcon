@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Heading, Text, VStack, HStack } from "@chakra-ui/react";
 import BaseCard from "./BaseCard";
 import { grabWeather } from "../../utilities";
@@ -10,8 +10,13 @@ export default function WeatherCard() {
     maxTemp: null,
     minTemp: null,
   });
+  const hasFetched = useRef(false);
 
   useEffect(() => {
+    // Prevent StrictMode double-fetch
+    if (hasFetched.current) return;
+    hasFetched.current = true;
+
     const fetchWeather = async () => {
       const data = await grabWeather();
       if (data) setWeather(data);
@@ -29,28 +34,28 @@ export default function WeatherCard() {
 
         {/* Current temp */}
         <Heading size="2xl" color="forge.red.400">
-          {currTemp !== null ? `${currTemp}°` : "--"}
+          {currTemp !== null ? ` ${currTemp}°` : "--"}
         </Heading>
 
         {/* Feels like */}
         <Text color="text.muted">
-          Feels like{" "}
+          Feels like{"  :  "}
           <Text as="span" color="text.primary">
-            {feelsLikeTemp !== null ? `${feelsLikeTemp}°` : "--"}
+            {feelsLikeTemp !== null ? ` ${feelsLikeTemp}°` : "--"}
           </Text>
         </Text>
 
         {/* High / Low */}
         <HStack spacing={4}>
           <Text color="text.muted">
-            H{" "}
+            H{"  :  "}
             <Text as="span" color="text.primary">
-              {maxTemp !== null ? `${maxTemp}°` : "--"}
+              {maxTemp !== null ? `  ${maxTemp}°` : "--"}
             </Text>
           </Text>
 
           <Text color="text.muted">
-            L{" "}
+            L{"  :  "}
             <Text as="span" color="text.primary">
               {minTemp !== null ? `${minTemp}°` : "--"}
             </Text>
