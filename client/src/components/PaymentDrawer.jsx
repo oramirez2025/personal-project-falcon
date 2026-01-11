@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 import { payForOrder } from "../utilities";
@@ -13,6 +13,7 @@ export default function PaymentDrawer({ show, onClose, order }) {
   const [loading, setLoading] = useState(false);
   const [clientSecret, setClientSecret] = useState("");
   const [error, setError] = useState(null);
+  const hasInitialized = useRef(false);
   
   const appearance = { 
     theme: "night", 
@@ -46,7 +47,6 @@ export default function PaymentDrawer({ show, onClose, order }) {
       const errorMessage = err.response?.data?.error || err.message || "Failed to initialize payment.";
       setError(errorMessage);
       showErrorToast("Payment", errorMessage);
-      // Don't close drawer on error - let user see the error and retry or cancel
     } finally {
       setLoading(false);
     }
@@ -54,10 +54,19 @@ export default function PaymentDrawer({ show, onClose, order }) {
 
   useEffect(() => {
     if (show && order?.id) {
+      // Prevent StrictMode double-initialization
+      if (hasInitialized.current) return;
+      hasInitialized.current = true;
+      
       // Reset state when drawer opens
       setClientSecret("");
       setError(null);
       initializePayment();
+    }
+    
+    // Reset the ref when drawer closes so it can initialize again on next open
+    if (!show) {
+      hasInitialized.current = false;
     }
   }, [show, order?.id]);
 
@@ -137,7 +146,11 @@ export default function PaymentDrawer({ show, onClose, order }) {
                   <Button 
                     size="sm" 
                     mt={2} 
-                    onClick={initializePayment}
+                    onClick={() => {
+                      hasInitialized.current = false;
+                      initializePayment();
+                      hasInitialized.current = true;
+                    }}
                     bg="forge.red.700"
                     color="forge.tan.50"
                     _hover={{ bg: "forge.red.600" }}

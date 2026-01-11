@@ -1,40 +1,32 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   Box,
-  Button,
   Heading,
   Container,
   Grid,
   VStack,
   HStack,
 } from "@chakra-ui/react";
+import { useOutletContext } from "react-router-dom";
 
 import DaySection from "../components/sections/DaySection";
 import WeatherCard from "../components/cards/WeatherCard";
 import CountdownTimer from "../components/CountdownTimer";
 import TicketsPage from "./TicketsPage";
-
-import {
-  fetchEvents,
-  userConfirmation,
-} from "../utilities";
-
+import { fetchEvents } from "../utilities";
 import HeroicHall from "../assets/HeroicHall.jpeg";
 
 export default function EventsPage() {
   const [events, setEvents] = useState([]);
-  const [user, setUser] = useState(null);
+  const { user } = useOutletContext(); // Get user from App.jsx instead of duplicate call
+  const hasFetched = useRef(false);
 
   useEffect(() => {
+    // Prevent StrictMode double-fetch
+    if (hasFetched.current) return;
+    hasFetched.current = true;
+    
     fetchEvents(setEvents);
-  }, []);
-
-  useEffect(() => {
-    const restoreUser = async () => {
-      const confirmedUser = await userConfirmation();
-      setUser(confirmedUser);
-    };
-    restoreUser();
   }, []);
 
   const eventsByDay = events.reduce((acc, event) => {
@@ -71,7 +63,8 @@ export default function EventsPage() {
       </Box>
 
       {/* Tickets */}
-      <TicketsPage/>
+      <TicketsPage />
+      
       {/* Events */}
       <Container maxW="container.xl" py={10}>
         <VStack align="stretch" spacing={10}>
