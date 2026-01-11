@@ -98,6 +98,11 @@ export const decrementTickets = async (orderId) => {
   }
 }
 
+export const reserveTickets = async (orderId) => {
+  const response = await api.patch('payments/reserve/', {order_id: orderId});
+  return response.data
+}
+
 // ============= PAYMENTS =============
 
 export const grabWeather = async () => {

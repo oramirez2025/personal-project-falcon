@@ -23,26 +23,49 @@ def stripe_webhook(request):
     except (ValueError, stripe.error.SignatureVerificationError):
         return HttpResponse(status=400)
 
-    # --- Payment succeeded ---
-    if event["type"] == "payment_intent.succeeded":
-        intent = event["data"]["object"]
-        order_id = intent.metadata.get("order_id")
+    
+    event_type = event["type"]
+    intent = event["data"]["object"]
+    order_id = intent.metadata.get("order_id")
 
-        if not order_id:
-            return HttpResponse(status=400)
+    if not order_id:
+        return HttpResponse(status=400)
 
-        # Idempotent updates
-        Order.objects.filter(id=order_id).update(status="paid")
-        Payment.objects.filter(
-            stripe_payment_intent_id=intent.id
-        ).update(status="paid")
+    # --- Payment Success ---
+    if event_type == "payment_intent.succeeded":
+        with transaction.atomic():
+            order = Order.objects.select_for_update().get(id=order_id)
+
+            # --- Already Paid ---
+            if order.status == 'paid':
+                Payment.objects.filter(stripe_payment_intent_id=intent['id']).update(status='paid')
+
+            # --- Hold Expired ---
+            if order.status == 'reserved' and order.reserved_until and order.reserved_until <= timezone.now():
+                release_order_inventory(order)
+                Payment.objects.filter(stripe_payment_intent_id=intent['id']).update(status='failed')
+                order.status = 'failed'
+                order.save(update_fields=['status'])
+                return HttpResponse(status=200)
+        
+            # --- Normal Success ---
+            order.status = 'paid'
+            order.save(update_fields=['status'])
+            Payment.objects.filter(stripe_payment_intent_id=intent['id']).update(status='paid')
+    
+        return HttpResponse(status=200)
 
     # --- Payment failed ---
-    elif event["type"] == "payment_intent.payment_failed":
-        intent = event["data"]["object"]
-        order_id = intent.metadata.get("order_id")
+    if event_type == "payment_intent.payment_failed":
+        with transaction.atomic()
+            order = Order.objects.select_for_update().get(id=order.id)
+            Payment.objects.filter(stripe_payment_intent_id=intent['id']).update(status='failed')
 
-        if order_id:
-            Order.objects.filter(id=order_id).update(status="failed")
+            if order.status == 'reserved':
+                release_order_inventory(order)
+            else:
+                order.status = 'failed'
+                order.save(update_fields=['status'])
+        return HttpResponse(status=200)
 
     return HttpResponse(status=200)
