@@ -27,7 +27,6 @@ const falconLoader = async () => {
 
 }
 
-<<<<<<< HEAD
 const router = createBrowserRouter([ 
 {
     path: '/',
@@ -69,51 +68,7 @@ const router = createBrowserRouter([
             element: <QuestionsAnswersPage/>
         }
     ]
-
-
-    
-
-
 }
-=======
-
-const router = createBrowserRouter([
-    {
-        path: '/',
-        element: <App />,
-        loader: falconLoader,
-        children: [
-            {
-                index: true,
-                element: <EventsPage />
-            },
-            {
-                path: 'signup',
-                element: <SignUpPage />
-            },
-            {
-                path: 'events',
-                element: <EventsPage />
-            },
-            {
-                path: 'logIn',
-                element: <LogInPage />
-            },
-            {
-                path: 'tickets',
-                element: <TicketsPage />
-            },
-            {
-                path: 'profile',
-                element: <UserProfile />
-            },
-            {
-                path: 'questions',
-                element: <QuestionsAnswersPage />
-            }
-        ]
-    }
->>>>>>> main
 ])
 
 export default router;

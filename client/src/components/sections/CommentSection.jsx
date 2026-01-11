@@ -1,29 +1,62 @@
-// components/CommentSection.jsx
-import { Button } from "react-bootstrap";
+import {
+  Button,
+  Container,
+  Heading,
+  Stack,
+  Separator,
+  Text,
+} from "@chakra-ui/react";
 import { useEffect, useRef, useState } from "react";
-import CommentCard from "../CommentCard";
-import CreateCommentModal from "../CreateCommentModal";
-
-
-
+import CommentCard from "../cards/CommentCard";
+import CommentSkeleton from "../CommentSkeleton";
+import CreateCommentModal from "../ui/CreateCommentModal";
 import {
   fetchComments,
   createComments,
   deleteComment,
   updateComment,
 } from "../../utilities";
+import { MotionBox } from "../Motion";
+import {
+  staggerContainer,
+  staggerItem,
+} from "../animations/fffAnimations";
+import { primaryButtonStyles } from "../../theme";
 
-export default function CommentSection({eventId,user}) {
+export default function CommentSection({ eventId, user }) {
   const [comments, setComments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [hasFetched, setHasFetched] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const wsRef = useRef(null);
 
   // ======================
-  // Initial fetch
+  // Initial fetch (with skeleton delay)
   // ======================
   useEffect(() => {
     if (!eventId) return;
-    fetchComments(setComments, eventId);
+
+    let mounted = true;
+    const MIN_DELAY = 500;
+
+    setLoading(true);
+    setHasFetched(false);
+
+    fetchComments((data) => {
+      if (!mounted) return;
+
+      setComments(data);
+
+      setTimeout(() => {
+        if (!mounted) return;
+        setLoading(false);
+        setHasFetched(true);
+      }, MIN_DELAY);
+    }, eventId);
+
+    return () => {
+      mounted = false;
+    };
   }, [eventId]);
 
   // ======================
@@ -40,16 +73,20 @@ export default function CommentSection({eventId,user}) {
 
       socket.onmessage = (e) => {
         const { type, comment } = JSON.parse(e.data);
+
         setComments((prev) => {
           switch (type) {
             case "new_comment":
               return comment.parent
                 ? addReply(prev, comment.parent, comment)
                 : [...prev, comment];
+
             case "update_comment":
               return updateRecursive(prev, comment);
+
             case "delete_comment":
               return deleteRecursive(prev, comment.id);
+
             default:
               return prev;
           }
@@ -63,7 +100,6 @@ export default function CommentSection({eventId,user}) {
     connect();
     return () => socket?.close();
   }, [eventId]);
-
 
   // ======================
   // Tree helpers
@@ -117,25 +153,67 @@ export default function CommentSection({eventId,user}) {
   // Render
   // ======================
   return (
-    <>
-      <h5>Comments</h5>
+    <Container maxW="container.lg" py={10}>
+      <Heading
+        color="forge.red.500"
+        textDecoration="underline"
+        mb={8}
+        textAlign="center"
+      >
+        Discussion
+      </Heading>
 
-      {comments.map((comment) => (
-        <CommentCard
-          key={comment.id}
-          comment={comment}
-          depth={0}
-          onEdit={handleEdit}
-          onLike={handleLike}
-          onDelete={handleDelete}
-          onReply={handleReply}
-          user={user}
-        />
-      ))}
+      {/* Skeletons (only before first load completes) */}
+      {loading && !hasFetched && (
+        <Stack spacing={8} divider={<Separator />}>
+          {[...Array(3)].map((_, i) => (
+            <CommentSkeleton key={i} />
+          ))}
+        </Stack>
+      )}
 
-      <Button size="sm" onClick={() => setShowCreate(true)}>
-        Add Comment
-      </Button>
+      {/* Empty state */}
+      {!loading && hasFetched && comments.length === 0 && (
+        <Text color="forge.stone.600" textAlign="center" mt={6}>
+          Be the first to start the discussion.
+        </Text>
+      )}
+
+      {/* Loaded comments */}
+      {!loading && comments.length > 0 && (
+        <MotionBox
+          variants={staggerContainer}
+          initial="hidden"
+          animate="visible"
+        >
+          <Stack spacing={8} divider={<Separator />}>
+            {comments.map((comment) => (
+              <MotionBox key={comment.id} variants={staggerItem}>
+                <CommentCard
+                  comment={comment}
+                  depth={0}
+                  user={user}
+                  onEdit={handleEdit}
+                  onLike={handleLike}
+                  onDelete={handleDelete}
+                  onReply={handleReply}
+                />
+              </MotionBox>
+            ))}
+          </Stack>
+        </MotionBox>
+      )}
+
+      {!!user && 
+          <Button
+            size="lg"
+            {...primaryButtonStyles}
+            alignSelf="flex-start"
+            onClick={() =>  setShowCreate(true)}
+          >
+            Add a Comment
+          </Button>
+      }
 
       <CreateCommentModal
         show={showCreate}
@@ -145,6 +223,6 @@ export default function CommentSection({eventId,user}) {
           setShowCreate(false);
         }}
       />
-    </>
+    </Container>
   );
 }
