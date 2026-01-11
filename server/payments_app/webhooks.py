@@ -57,7 +57,7 @@ def stripe_webhook(request):
 
     # --- Payment failed ---
     if event_type == "payment_intent.payment_failed":
-        with transaction.atomic()
+        with transaction.atomic():
             order = Order.objects.select_for_update().get(id=order.id)
             Payment.objects.filter(stripe_payment_intent_id=intent['id']).update(status='failed')
 

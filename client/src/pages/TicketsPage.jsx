@@ -43,7 +43,7 @@ export default function TicketsPage() {
       console.error("Checkout error:", err);
       showErrorToast(
         "Checkout", 
-        err.response?.data?.error || "Something went wrong with checkout."
+        err.response?.data?.error || "Login to purchase tickets."
       );
     } finally {
       setIsLoading(false);

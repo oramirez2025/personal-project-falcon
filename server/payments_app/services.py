@@ -18,7 +18,7 @@ def lock_templates_for_order_items(items):
 
 @transaction.atomic
 def reserve_order_inventory(order):
-    order = order.Order.objects.select_for_update().get(id=order.id)
+    order = Order.objects.select_for_update().get(id=order.id)
 
     if order.status == "paid":
         raise ValidationError("Order already paid for.")
