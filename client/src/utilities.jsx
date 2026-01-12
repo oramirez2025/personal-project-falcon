@@ -149,3 +149,42 @@ export const updateEvent = async(setEvents, id, data) => {
     console.error(e)
   }
 }
+
+// ============= USER PROFILE =============
+
+export const fetchUserProfile = async () => {
+  try {
+    const response = await api.get("user/account/");
+    return response.data;
+  } catch (err) {
+    console.error("Failed to fetch user profile:", err);
+    throw err;
+  }
+};
+
+export const fetchUserTickets = async () => {
+  try {
+    const response = await api.get("user/tickets/");
+    return response.data;
+  } catch (err) {
+    console.error("Failed to fetch user tickets:", err);
+    throw err;
+  }
+};
+
+export const uploadProfilePicture = async (file) => {
+  try {
+    const formData = new FormData();
+    formData.append('profile_pic', file);
+
+    const response = await api.patch("user/account/", formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  } catch (err) {
+    console.error("Failed to upload profile picture:", err);
+    throw err;
+  }
+};

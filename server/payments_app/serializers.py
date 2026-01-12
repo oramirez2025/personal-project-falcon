@@ -17,9 +17,8 @@ class OrderItemSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = OrderItem
-        fields = ['id', 'ticket_template_id', 'ticket_type', 'title_at_purchase', 'quantity', 'line_total', 'unit_price_at_purchase',]
-        read_only_fields = fields
-
+        fields = ['id', 'ticket_template_id', 'ticket_template', 'ticket_type', 'title_at_purchase', 'quantity', 'line_total', 'unit_price_at_purchase',]
+    ticket_type = serializers.CharField(source="ticket_template.ticket_type", read_only=True)
 
 class OrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True, read_only=True)
