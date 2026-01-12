@@ -3,10 +3,10 @@ from .models import MyUsers, UserProfile
 from event_app.serializers import EventWishlistSerializer
 from comment_app.serializers import CommentSerializer
 from ticket_app.serializers import TicketSerializer
-
-"""
-TODO : Profile pic Y/N ? Y = utilize pillow
-"""
+from PIL import Image
+from io import BytesIO
+from django.core.files.uploadedfile import InMemoryUploadedFile
+import sys
 
 class UsersSerializer(serializers.ModelSerializer):
     """Basic - for reg/auth"""
@@ -90,7 +90,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             # ================================
             'bio',
             'phone_number',
-            # 'profile_picture', # When pillow is configured, profile pic can be integrated
+            'profile_pic',
 
             # ================================
             # Related data (all-in-one query)
@@ -106,11 +106,85 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 class UserProfileUpdateSerializer(serializers.ModelSerializer):
     """Used to update profile."""
-    
+
     class Meta:
         model = UserProfile
         fields = [
             'bio',
             'phone_number',
-            # 'profile_picture', # REQ pillow implementation
+            'profile_pic',
         ]
+
+    # Image validation constants
+    MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
+    MIN_DIMENSION = 50  # Minimum 50x50 pixels
+    MAX_DIMENSION = 4000  # Maximum 4000x4000 pixels
+    RESIZE_THRESHOLD = 800  # Auto-resize if larger than 800x800
+    VALID_FORMATS = ['JPEG', 'PNG', 'GIF']
+
+    def validate_profile_pic(self, value):
+        if not value:
+            return value
+
+        # Check file size (5MB max)
+        if value.size > self.MAX_FILE_SIZE:
+            raise serializers.ValidationError("Image file too large. Max size is 5MB.")
+
+        # Verify image is valid using Pillow
+        try:
+            image = Image.open(value)
+            image.verify()  # Verify it's a valid image
+            # Re-open after verify (verify() can only be called once)
+            value.seek(0)
+            image = Image.open(value)
+        except Exception:
+            raise serializers.ValidationError("Invalid or corrupted image file.")
+
+        # Check image format
+        if image.format not in self.VALID_FORMATS:
+            raise serializers.ValidationError(
+                f"Invalid image format. Allowed formats: {', '.join(self.VALID_FORMATS)}."
+            )
+
+        # Check minimum dimensions
+        width, height = image.size
+        if width < self.MIN_DIMENSION or height < self.MIN_DIMENSION:
+            raise serializers.ValidationError(
+                f"Image too small. Minimum size is {self.MIN_DIMENSION}x{self.MIN_DIMENSION} pixels."
+            )
+
+        # Check maximum dimensions
+        if width > self.MAX_DIMENSION or height > self.MAX_DIMENSION:
+            raise serializers.ValidationError(
+                f"Image too large. Maximum size is {self.MAX_DIMENSION}x{self.MAX_DIMENSION} pixels."
+            )
+
+        # Auto-resize if larger than threshold
+        if width > self.RESIZE_THRESHOLD or height > self.RESIZE_THRESHOLD:
+            value = self._resize_image(image, value.name)
+
+        return value
+
+    def _resize_image(self, image, filename):
+        """Resize image to fit within RESIZE_THRESHOLD while maintaining aspect ratio."""
+        # Convert to RGB if necessary (for PNG with transparency)
+        if image.mode in ('RGBA', 'P'):
+            image = image.convert('RGB')
+
+        # Calculate new dimensions maintaining aspect ratio
+        image.thumbnail((self.RESIZE_THRESHOLD, self.RESIZE_THRESHOLD), Image.LANCZOS)
+
+        # Save to BytesIO buffer
+        output = BytesIO()
+        image.save(output, format='JPEG', quality=85)
+        output.seek(0)
+
+        # Create new InMemoryUploadedFile
+        return InMemoryUploadedFile(
+            file=output,
+            field_name='profile_pic',
+            name=f"{filename.rsplit('.', 1)[0]}.jpg",
+            content_type='image/jpeg',
+            size=sys.getsizeof(output),
+            charset=None
+        )

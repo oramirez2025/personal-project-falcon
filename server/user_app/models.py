@@ -1,9 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
-# TODO
-# consider refactor to replace is_admin with is_staff (removes bloat)
-# profile pic y/n? If y, then implement pillow
+# TODO: consider refactor to replace is_admin with is_staff (removes bloat)
 
 class MyUsers(AbstractUser):
     email = models.EmailField(unique=True)
@@ -71,7 +69,7 @@ class UserProfile(models.Model):
         profile = UserProfile.objects.select_related('user').prefetch_related(
             'user__event_wishlists__event',
             'user__comments__event',
-            'user__tickets__ticket',
+            'user__tickets__ticket_template',
         ).get(user=request.user)
         ```
     """
@@ -83,13 +81,11 @@ class UserProfile(models.Model):
     )
     bio = models.TextField(blank=True, null=True)
     phone_number = models.CharField(max_length=20, blank=True, null=True)
-    
-    # TODO item
-    # profile_pic = models.ImageField(
-    #     upload_to='profile_pics/',
-    #     blank=True,
-    #     null=True
-    # )
+    profile_pic = models.ImageField(
+        upload_to='profile_pics/',
+        blank=True,
+        null=True
+    )
 
     def __str__(self):
         return f"{self.user.email or self.user.first_name}'s Profile"

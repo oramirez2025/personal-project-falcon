@@ -13,10 +13,11 @@ class PaymentSerializer(serializers.ModelSerializer):
 
 class OrderItemSerializer(serializers.ModelSerializer):
     ticket_template_id = serializers.IntegerField(source="ticket_template.id", read_only=True)
+    ticket_type = serializers.CharField(source="ticket_template.ticket_type", read_only=True)
 
     class Meta:
         model = OrderItem
-        fields = ['id', 'ticket_template', 'title_at_purchase', 'quantity', 'line_total',]
+        fields = ['id', 'ticket_template', 'ticket_template_id', 'ticket_type', 'title_at_purchase', 'quantity', 'line_total',]
         read_only_fields = fields
 
 
