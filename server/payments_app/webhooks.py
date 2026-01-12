@@ -7,6 +7,7 @@ from django.db import transaction
 from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
 from .services import release_order_inventory
+from ticket_app.models import Ticket
 
 stripe.api_key = settings.STRIPE_API_KEY
 
@@ -21,13 +22,14 @@ def stripe_webhook(request):
             sig_header,
             settings.STRIPE_WEBHOOK_SECRET
         )
-    except (ValueError, stripe.error.SignatureVerificationError):
+    except (ValueError, stripe.error.SignatureVerificationError) as e:
+        print("WEBHOOK SIGNATURE/JSON ERROR:", str(e))
         return HttpResponse(status=400)
 
-    
     event_type = event["type"]
     intent = event["data"]["object"]
     order_id = intent.metadata.get("order_id")
+
 
     if not order_id:
         return HttpResponse(status=200)
@@ -42,25 +44,51 @@ def stripe_webhook(request):
 
             # --- Already Paid ---
             if order.status == 'paid':
-                Payment.objects.filter(
-                    stripe_payment_intent_id=intent['id']
-                ).update(status='paid')
+                Payment.objects.update_or_create(
+                    order=order,
+                    defaults={
+                        "stripe_payment_intent_id": intent["id"],
+                        "status": "paid",
+                    }
+                )
                 return HttpResponse(status=200)
 
             # --- Hold Expired ---
             if order.status == 'reserved' and order.reserved_until and order.reserved_until <= timezone.now():
                 release_order_inventory(order)
-                Payment.objects.filter(
-                    stripe_payment_intent_id=intent['id']
-                ).update(status='failed')
+                Payment.objects.update_or_create(
+                    order=order,
+                    defaults={
+                        "stripe_payment_intent_id": intent["id"],
+                        "status": "failed",
+                    }
+                )
                 return HttpResponse(status=200)
         
             # --- Normal Success ---
             order.status = 'paid'
             order.save(update_fields=['status'])
-            Payment.objects.filter(
-                stripe_payment_intent_id=intent['id']
-            ).update(status='paid')
+            Payment.objects.update_or_create(
+                order=order,
+                defaults={
+                    "stripe_payment_intent_id": intent["id"],
+                    "status": "paid",
+                }
+            )
+
+            items = list(order.items.select_related('ticket_template'))
+            for item in items:
+                exists = Ticket.objects.filter(
+                    user=order.user,
+                    ticket_template=item.ticket_template,
+                    quantity = item.quantity,
+                ).exists()
+                if not exists:
+                    Ticket.objects.create(
+                        user=order.user,
+                        ticket_template = item.ticket_template,
+                        quantity = item.quantity,
+                    )
     
         return HttpResponse(status=200)
 
@@ -72,9 +100,13 @@ def stripe_webhook(request):
             except Order.DoesNotExist:
                 return HttpResponse(status=200)
 
-            Payment.objects.filter(
-                stripe_payment_intent_id=intent['id']
-            ).update(status='failed')
+            Payment.objects.update_or_create(
+                order=order,
+                defaults={
+                    "stripe_payment_intent_id": intent["id"],
+                    "status": "failed",
+                }
+            )
 
             if order.status == 'reserved':
                 release_order_inventory(order)
@@ -83,6 +115,7 @@ def stripe_webhook(request):
                 order.save(update_fields=['status'])
         return HttpResponse(status=200)
     
+    # --- Payment Canceled ---
     if event_type == "payment_intent.canceled":
         with transaction.atomic():
             try:
@@ -90,9 +123,14 @@ def stripe_webhook(request):
             except Order.DoesNotExist:
                 return HttpResponse(status=200)
 
-            Payment.objects.filter(
-                stripe_payment_intent_id=intent["id"]
-            ).update(status="failed")
+            Payment.objects.update_or_create(
+                order=order,
+                defaults={
+                    "stripe_payment_intent_id": intent["id"],
+                    "status": "failed",
+                }
+            )
+
             if order.status == "reserved":
                 release_order_inventory(order)
             else:
