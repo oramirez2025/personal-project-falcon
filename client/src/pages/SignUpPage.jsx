@@ -15,7 +15,7 @@ import { showSuccessToast } from "../components/ui/showSuccessToast";
 import { showErrorToast } from "../components/ui/showErrorToast";
 import { api } from "../utilities";
 import { inputStyles, primaryButtonStyles } from "../theme";
-import deathsteedBg from "../assets/Birdrunner.jpeg";
+import adobestock from "../assets/adobestock.jpg";
 
 const SignUp = () => {
   const [email, setEmail] = useState("");
@@ -50,7 +50,7 @@ const SignUp = () => {
 return (
   <Box
     position="relative"
-    bgImage={`url(${deathsteedBg})`}
+    bgImage={`url(${adobestock})`}
     bgSize="cover"
     bgPos="center"
     bgRepeat="no-repeat"
@@ -58,18 +58,11 @@ return (
     display="flex"
     alignItems="center"
     justifyContent="center"
-    _before={{
-      content: '""',
-      position: "absolute",
-      inset: 0,
-      bg: "linear-gradient(145deg, rgba(0,0,0,0.75), rgba(255,80,0,0.35))",
-      zIndex: 0,
-    }}
   >
     <Container maxW="md" py={20} position="relative" zIndex={1}>
       <MotionBox {...fadeInUp}>
         <Box
-          bg="rgba"
+          bg="rgba(22, 26, 31, 0.65)"
           borderRadius="lg"
           borderWidth="2px"
           borderColor="border.accent"

@@ -16,7 +16,7 @@ import { showErrorToast } from "../components/ui/showErrorToast";
 import { useOutletContext, useNavigate } from "react-router-dom";
 import { userLogIn } from "../utilities";
 import { inputStyles, primaryButtonStyles } from "../theme";
-import griffonBg from "../assets/Lightning Griffon.jpeg";
+import falcon from "../assets/falcon.jpeg";
 
 const LogIn = () => {
   const [email, setEmail] = useState("");
@@ -42,7 +42,7 @@ const LogIn = () => {
   return (
     <Box
       position="relative"
-      bgImage={`url(${griffonBg})`}
+      bgImage={`url(${falcon})`}
       bgSize="cover"
       bgPos="center"
       bgRepeat="no-repeat"
@@ -50,18 +50,11 @@ const LogIn = () => {
       display="flex"
       alignItems="center"
       justifyContent="center"
-      _before={{
-        content: '""',
-        position: "absolute",
-        inset: 0,
-        bg: "linear-gradient(145deg, rgba(0,0,0,0.75), rgba(255,80,0,0.35))",
-        zIndex: 0,
-      }}
     >
       <Container maxW="md" position="relative" zIndex={1}>
         <MotionBox {...fadeInUp}>
           <Box
-            bg="rgba"
+            bg="rgba(22, 26, 31, 0.65)"
             borderRadius="lg"
             borderWidth="2px"
             borderColor="border.accent"
