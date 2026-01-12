@@ -25,7 +25,7 @@ export default function DaySection({ day, events }) {
       >
         {events.map((event) => (
           <MotionBox key={event.id} variants={staggerItem}>
-            <EventCard {...event} />
+            <EventCard event={event} detailed={false} />
           </MotionBox>
         ))}
       </MotionBox>

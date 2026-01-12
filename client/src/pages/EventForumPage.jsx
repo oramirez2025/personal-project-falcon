@@ -5,11 +5,14 @@ import {
   createComments,
   updateComment,
   deleteComment,
+  fetchEvent,
 } from "../utilities";
+import EventCard from "../components/cards/EventCard";
 
 export default function EventForumPage() {
-  const { eventId } = useParams();
+  const { eventId, commentId } = useParams();
   const { user } = useOutletContext();
+  const [event, setEvent] = useState(null)
 
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -48,6 +51,8 @@ export default function EventForumPage() {
     let mounted = true;
     setLoading(true);
     setHasFetched(false);
+
+    fetchEvent(setEvent, eventId)
 
     fetchComments((data) => {
       if (!mounted) return;
@@ -114,22 +119,26 @@ export default function EventForumPage() {
 
   const handleDelete = (id) =>
     deleteComment(null, id);
-
+  console.log(event)
   return (
-    <Outlet
-      context={{
-        comments,
-        loading,
-        hasFetched,
-        user,
-        handlers: {
-          onCreate: handleCreate,
-          onReply: handleReply,
-          onEdit: handleEdit,
-          onLike: handleLike,
-          onDelete: handleDelete,
-        },
-      }}
-    />
+    <>
+      {!commentId && event && <EventCard event={event} detailed={true}/>
+      }
+      <Outlet
+        context={{
+          comments,
+          loading,
+          hasFetched,
+          user,
+          handlers: {
+            onCreate: handleCreate,
+            onReply: handleReply,
+            onEdit: handleEdit,
+            onLike: handleLike,
+            onDelete: handleDelete,
+          },
+        }}
+      />
+    </>
   );
 }

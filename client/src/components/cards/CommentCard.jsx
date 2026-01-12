@@ -11,6 +11,7 @@ import { cardHover } from "../animations/fffAnimations";
 import CreateCommentModal from "../ui/CreateCommentModal";
 import EditCommentModal from "../ui/EditCommentModal";
 import { AnimatePresence } from "framer-motion";
+import BaseCard from "./BaseCard";
 import {
   primaryButtonStyles,
   outlineButtonStyles,
@@ -49,34 +50,20 @@ export default function CommentCard({
   return (
     <Box pl={`${indent}em`} mt={4}>
       <MotionBox {...cardHover}>
-        <Box
-          bg="forge.tan.50"
-          borderRadius="lg"
-          border="2px solid"
-          borderColor="border.accent"
-          boxShadow="md"
-          p={4}
-        >
+        <BaseCard>
           <VStack align="stretch" spacing={3}>
             {/* Author + Time */}
-            <Text color="forge.stone.900" fontWeight="600">
+            <Text fontWeight="600">
               {author}
-              <Text as="span" color="forge.stone.600" fontWeight="400">
+              <Text as="span" fontWeight="400">
                 {" "}· {time}
               </Text>
             </Text>
 
             {/* Text */}
-            <Text color="forge.stone.800" whiteSpace="pre-wrap">
+            <Text whiteSpace="pre-wrap">
               {text}
             </Text>
-
-            {/* Reply count */}
-            {replyCount > 0 && (
-              <Text fontSize="sm" color="forge.stone.600">
-                {replyCount} {replyCount === 1 ? "reply" : "replies"}
-              </Text>
-            )}
 
             {/* Actions */}
             <HStack spacing={2} flexWrap="wrap">
@@ -103,10 +90,10 @@ export default function CommentCard({
               {isOP && (
                 <Button
                   size="sm"
-                  bg="forge.stone.100"
+                  bg="forge.stone.300"
                   color="forge.stone.900"
                   border="1px solid"
-                  borderColor="forge.stone.300"
+                  borderColor="forge.stone.800"
                   _hover={{ bg: "forge.stone.200" }}
                   onClick={() => setShowEdit(true)}
                 >
@@ -117,12 +104,13 @@ export default function CommentCard({
               {(isOP || isAdmin) && (
                 <Button
                   size="sm"
-                  variant="outline"
-                  borderColor="forge.red.600"
-                  color="forge.red.600"
+                  bg="forge.gold.600"
+                  color="black"
+                  border="1px solid"
+                  borderColor="forge.gold.600"
                   _hover={{
-                    bg: "forge.red.50",
-                    borderColor: "forge.red.700",
+                    bg: "forge.gold.50",
+                    borderColor: "forge.gold.700",
                   }}
                   onClick={() => onDelete(id)}
                 >
@@ -139,6 +127,9 @@ export default function CommentCard({
                   variant="ghost"
                   alignSelf="flex-start"
                   onClick={() => setShowReplies((prev) => !prev)}
+                  _hover={{
+                    color: "forge.gold.500",
+                  }}
                 >
                   {showReplies
                     ? `Hide (${replyCount}) replies`
@@ -150,16 +141,18 @@ export default function CommentCard({
                   to={`/events/${eventId}/comments/${id}`}
                   size="xs"
                   variant="ghost"
-                  color="forge.gold.600"
                   alignSelf="flex-start"
                   onClick={() => setThread(comment)}
+                  _hover={{
+                    color: "forge.gold.500",
+                  }}
                 >
                   View {replyCount} replies →
                 </Button>
               )
             )}
           </VStack>
-        </Box>
+        </BaseCard>
       </MotionBox>
 
       {/* Inline replies */}
