@@ -21,6 +21,7 @@ packaging==25.0
 pandas==2.3.3
 platformdirs==4.5.1
 pluggy==1.6.0
+Pillow==11.1.0
 psycopg==3.3.2
 psycopg-binary==3.3.2
 Pygments==2.19.2

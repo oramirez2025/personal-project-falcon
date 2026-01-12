@@ -5,10 +5,11 @@ import { showErrorToast } from "./ui/showErrorToast";
 import { showSuccessToast } from "./ui/showSuccessToast";
 import { primaryButtonStyles } from "../theme";
 
-export default function StripeCheckoutForm({ order, onSuccess }) {
+export default function StripeCheckoutForm({ onSuccess }) {
     const stripe = useStripe();
     const elements = useElements();
     const [processing, setProcessing] = useState(false);
+    const [ready, setReady] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -18,6 +19,12 @@ export default function StripeCheckoutForm({ order, onSuccess }) {
         setProcessing(true);
 
         try {
+            console.log("Confirming payment", {
+            stripe: !!stripe,
+            elements: !!elements,
+            ready,
+        });
+            
             const { error, paymentIntent } = await stripe.confirmPayment({
                 elements,
                 redirect: "if_required"
@@ -48,11 +55,14 @@ export default function StripeCheckoutForm({ order, onSuccess }) {
 
     return (
         <VStack as="form" onSubmit={handleSubmit} spacing={4} align="stretch">
-            <PaymentElement />
+            <PaymentElement onReady={() => {
+            console.log("PaymentElement ready");
+            setReady(true);}}
+            />
 
             <Button 
                 type="submit" 
-                disabled={!stripe || !elements || processing}
+                disabled={!stripe || !elements || processing || !ready}
                 {...primaryButtonStyles}
                 _disabled={{
                     opacity: 0.6,

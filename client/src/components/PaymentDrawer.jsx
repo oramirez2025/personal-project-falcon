@@ -34,8 +34,7 @@ export default function PaymentDrawer({ show, onClose, order }) {
     try {
       console.log("Initializing payment for order:", order.id);
       const paymentData = await payForOrder(order.id);
-      console.log("Payment data received:", paymentData);
-      
+
       if (paymentData?.client_secret) {
         setClientSecret(paymentData.client_secret);
       } else {
