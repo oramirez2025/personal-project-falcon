@@ -5,7 +5,7 @@ from rest_framework.exceptions import ValidationError
 from ticket_app.models import TicketTemplate
 from .models import Order
 
-hold_minutes = 1
+hold_minutes = 10
 
 def lock_templates_for_order_items(items):
     locked = {}
