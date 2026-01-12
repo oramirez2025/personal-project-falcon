@@ -1,6 +1,5 @@
 from django.db import models
 from user_app.models import MyUsers
-from django.core.exceptions import ValidationError
 from django.core import validators as v
 
 
