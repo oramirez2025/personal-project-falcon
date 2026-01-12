@@ -87,15 +87,10 @@ export const payForOrder = async (orderId) => {
   }
 };
 
-export const decrementTickets = async (orderId) => {
-  try {
-    const response = await api.patch(`ticket/decrement/`, {order_id: orderId,
-    });
-    return response
-  } catch (err) {
-    console.log("Error decrementing ticket quantity.");
-    throw err;
-  }
+
+export const reserveTickets = async (orderId) => {
+  const response = await api.patch('payments/reserve/', {order_id: orderId});
+  return response.data
 }
 
 // ============= PAYMENTS =============

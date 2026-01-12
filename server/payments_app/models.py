@@ -2,6 +2,7 @@ from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from user_app.models import MyUsers
 from ticket_app.models import TicketTemplate
+from django.utils import timezone
 
 
 class Payment(models.Model):
@@ -25,11 +26,15 @@ class Payment(models.Model):
 class Order(models.Model):
     status = models.CharField(
     max_length=30,
-    choices=[('pending', 'Pending'), ('paid', 'Paid'), ('failed', 'Failed')],
+    choices=[('pending', 'Pending'), ('paid', 'Paid'), ('failed', 'Failed'), ('reserved', 'Reserved'), ('expired', 'Expired')],
     default='pending'
     )
     user = models.ForeignKey(MyUsers, on_delete=models.CASCADE, related_name="orders")
     created_at = models.DateTimeField(auto_now_add=True)
+    
+    # Hold
+    reserved_until = models.DateTimeField(null=True, blank=True)
+
     # Receipt Fields
     subtotal = models.DecimalField(max_digits=8, decimal_places=2, default=0)
     tax = models.DecimalField(max_digits=8, decimal_places=2, default=0)
@@ -56,6 +61,8 @@ class Order(models.Model):
                 'quantity',
             )
         )
+    def hold_is_active(self):
+        return self.status == "reserved" and self.reserved_until and self.reserved_until > timezone.now()
     
 class OrderItem(models.Model):
     order = models.ForeignKey('Order', on_delete=models.CASCADE, related_name="items")

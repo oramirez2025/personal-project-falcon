@@ -5,7 +5,7 @@ import { MotionBox } from "../components/Motion";
 import { staggerContainer, staggerItem } from "../components/animations/fffAnimations";
 import TicketCard from "../components/cards/TicketCard";
 import PaymentDrawer from "../components/PaymentDrawer";
-import { createOrder } from "../utilities";
+import { createOrder, reserveTickets } from "../utilities";
 import { primaryButtonStyles } from "../theme";
 import { showErrorToast } from "../components/ui/showErrorToast";
 
@@ -30,6 +30,7 @@ export default function TicketsPage() {
     try {
       console.log("Creating order with cart:", cart);
       const createdOrder = await createOrder(cart);
+      await reserveTickets(createdOrder.id)
       console.log("Order created:", createdOrder);
       
       if (createdOrder && createdOrder.id) {

@@ -5,7 +5,7 @@ import { showErrorToast } from "./ui/showErrorToast";
 import { showSuccessToast } from "./ui/showSuccessToast";
 import { primaryButtonStyles } from "../theme";
 
-export default function StripeCheckoutForm({ order, onSuccess }) {
+export default function StripeCheckoutForm({ onSuccess }) {
     const stripe = useStripe();
     const elements = useElements();
     const [processing, setProcessing] = useState(false);

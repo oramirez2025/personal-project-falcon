@@ -1,11 +1,8 @@
-from django.shortcuts import render
-from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status as s
-import stripe
 from .models import Order, OrderItem, Payment
-from .serializers import PaymentSerializer
-from ticket_app.models import Ticket, TicketTemplate
+from .serializers import PaymentSerializer, OrderSerializer
+from ticket_app.models import TicketTemplate
 from falcon_proj import settings
 from decimal import Decimal
 from django.shortcuts import get_object_or_404
@@ -13,6 +10,8 @@ from django.db import transaction
 from rest_framework.validators import ValidationError
 from user_app.views import User_Auth
 from decimal import Decimal
+from .services import reserve_order_inventory, release_expired_holds
+import stripe
 
 
 # Create your views here.
@@ -22,6 +21,7 @@ stripe.api_key = settings.STRIPE_API_KEY
 class CreatePaymentIntent(User_Auth):
     @transaction.atomic
     def post(self, request):
+        release_expired_holds()
         order_id = request.data.get("order_id")
         if not order_id:
             return Response({"detail": "order_id required."}, status=s.HTTP_400_BAD_REQUEST)
@@ -30,60 +30,38 @@ class CreatePaymentIntent(User_Auth):
         if order.status == 'paid':
             return Response({"detail": 'Order already paid for.'}, status=s.HTTP_400_BAD_REQUEST)
         
+        if not order.hold_is_active():
+            return Response({'detail': 'Order not reserved or hold is expired'}, status=s.HTTP_400_BAD_REQUEST)
+
         # Check if we already have a valid payment intent for this order
         existing_payment = Payment.objects.filter(order=order).first()
         
         if existing_payment and existing_payment.stripe_payment_intent_id:
             try:
-                existing_intent = stripe.PaymentIntent.retrieve(existing_payment.stripe_payment_intent_id)
+                intent = stripe.PaymentIntent.retrieve(existing_payment.stripe_payment_intent_id)
                 
                 # If intent is still usable, return it (don't create a new one)
-                if existing_intent.status in ['requires_payment_method', 'requires_confirmation', 'requires_action']:
+                if intent.status in ['requires_payment_method', 'requires_confirmation', 'requires_action', 'processing']:
                     return Response(
                         {
-                            "client_secret": existing_intent.client_secret,
+                            "client_secret": intent.client_secret,
                             "order_id": order.id,
                         },
                         status=s.HTTP_200_OK
                     )
                 
                 # If intent succeeded, order is paid
-                if existing_intent.status == 'succeeded':
-                    order.status = 'paid'
-                    order.save()
-                    return Response({"detail": "Order already paid."}, status=s.HTTP_400_BAD_REQUEST)
+                if intent.status == 'succeeded':
+                    return Response({"detail": 'Order already paid'}, status=s.HTTP_400_BAD_REQUEST)
                     
             except stripe.error.StripeError as e:
                 # Intent doesn't exist or other Stripe error - we'll create a new one below
                 print(f"Stripe error retrieving intent: {e}")
-        
-        # Only decrement tickets if this is a NEW payment attempt (no existing payment)
-        if not existing_payment:
-            items = list(order.items.select_related("ticket_template"))
-
-            for item in items:
-                tt = TicketTemplate.objects.select_for_update().get(
-                    id=item.ticket_template.id
-                )
-
-                if item.quantity > tt.available_quantity:
-                    raise ValidationError(f"Not enough tickets available for {tt.ticket_type}.")
-                
-                tt.available_quantity -= item.quantity
-                # Recall: community lodging is an upgrade of the general ticket
-                if tt.ticket_type == "community":
-                    general = TicketTemplate.objects.select_for_update().get(ticket_type="general")
-                    if item.quantity > general.available_quantity:
-                        raise ValidationError(
-                            "Not enough general tickets available for community lodging."
-                        )
-                    general.available_quantity -= item.quantity
-                    general.save()
-                tt.save()
+        amount = int((order.total * Decimal('100')).quantize(Decimal('1')))
 
         # Create new Stripe payment intent
         intent = stripe.PaymentIntent.create(
-            amount=int(order.total * 100),
+            amount=amount,
             currency="usd",
             automatic_payment_methods={'enabled': True},
             metadata={"order_id": str(order.id), 'user_id': str(request.user.id)},
@@ -107,7 +85,7 @@ class CreatePaymentIntent(User_Auth):
         )
 
             
-class ViewPayment(APIView):
+class ViewPayment(User_Auth):
     def get(self, request):
         staff = getattr(request.user, "is_staff")
         if not staff:
@@ -120,6 +98,8 @@ class ViewPayment(APIView):
     
 class CreateOrder(User_Auth):
     def post(self, request):
+        if not request.user:
+            return Response({'detail': 'Login or create account to purchase tickets'}, status=s.HTTP_401_UNAUTHORIZED)
         user = request.user
         cart = request.data
 
@@ -150,7 +130,6 @@ class CreateOrder(User_Auth):
             )
         }
 
-        created_items = []
         for ticket_type, qty in type_map.items():
             if qty <= 0:
                 continue
@@ -161,10 +140,11 @@ class CreateOrder(User_Auth):
                     status=s.HTTP_400_BAD_REQUEST
                 )
             
+            template = templates[ticket_type]
             unit_price = template.price
             line_total = (unit_price * Decimal(qty)).quantize(Decimal("0.01"))
 
-            item = OrderItem.objects.create(
+            OrderItem.objects.create(
                 order=order,
                 ticket_template=template,
                 quantity=qty,
@@ -172,30 +152,36 @@ class CreateOrder(User_Auth):
                 unit_price_at_purchase=unit_price,
                 line_total=line_total,
             )
-            created_items.append(item)
         
         order.recalculate_totals()
-        order.save(update_fields=["subtotal", "total"])
-            
+        order.save(update_fields=["subtotal", "total", 'tax', 'fees'])
+
+        return Response(OrderSerializer(order).data, status=s.HTTP_201_CREATED)
+
+
+class ReserveTickets(User_Auth):
+    @transaction.atomic
+    def patch(self, request):
+        release_expired_holds()
+        order_id = request.data.get('order_id')
+        if not order_id:
+            return Response({'detail': 'order_id required'}, status=s.HTTP_400_BAD_REQUEST)
+        
+        order = get_object_or_404(Order, id=order_id, user=request.user)
+
+        try:
+            reserve_order_inventory(order)
+        except ValidationError as e:
+            return Response({'detail': str(e.detail)}, status=s.HTTP_400_BAD_REQUEST)
+        
+        order.refresh_from_db()
         return Response(
             {
-                'id': order.id,
+                "detail": 'Tickets reserved for 10 minutes.',
+                'order_id': order.id,
                 'status': order.status,
-                'subtotal': str(order.subtotal),
-                'tax': str(order.tax),
-                'fees': str(order.fees),
-                'total': str(order.total),
-                'items': [
-                    {
-                        "id": item.id,
-                        "title_at_purchase": item.title_at_purchase,
-                        "quantity": item.quantity,
-                        "unit_price_at_purchase": str(item.unit_price_at_purchase),
-                        "line_total": str(item.line_total),
-                        "ticket_type": item.ticket_template.ticket_type,
-                    }
-                    for item in order.items.select_related("ticket_template")
-                ]
-            }, 
-            status=s.HTTP_201_CREATED
+                'reserved_until': order.reserved_until,
+            },
+            status=s.HTTP_200_OK
         )
+        
