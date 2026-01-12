@@ -5,7 +5,7 @@ import BaseCard from "./BaseCard"
 import { inputStyles } from "../../theme"
 
 /*
-  Uses cardHover animation from fffAnimations
+  Uses centralized cardHover animation from fffAnimations
   Uses shared inputStyles from theme.js
   Accepts optional icon prop (lucide-react component)
  */
@@ -21,25 +21,27 @@ export default function TicketCard({
       {...cardHover}
       h="100%"
     >
-      <BaseCard hoverable={false}>
-        <VStack align="stretch" spacing={4}>
-          {/* Title + icon + description */}
-          <VStack align="start" spacing={2} minH="72px">
-            <HStack spacing={2}>
-              {icon && (
-                <Box color="forge.gold.400">
-                  {icon}
-                </Box>
-              )}
-              <Heading size="md">{title}</Heading>
-            </HStack>
+      <BaseCard hoverable={false} h="100%">
+        <VStack align="stretch" spacing={4} h="100%">
+          {/* Title + icon */}
+          <HStack spacing={2}>
+            {icon && (
+              <Box color="forge.gold.400">
+                {icon}
+              </Box>
+            )}
+            <Heading size="md">{title}</Heading>
+          </HStack>
+
+          {/* Description - fixed height, wraps text */}
+          <Box flex="1" minH="80px">
             <Text color="text.muted" fontSize="sm">
               {description}
             </Text>
-          </VStack>
+          </Box>
 
-          {/* Price + quantity */}
-          <VStack align="start" spacing={1}>
+          {/* Price + quantity - always at bottom */}
+          <VStack align="start" spacing={1} mt="auto">
             <Heading size="sm" color="forge.red.400">
               {price}
             </Heading>
