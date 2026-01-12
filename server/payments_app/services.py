@@ -65,7 +65,7 @@ def reserve_order_inventory(order):
 @transaction.atomic
 def release_order_inventory(order):
 
-    order = order.Order.objects.select_for_update().get(id=order.id)
+    order = Order.objects.select_for_update().get(id=order.id)
 
     if order.status != 'reserved':
         return order
@@ -94,6 +94,7 @@ def release_order_inventory(order):
     order.save(update_fields=['status', 'reserved_until'])
     return order
 
+@transaction.atomic
 def release_expired_holds():
     now = timezone.now()
     expired = (
