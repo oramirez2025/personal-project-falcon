@@ -9,7 +9,6 @@ import {
 import { useOutletContext } from "react-router-dom";
 import { useState } from "react";
 import CommentCard from "../cards/CommentCard";
-import CommentSkeleton from "../CommentSkeleton";
 import CreateCommentModal from "../ui/CreateCommentModal";
 import { MotionBox } from "../Motion";
 import { staggerContainer, staggerItem } from "../animations/fffAnimations";
@@ -36,14 +35,6 @@ export default function CommentSection() {
       >
         Discussion
       </Heading>
-
-      {loading && !hasFetched && (
-        <Stack spacing={8} divider={<Separator />}>
-          {[...Array(3)].map((_, i) => (
-            <CommentSkeleton key={i} />
-          ))}
-        </Stack>
-      )}
 
       {!loading && hasFetched && comments.length === 0 && (
         <Text textAlign="center" color="forge.stone.600">
@@ -74,7 +65,7 @@ export default function CommentSection() {
         </MotionBox>
       )}
 
-      {!!user && (
+      {!!user && !loading && (
         <Button
           mt={6}
           size="lg"

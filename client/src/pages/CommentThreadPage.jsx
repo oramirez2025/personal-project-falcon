@@ -1,8 +1,6 @@
 import { useParams, useOutletContext, Link } from "react-router-dom";
-import { Box, Heading, Button, VStack } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import { Box, Heading, Button} from "@chakra-ui/react";
 import CommentCard from "../components/cards/CommentCard";
-import { fetchCommentThread } from "../utilities";
 import { MotionBox } from "../components/Motion";
 import { staggerContainer } from "../components/animations/fffAnimations";
 

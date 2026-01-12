@@ -46,23 +46,16 @@ export default function EventForumPage() {
     if (!eventId) return;
 
     let mounted = true;
-    const MIN_DELAY = 500;
-
     setLoading(true);
     setHasFetched(false);
 
     fetchComments((data) => {
       if (!mounted) return;
-
       setComments(data);
-
-      setTimeout(() => {
-        if (!mounted) return;
-        setLoading(false);
-        setHasFetched(true);
-      }, MIN_DELAY);
+      setLoading(false);
+      setHasFetched(true);
     }, eventId);
-    
+
     return () => {
       mounted = false;
     };
