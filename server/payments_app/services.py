@@ -5,7 +5,7 @@ from rest_framework.exceptions import ValidationError
 from ticket_app.models import TicketTemplate
 from .models import Order
 
-hold_minutes = 10
+hold_minutes = 1
 
 def lock_templates_for_order_items(items):
     locked = {}
@@ -33,7 +33,9 @@ def reserve_order_inventory(order):
 
     locked = lock_templates_for_order_items(items)
 
-    needs_general = any(t.ticket_type == 'community' for t in locked.values())
+    upgrade_types = {'community', 'master'}
+
+    needs_general = any(t.ticket_type in upgrade_types for t in locked.values())
     general_tt = None
     if needs_general:
         general_tt = TicketTemplate.objects.select_for_update().get(ticket_type='general')
@@ -43,7 +45,7 @@ def reserve_order_inventory(order):
         if item.quantity > tt.available_quantity:
             raise ValidationError(f"Not enough tickets available for {tt.ticket_type}.")
         
-        if tt.ticket_type == 'community':
+        if tt.ticket_type in upgrade_types:
             if item.quantity > general_tt.available_quantity:
                 raise ValidationError("Not enough general tickets available for community lodging.")
 
@@ -53,7 +55,7 @@ def reserve_order_inventory(order):
         tt.available_quantity -= item.quantity
         tt.save(update_fields=['available_quantity'])
 
-        if tt.ticket_type == 'community':
+        if tt.ticket_type in upgrade_types:
             general_tt.available_quantity -= item.quantity
             general_tt.save(update_fields=['available_quantity'])
     
@@ -75,7 +77,9 @@ def release_order_inventory(order):
     items = list(order.items.select_related('ticket_template'))
     locked = lock_templates_for_order_items(items)
 
-    needs_general = any(t.ticket_type == 'community' for t in locked.values())
+    upgrade_types = {'community', 'master'}
+
+    needs_general = any(t.ticket_type in upgrade_types for t in locked.values())
     general_tt = None
     if needs_general:
         general_tt = TicketTemplate.objects.select_for_update().get(ticket_type='general')
@@ -85,7 +89,7 @@ def release_order_inventory(order):
         tt.available_quantity += item.quantity
         tt.save(update_fields=['available_quantity'])
 
-        if tt.ticket_type == 'community':
+        if tt.ticket_type in upgrade_types:
             general_tt.available_quantity += item.quantity
             general_tt.save(update_fields=['available_quantity'])
         
