@@ -5,8 +5,8 @@ import { MotionBox } from "../components/Motion";
 import { staggerContainer, staggerItem } from "../components/animations/fffAnimations";
 import TicketCard from "../components/cards/TicketCard";
 import PaymentDrawer from "../components/PaymentDrawer";
-import { createOrder } from "../utilities";
-import { primaryButtonStyles, outlineButtonStyles } from "../theme";
+import { createOrder, reserveTickets } from "../utilities";
+import { primaryButtonStyles } from "../theme";
 import { showErrorToast } from "../components/ui/showErrorToast";
 import HeroicHall from "../assets/HeroicHall.jpeg";
 
@@ -22,6 +22,7 @@ export default function TicketsPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleCheckout = async () => {
+    // Validate at least one ticket selected
     if (ticketA === 0 && ticketB === 0 && ticketC === 0) {
       showErrorToast("Checkout", "Please select at least one ticket.");
       return;
@@ -31,7 +32,10 @@ export default function TicketsPage() {
     setIsLoading(true);
 
     try {
+      console.log("Creating order with cart:", cart);
       const createdOrder = await createOrder(cart);
+      await reserveTickets(createdOrder.id);
+      console.log("Order created:", createdOrder);
       
       if (createdOrder && createdOrder.id) {
         setOrder(createdOrder);
@@ -40,6 +44,7 @@ export default function TicketsPage() {
         showErrorToast("Checkout", "Failed to create order - invalid response.");
       }
     } catch (err) {
+      console.error("Checkout error:", err);
       showErrorToast(
         "Checkout", 
         err.response?.data?.error || "Something went wrong with checkout."

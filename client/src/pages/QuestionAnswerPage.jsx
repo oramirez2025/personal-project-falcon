@@ -3,7 +3,7 @@ import { MotionBox } from "../components/Motion"
 import { staggerContainer, staggerItem } from "../components/animations/fffAnimations"
 import VideoAnimations from "../components/VideoAnimations"
 import FAQCard from "../components/cards/FaqCard"
-import FAQ_Animations from "/home/falcon/Team-Group-Project/personal-project-falcon/client/src/assets/FAQ_Animations.mp4"
+import FAQ_Animations from "../assets/FAQ_Animations.mp4"
 
 /*
 FAQ Page - Now uses reusable FAQCard component
