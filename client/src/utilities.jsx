@@ -157,6 +157,16 @@ export const updateEvent = async(setEvents, id, data) => {
 
 // ============= COMMENTS =============
 
+export const fetchCommentThread = async (commentId) => {
+  try {
+    const response = await api.get(`comment/single/${commentId}/`)
+    return response.data 
+  } 
+  catch (e) {
+    console.error(e)
+  }
+}
+
 export const fetchComments = async (setComments, event) => {
   try {
     const response = await api.get(`comment/events/${event}/`)

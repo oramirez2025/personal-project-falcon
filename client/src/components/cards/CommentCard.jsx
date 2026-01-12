@@ -10,10 +10,13 @@ import { MotionBox } from "../Motion";
 import { cardHover } from "../animations/fffAnimations";
 import CreateCommentModal from "../ui/CreateCommentModal";
 import EditCommentModal from "../ui/EditCommentModal";
+import { AnimatePresence } from "framer-motion";
 import {
   primaryButtonStyles,
   outlineButtonStyles,
 } from "../../theme";
+import { Link, useOutletContext, useParams } from "react-router-dom";
+import { staggerContainer, staggerItem } from "../animations/fffAnimations";
 
 export default function CommentCard({
   comment,
@@ -28,17 +31,23 @@ export default function CommentCard({
 
   const [showReply, setShowReply] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
+  const [showReplies, setShowReplies] = useState(false);
+
+  const { eventId } = useParams();
+  const {setThread} = useOutletContext();
 
   const isLoggedIn = !!user;
   const isOP = user?.id === author;
   const isAdmin = user?.is_admin;
 
+  const INLINE_DEPTH_LIMIT = 1; // Can be changed but for now 1 
+  const canExpandInline = depth < INLINE_DEPTH_LIMIT;
+  const replyCount = replies.length;
+
   const indent = Math.min(depth, 6) * 1.25;
   const hasLiked = likes.includes(user?.id);
-  console.log(user)
   return (
     <Box pl={`${indent}em`} mt={4}>
-      {/* Animated Card */}
       <MotionBox {...cardHover}>
         <Box
           bg="forge.tan.50"
@@ -57,13 +66,19 @@ export default function CommentCard({
               </Text>
             </Text>
 
-            {/* Comment Text */}
+            {/* Text */}
             <Text color="forge.stone.800" whiteSpace="pre-wrap">
               {text}
             </Text>
 
-            {/* Actions */}
+            {/* Reply count */}
+            {replyCount > 0 && (
+              <Text fontSize="sm" color="forge.stone.600">
+                {replyCount} {replyCount === 1 ? "reply" : "replies"}
+              </Text>
+            )}
 
+            {/* Actions */}
             <HStack spacing={2} flexWrap="wrap">
               {isLoggedIn && (
                 <Button
@@ -116,9 +131,71 @@ export default function CommentCard({
               )}
             </HStack>
 
+            {/* Toggle OR Navigate */}
+            {replyCount > 0 && (
+              canExpandInline ? (
+                <Button
+                  size="xs"
+                  variant="ghost"
+                  alignSelf="flex-start"
+                  onClick={() => setShowReplies((prev) => !prev)}
+                >
+                  {showReplies
+                    ? `Hide (${replyCount}) replies`
+                    : `Show (${replyCount}) replies`}
+                </Button>
+              ) : (
+                <Button
+                  as={Link}
+                  to={`/events/${eventId}/comments/${id}`}
+                  size="xs"
+                  variant="ghost"
+                  color="forge.gold.600"
+                  alignSelf="flex-start"
+                  onClick={() => setThread(comment)}
+                >
+                  View {replyCount} replies →
+                </Button>
+              )
+            )}
           </VStack>
         </Box>
       </MotionBox>
+
+      {/* Inline replies */}
+      <AnimatePresence initial={false}>
+        {canExpandInline && showReplies && (
+          <MotionBox
+            key="replies"
+            variants={staggerContainer}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+          >
+            <VStack align="stretch" spacing={4} mt={4}>
+              {replies.map((reply) => (
+                <MotionBox
+                  key={reply.id}
+                  variants={staggerItem}
+                >
+                  <CommentCard
+                    comment={reply}
+                    depth={depth + 1}
+                    user={user}
+                    onDelete={onDelete}
+                    onEdit={onEdit}
+                    onReply={onReply}
+                    onLike={onLike}
+                  />
+                </MotionBox>
+              ))}
+            </VStack>
+          </MotionBox>
+        )}
+      </AnimatePresence>
+
+
+
 
       {/* Reply Modal */}
       <CreateCommentModal
@@ -140,22 +217,6 @@ export default function CommentCard({
           setShowEdit(false);
         }}
       />
-
-      {/* Recursive Replies */}
-      <VStack align="stretch" spacing={4} mt={4}>
-        {replies.map((reply) => (
-          <CommentCard
-            key={reply.id}
-            comment={reply}
-            depth={depth + 1}
-            user={user}
-            onDelete={onDelete}
-            onEdit={onEdit}
-            onReply={onReply}
-            onLike={onLike}
-          />
-        ))}
-      </VStack>
     </Box>
   );
 }

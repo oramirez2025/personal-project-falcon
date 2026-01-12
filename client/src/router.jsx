@@ -8,6 +8,8 @@ import LogInPage from "./pages/LogInPage";
 import TicketsPage from "./pages/TicketsPage";
 import QuestionsAnswersPage from "./pages/QuestionAnswerPage";
 import EventForumPage from "./pages/EventForumPage";
+import CommentSection from "./components/sections/CommentSection";
+import CommentThreadPage from "./pages/CommentThreadPage";
 
 const falconLoader = async () => {
     const token = localStorage.getItem("token")
@@ -48,6 +50,14 @@ const router = createBrowserRouter([
                 {
                 path: ":eventId",
                 element: <EventForumPage/>,
+                children: [{
+                    index: true, 
+                    element: <CommentSection/>
+                },
+                {
+                    path: "comments/:commentId",
+                    element: <CommentThreadPage/>
+                }]
                 }
             ]
         },

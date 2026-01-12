@@ -197,20 +197,37 @@ Container variants for staggered children animations
 ❗Use with motion.div containing multiple children
 */
 export const staggerContainer = {
-    hidden: { opacity: 0 },
-    visible: {
-        opacity: 1,
-        transition: {
-            staggerChildren: 0.1,
-            delayChildren: 0.2,
-        }
-    }
-}
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.2,
+    },
+  },
+  exit: {
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.2,
+      staggerDirection: -1,
+    },
+  },
+};
+
 
 export const staggerItem = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 }
-}
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+  },
+  exit: {
+    opacity: 0,
+    y: 20,
+  },
+};
+
+
 
 // ============================================
 // PAGE TRANSITIONS
