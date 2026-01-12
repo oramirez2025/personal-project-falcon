@@ -4,8 +4,13 @@ from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 from ticket_app.models import TicketTemplate
 from .models import Order
+from falcon_proj import settings
+import stripe
 
-hold_minutes = 10
+
+hold_minutes = 11
+
+stripe.api_key = settings.STRIPE_API_KEY
 
 def lock_templates_for_order_items(items):
     locked = {}
@@ -92,7 +97,21 @@ def release_order_inventory(order):
         if tt.ticket_type in upgrade_types:
             general_tt.available_quantity += item.quantity
             general_tt.save(update_fields=['available_quantity'])
+
+    payment = getattr(order, 'payment', None)
+    if payment and payment.stripe_payment_intent_id:
+        try:
+            stripe.PaymentIntent.cancel(payment.stripe_payment_intent_id)
+        except stripe.error.StripeError:
+            pass
         
+    # --- Payment fails whenn hold expires ---
+    payment = getattr(order, "payment", None)
+    if payment and payment.status != "paid":
+        payment.status = "failed"
+        payment.save(update_fields=["status"])
+
+
     order.status = 'expired'
     order.reserved_until = None
     order.save(update_fields=['status', 'reserved_until'])
