@@ -143,7 +143,7 @@ class UserAccountView(User_Auth):
         profile = UserProfile.objects.select_related('user').prefetch_related(
             'user__event_wishlists__event',
             'user__comments__event',
-            'user__tickets__ticket',
+            'user__tickets__ticket_template',
         ).get(user=request.user)
         serializer = UserProfileSerializer(profile)
         return Response(serializer.data, status=s.HTTP_200_OK)
@@ -222,3 +222,21 @@ class AdminPromotionView(User_Auth):
                 "is_admin": is_admin
             }
         }, status=s.HTTP_200_OK)
+
+
+class UserTicketsView(User_Auth):
+    """Get user's paid ticket orders."""
+    def get(self, request):
+        from payments_app.models import Order
+        from payments_app.serializers import OrderSerializer
+
+        orders = Order.objects.filter(
+            user=request.user,
+            status='paid'
+        ).prefetch_related(
+            'items__ticket_template',
+            'payment'
+        ).order_by('-created_at')
+
+        serializer = OrderSerializer(orders, many=True)
+        return Response(serializer.data, status=s.HTTP_200_OK)

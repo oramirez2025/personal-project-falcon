@@ -6,6 +6,7 @@ from .views import (
     Log_out,
     UserAccountView,
     AdminPromotionView,
+    UserTicketsView,
 )
 
 urlpatterns = [
@@ -17,7 +18,10 @@ urlpatterns = [
     
     # User account/profile endpoint (single source for React)
     path('account/', UserAccountView.as_view(), name='user_account'),
-    
+
+    # User tickets endpoint
+    path('tickets/', UserTicketsView.as_view(), name='user_tickets'),
+
     # Admin management endpoint
     path('admin-stat/', AdminPromotionView.as_view(), name='admin_access'),
 ]

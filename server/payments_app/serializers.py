@@ -13,12 +13,12 @@ class PaymentSerializer(serializers.ModelSerializer):
 
 class OrderItemSerializer(serializers.ModelSerializer):
     ticket_template_id = serializers.IntegerField(source="ticket_template.id", read_only=True)
-
+    ticket_type = serializers.CharField(source='ticket_template.ticket_type', read_only=True)
+    
     class Meta:
         model = OrderItem
-        fields = ['id', 'ticket_template', 'title_at_purchase', 'quantity', 'line_total',]
-        read_only_fields = fields
-
+        fields = ['id', 'ticket_template_id', 'ticket_template', 'ticket_type', 'title_at_purchase', 'quantity', 'line_total', 'unit_price_at_purchase',]
+    ticket_type = serializers.CharField(source="ticket_template.ticket_type", read_only=True)
 
 class OrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True, read_only=True)
@@ -31,8 +31,8 @@ class OrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ["id", "status", "created_at", "user_id", "user_email", "subtotal", "tax", "fees", "total", "items", "payment_status", "stripe_payment_intent_id",]
-        read_only_fields = ['id', 'user_id', 'user_email', 'created_at', 'subtotal', 'items', 'stripe_payment_intent_id']
+        fields = ["id", "status", "created_at", "user_id", "user_email", "subtotal", "tax", "fees", "total", "items", "payment_status", "stripe_payment_intent_id", 'reserved_until',]
+        read_only_fields = fields
 
     def get_payment_status(self, obj):
         payment = getattr(obj, "payment", None)

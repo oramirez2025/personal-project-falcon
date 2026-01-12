@@ -1,43 +1,33 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Outlet } from "react-router-dom";
 import {
   Box,
-  Button,
   Heading,
   Container,
   Grid,
   VStack,
   HStack,
 } from "@chakra-ui/react";
-
 import DaySection from "../components/sections/DaySection";
 import WeatherCard from "../components/cards/WeatherCard";
 import CountdownTimer from "../components/CountdownTimer";
 import TicketsPage from "./TicketsPage";
-
-import {
-  fetchEvents,
-  userConfirmation,
-} from "../utilities";
-
+import { fetchEvents } from "../utilities";
 import HeroicHall from "../assets/HeroicHall.jpeg";
 import { useParams } from "react-router-dom";
 
 export default function EventsPage() {
   const [events, setEvents] = useState([]);
-  const [user, setUser] = useState(null);
+  const hasFetched = useRef(false);
+  const { user } = useOutletContext(); // Get user from App.jsx instead of duplicate call
   const {eventId} = useParams()
 
   useEffect(() => {
+    // Prevent StrictMode double-fetch
+    if (hasFetched.current) return;
+    hasFetched.current = true;
+    
     fetchEvents(setEvents);
-  }, []);
-
-  useEffect(() => {
-    const restoreUser = async () => {
-      const confirmedUser = await userConfirmation();
-      setUser(confirmedUser);
-    };
-    restoreUser();
   }, []);
 
   const eventsByDay = events.reduce((acc, event) => {
