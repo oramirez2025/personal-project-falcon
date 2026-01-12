@@ -15,6 +15,7 @@ import { showSuccessToast } from "../components/ui/showSuccessToast";
 import { showErrorToast } from "../components/ui/showErrorToast";
 import { api } from "../utilities";
 import { inputStyles, primaryButtonStyles } from "../theme";
+import deathsteedBg from "../assets/Birdrunner.jpeg";
 
 const SignUp = () => {
   const [email, setEmail] = useState("");
@@ -44,11 +45,31 @@ const SignUp = () => {
     }
   };
 
-  return (
-    <Container maxW="md" py={20}>
+
+
+return (
+  <Box
+    position="relative"
+    bgImage={`url(${deathsteedBg})`}
+    bgSize="cover"
+    bgPos="center"
+    bgRepeat="no-repeat"
+    minH="100vh"
+    display="flex"
+    alignItems="center"
+    justifyContent="center"
+    _before={{
+      content: '""',
+      position: "absolute",
+      inset: 0,
+      bg: "linear-gradient(145deg, rgba(0,0,0,0.75), rgba(255,80,0,0.35))",
+      zIndex: 0,
+    }}
+  >
+    <Container maxW="md" py={20} position="relative" zIndex={1}>
       <MotionBox {...fadeInUp}>
         <Box
-          bg="bg.secondary"
+          bg="rgba"
           borderRadius="lg"
           borderWidth="2px"
           borderColor="border.accent"
@@ -56,12 +77,10 @@ const SignUp = () => {
           boxShadow="xl"
         >
           <VStack spacing={6} as="form" onSubmit={handleClick}>
-            {/* Header */}
             <Heading size="xl" color="text.primary">
               Sign Up
             </Heading>
 
-            {/* Email Field */}
             <Field.Root w="100%">
               <Field.Label color="text.secondary">Email Address</Field.Label>
               <Input
@@ -74,7 +93,6 @@ const SignUp = () => {
               />
             </Field.Root>
 
-            {/* Password Field */}
             <Field.Root w="100%">
               <Field.Label color="text.secondary">Password</Field.Label>
               <Input
@@ -87,20 +105,14 @@ const SignUp = () => {
               />
             </Field.Root>
 
-            {/* Submit Button */}
-            <Button
-              type="submit"
-              w="100%"
-              size="lg"
-              {...primaryButtonStyles}
-            >
+            <Button type="submit" w="100%" size="lg" {...primaryButtonStyles}>
               Submit
             </Button>
           </VStack>
         </Box>
       </MotionBox>
     </Container>
-  );
+    </Box>
+);
 };
-
 export default SignUp;

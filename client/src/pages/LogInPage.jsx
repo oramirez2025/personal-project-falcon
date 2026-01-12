@@ -16,6 +16,7 @@ import { showErrorToast } from "../components/ui/showErrorToast";
 import { useOutletContext, useNavigate } from "react-router-dom";
 import { userLogIn } from "../utilities";
 import { inputStyles, primaryButtonStyles } from "../theme";
+import griffonBg from "../assets/Lightning Griffon.jpeg";
 
 const LogIn = () => {
   const [email, setEmail] = useState("");
@@ -39,64 +40,74 @@ const LogIn = () => {
   };
 
   return (
-    <Container maxW="md" py={20}>
-      <MotionBox {...fadeInUp}>
-        <Box
-          bg="bg.secondary"
-          borderRadius="lg"
-          borderWidth="2px"
-          borderColor="border.accent"
-          p={8}
-          boxShadow="xl"
-        >
-          <VStack spacing={6} as="form" onSubmit={handleSubmit}>
-            {/* Header */}
-            <Heading size="xl" color="text.primary">
-              Log In
-            </Heading>
+    <Box
+      position="relative"
+      bgImage={`url(${griffonBg})`}
+      bgSize="cover"
+      bgPos="center"
+      bgRepeat="no-repeat"
+      minH="100vh"
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+      _before={{
+        content: '""',
+        position: "absolute",
+        inset: 0,
+        bg: "linear-gradient(145deg, rgba(0,0,0,0.75), rgba(255,80,0,0.35))",
+        zIndex: 0,
+      }}
+    >
+      <Container maxW="md" position="relative" zIndex={1}>
+        <MotionBox {...fadeInUp}>
+          <Box
+            bg="rgba"
+            borderRadius="lg"
+            borderWidth="2px"
+            borderColor="border.accent"
+            p={8}
+            boxShadow="xl"
+          >
+            <VStack spacing={6} as="form" onSubmit={handleSubmit}>
+              <Heading size="xl" color="text.primary">
+                Log In
+              </Heading>
 
-            {/* Email Field */}
-            <Field.Root w="100%">
-              <Field.Label color="text.secondary">Email address</Field.Label>
-              <Input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter email"
-                {...inputStyles}
-                required
-              />
-              <Field.HelperText color="text.muted" fontSize="sm">
-                We'll never share your email with anyone else.
-              </Field.HelperText>
-            </Field.Root>
+              <Field.Root w="100%">
+                <Field.Label color="text.secondary">Email address</Field.Label>
+                <Input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter email"
+                  {...inputStyles}
+                  required
+                />
+                <Field.HelperText color="text.muted" fontSize="sm">
+                  We'll never share your email with anyone else.
+                </Field.HelperText>
+              </Field.Root>
 
-            {/* Password Field */}
-            <Field.Root w="100%">
-              <Field.Label color="text.secondary">Password</Field.Label>
-              <Input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Password"
-                {...inputStyles}
-                required
-              />
-            </Field.Root>
+              <Field.Root w="100%">
+                <Field.Label color="text.secondary">Password</Field.Label>
+                <Input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Password"
+                  {...inputStyles}
+                  required
+                />
+              </Field.Root>
 
-            {/* Submit Button */}
-            <Button
-              type="submit"
-              w="100%"
-              size="lg"
-              {...primaryButtonStyles}
-            >
-              Submit
-            </Button>
-          </VStack>
-        </Box>
-      </MotionBox>
-    </Container>
+              <Button type="submit" w="100%" size="lg" {...primaryButtonStyles}>
+                Submit
+              </Button>
+            </VStack>
+          </Box>
+        </MotionBox>
+      </Container>
+    </Box>
   );
 };
 
