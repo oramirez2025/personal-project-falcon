@@ -24,7 +24,6 @@ export default function CommentSection() {
   } = useOutletContext();
 
   const [showCreate, setShowCreate] = useState(false);
-
   return (
     <Container maxW="container.lg" py={10}>
       <Heading
@@ -44,25 +43,30 @@ export default function CommentSection() {
 
       {/* Loaded comments */}
       {!loading && comments.length > 0 && (
-        <MotionBox
-          variants={staggerContainer}
-          initial="hidden"
-          animate="visible"
-        >
-          <Stack spacing={8} divider={<Separator />}>
-            {comments.map((comment) => (
-              <MotionBox key={comment.id} variants={staggerItem}>
-                <CommentCard
-                  key={comment.id}
-                  comment={comment}
-                  depth={0}
-                  user={user}
-                  {...handlers}
-                />
-              </MotionBox>
-            ))}
-          </Stack>
-        </MotionBox>
+      <MotionBox
+        variants={staggerContainer}
+        initial="hidden"
+        animate="visible"
+      >
+        <Stack spacing={8} divider={<Separator />}>
+          {comments.map((comment) => (
+            <MotionBox
+              key={comment.id}
+              variants={staggerItem}
+              initial="hidden"
+              animate="visible"
+              layout
+            >
+              <CommentCard
+                comment={comment}
+                depth={0}
+                user={user}
+                {...handlers}
+              />
+            </MotionBox>
+          ))}
+        </Stack>
+      </MotionBox>
       )}
 
       {!!user && !loading && (

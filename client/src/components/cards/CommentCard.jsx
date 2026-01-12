@@ -167,10 +167,13 @@ export default function CommentCard({
           >
             <VStack align="stretch" spacing={4} mt={4}>
               {replies.map((reply) => (
-                <MotionBox
-                  key={reply.id}
-                  variants={staggerItem}
-                >
+                  <MotionBox
+                    key={reply.id}
+                    variants={staggerItem}
+                    initial="hidden"
+                    animate="visible"
+                    layout
+                  >
                   <CommentCard
                     comment={reply}
                     depth={depth + 1}

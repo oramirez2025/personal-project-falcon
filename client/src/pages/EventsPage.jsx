@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useOutletContext, useParams } from "react-router-dom";
 import {
   Box,
   Heading,
@@ -14,7 +14,6 @@ import CountdownTimer from "../components/CountdownTimer";
 import TicketsPage from "./TicketsPage";
 import { fetchEvents } from "../utilities";
 import HeroicHall from "../assets/HeroicHall.jpeg";
-import { useParams } from "react-router-dom";
 
 export default function EventsPage() {
   const [events, setEvents] = useState([]);

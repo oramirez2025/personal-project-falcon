@@ -119,7 +119,6 @@ export default function EventForumPage() {
 
   const handleDelete = (id) =>
     deleteComment(null, id);
-  console.log(event)
   return (
     <>
       {!commentId && event && <EventCard event={event} detailed={true}/>
