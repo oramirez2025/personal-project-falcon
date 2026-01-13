@@ -22,13 +22,15 @@ def stripe_webhook(request):
             sig_header,
             settings.STRIPE_WEBHOOK_SECRET
         )
-    except (ValueError, stripe.error.SignatureVerificationError) as e:
-        print("WEBHOOK SIGNATURE/JSON ERROR:", str(e))
+    except (ValueError, stripe.error.SignatureVerificationError):
         return HttpResponse(status=400)
 
     event_type = event["type"]
+    if not event_type.startswith('payment_intent.'):
+        return HttpResponse(status=200)
+
     intent = event["data"]["object"]
-    order_id = intent.metadata.get("order_id")
+    order_id = (intent.get('metadata') or {}).get('order_id')
 
 
     if not order_id:
@@ -55,6 +57,12 @@ def stripe_webhook(request):
 
             # --- Hold Expired ---
             if order.status == 'reserved' and order.reserved_until and order.reserved_until <= timezone.now():
+                
+                try:
+                    stripe.PaymentIntent.cancel(payment_intent=intent["id"])
+                except stripe.error.StripeError:
+                    pass
+
                 release_order_inventory(order)
                 Payment.objects.update_or_create(
                     order=order,

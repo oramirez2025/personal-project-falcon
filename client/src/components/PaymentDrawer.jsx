@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 import { payForOrder } from "../utilities";
@@ -14,12 +14,28 @@ export default function PaymentDrawer({ show, onClose, order }) {
   const [clientSecret, setClientSecret] = useState("");
   const [error, setError] = useState(null);
   const hasInitialized = useRef(false);
-  
-  const appearance = { 
-    theme: "night", 
+
+  // NEW: compute expiration timestamp from reserved_until
+  const reservedUntilMs = useMemo(() => {
+    if (!order?.reserved_until) return null;
+    const ms = new Date(order.reserved_until).getTime();
+    return Number.isNaN(ms) ? null : ms;
+  }, [order?.reserved_until]);
+
+    // NEW: close the drawer 1 minute before the server hold expires (11 min hold, 10 min UI close)
+  const clientCloseMs = useMemo(() => {
+    return reservedUntilMs ? reservedUntilMs - 60_000 : null;
+  }, [reservedUntilMs]);
+
+
+  // NEW: track time remaining (for display + logic)
+  const [secondsLeft, setSecondsLeft] = useState(null);
+
+  const appearance = {
+    theme: "night",
     variables: {
-      colorPrimary: '#b91c1c',
-    }
+      colorPrimary: "#b91c1c",
+    },
   };
 
   const initializePayment = async () => {
@@ -27,12 +43,18 @@ export default function PaymentDrawer({ show, onClose, order }) {
       setError("Invalid order - missing order ID");
       return;
     }
-    
+
+    // NEW: hard stop if already expired
+    if (clientCloseMs && Date.now() >= clientCloseMs) {
+      showErrorToast("Hold expired", "Your ticket hold expired. Please restart checkout.");
+      onClose();
+      return;
+    }
+
     setLoading(true);
     setError(null);
-    
+
     try {
-      console.log("Initializing payment for order:", order.id);
       const paymentData = await payForOrder(order.id);
 
       if (paymentData?.client_secret) {
@@ -43,7 +65,8 @@ export default function PaymentDrawer({ show, onClose, order }) {
       }
     } catch (err) {
       console.error("Payment initialization error:", err);
-      const errorMessage = err.response?.data?.error || err.message || "Failed to initialize payment.";
+      const errorMessage =
+        err.response?.data?.error || err.response?.data?.detail || err.message || "Failed to initialize payment.";
       setError(errorMessage);
       showErrorToast("Payment", errorMessage);
     } finally {
@@ -56,18 +79,48 @@ export default function PaymentDrawer({ show, onClose, order }) {
       // Prevent StrictMode double-initialization
       if (hasInitialized.current) return;
       hasInitialized.current = true;
-      
+
       // Reset state when drawer opens
       setClientSecret("");
       setError(null);
+
       initializePayment();
     }
-    
+
     // Reset the ref when drawer closes so it can initialize again on next open
     if (!show) {
       hasInitialized.current = false;
+      setSecondsLeft(null);
     }
-  }, [show, order?.id]);
+  }, [show, order?.id]); // keep deps minimal like you had
+
+  // NEW: countdown timer that auto-closes drawer when hold expires
+  useEffect(() => {
+    if (!show || !clientCloseMs) return;
+
+    const tick = () => {
+      const remainingMs = clientCloseMs - Date.now();
+      const remainingSeconds = Math.max(0, Math.ceil(remainingMs / 1000));
+      setSecondsLeft(remainingSeconds);
+
+      if (remainingMs <= 0) {
+        showErrorToast("Hold expired", "Your ticket hold expired. Please restart checkout.");
+        onClose(); // closes drawer and unmounts Stripe Elements
+      }
+    };
+
+    tick(); // run immediately
+    const interval = setInterval(tick, 1000);
+    return () => clearInterval(interval);
+  }, [show, clientCloseMs, onClose]);
+
+  // OPTIONAL: format time remaining
+  const timeLabel = useMemo(() => {
+    if (secondsLeft == null) return null;
+    const m = String(Math.floor(secondsLeft / 60)).padStart(2, "0");
+    const s = String(secondsLeft % 60).padStart(2, "0");
+    return `${m}:${s}`;
+  }, [secondsLeft]);
 
   return (
     <Drawer.Root
@@ -107,6 +160,13 @@ export default function PaymentDrawer({ show, onClose, order }) {
 
           <Drawer.Body>
             <VStack align="stretch" spacing={4}>
+              {/* OPTIONAL: show time remaining */}
+              {timeLabel && (
+                <Text color="text.muted" fontSize="sm">
+                  Hold expires in {timeLabel}
+                </Text>
+              )}
+
               <Box>
                 <Text fontWeight="bold" color="text.primary" mb={2}>
                   Tickets:
@@ -121,30 +181,30 @@ export default function PaymentDrawer({ show, onClose, order }) {
               </Box>
 
               <Text color="text.primary">
-                <Text as="span" fontWeight="bold">Total: </Text>
+                <Text as="span" fontWeight="bold">
+                  Total:{" "}
+                </Text>
                 <Text as="span" color="forge.red.400" fontWeight="bold">
                   ${order?.total}
                 </Text>
               </Text>
 
-              {loading && (
-                <Text color="text.muted">Loading payment form...</Text>
-              )}
+              {loading && <Text color="text.muted">Loading payment form...</Text>}
 
               {error && (
-                <Box 
-                  bg="forge.red.900" 
-                  border="1px solid" 
-                  borderColor="forge.red.700" 
-                  borderRadius="md" 
+                <Box
+                  bg="forge.red.900"
+                  border="1px solid"
+                  borderColor="forge.red.700"
+                  borderRadius="md"
                   p={3}
                 >
                   <Text color="forge.red.200" fontSize="sm">
                     Error: {error}
                   </Text>
-                  <Button 
-                    size="sm" 
-                    mt={2} 
+                  <Button
+                    size="sm"
+                    mt={2}
                     onClick={() => {
                       hasInitialized.current = false;
                       initializePayment();
@@ -162,7 +222,7 @@ export default function PaymentDrawer({ show, onClose, order }) {
               {clientSecret && (
                 <Box mt={4}>
                   <Elements stripe={stripePromise} options={{ clientSecret, appearance }}>
-                    <StripeCheckoutForm order={order} onSuccess={onClose} />
+                    <StripeCheckoutForm onSuccess={onClose} />
                   </Elements>
                 </Box>
               )}

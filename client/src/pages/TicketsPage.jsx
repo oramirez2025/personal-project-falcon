@@ -34,11 +34,12 @@ export default function TicketsPage() {
     try {
       console.log("Creating order with cart:", cart);
       const createdOrder = await createOrder(cart);
-      await reserveTickets(createdOrder.id);
-      console.log("Order created:", createdOrder);
+
       
       if (createdOrder && createdOrder.id) {
-        setOrder(createdOrder);
+        const reserved = await reserveTickets(createdOrder.id)
+        const mergedOrder = {...createdOrder, ...reserved};
+        setOrder(mergedOrder);
         setShowPaymentDrawer(true);
       } else {
         showErrorToast("Checkout", "Failed to create order - invalid response.");

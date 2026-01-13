@@ -98,6 +98,7 @@ class ViewPayment(User_Auth):
     
 class CreateOrder(User_Auth):
     def post(self, request):
+        release_expired_holds()
         if not request.user:
             return Response({'detail': 'Login or create account to purchase tickets'}, status=s.HTTP_401_UNAUTHORIZED)
         user = request.user
