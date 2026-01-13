@@ -188,3 +188,75 @@ export const uploadProfilePicture = async (file) => {
     throw err;
   }
 };
+
+export const updateUserProfile = async (profileData) => {
+  try {
+    const response = await api.patch("user/account/", profileData);
+    return response.data;
+  } catch (err) {
+    console.error("Failed to update profile:", err);
+    throw err;
+  }
+};
+
+// ============= EVENT WISHLIST =============
+
+export const addToWishlist = async (eventId) => {
+  try {
+    const response = await api.post("event/watchlist/", { event_id: eventId });
+    return response.data;
+  } catch (err) {
+    console.error("Failed to add to wishlist:", err);
+    throw err;
+  }
+};
+
+export const removeFromWishlist = async (eventId) => {
+  try {
+    await api.delete(`event/watchlist/${eventId}/`);
+    return { success: true };
+  } catch (err) {
+    console.error("Failed to remove from wishlist:", err);
+    throw err;
+  }
+};
+
+// ============= ADMIN MANAGEMENT =============
+
+export const promoteUser = async (email) => {
+  try {
+    const response = await api.post("user/admin-stat/", {
+      email: email,
+      action: "promote"
+    });
+    return response.data;
+  } catch (err) {
+    console.error("Failed to promote user:", err);
+    throw err;
+  }
+};
+
+export const demoteUser = async (email) => {
+  try {
+    const response = await api.post("user/admin-stat/", {
+      email: email,
+      action: "demote"
+    });
+    return response.data;
+  } catch (err) {
+    console.error("Failed to demote user:", err);
+    throw err;
+  }
+};
+
+export const searchUsers = async (query = '') => {
+  try {
+    const response = await api.get("user/search/", {
+      params: { q: query }
+    });
+    return response.data;
+  } catch (err) {
+    console.error("Failed to search users:", err);
+    throw err;
+  }
+};

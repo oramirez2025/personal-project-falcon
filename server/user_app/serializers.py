@@ -106,14 +106,35 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 class UserProfileUpdateSerializer(serializers.ModelSerializer):
     """Used to update profile."""
+    # User model fields (writable)
+    first_name = serializers.CharField(max_length=50, required=False, allow_blank=True)
+    last_name = serializers.CharField(max_length=50, required=False, allow_blank=True)
 
     class Meta:
         model = UserProfile
         fields = [
+            'first_name',
+            'last_name',
             'bio',
             'phone_number',
             'profile_pic',
         ]
+
+    def update(self, instance, validated_data):
+        # Extract user fields
+        first_name = validated_data.pop('first_name', None)
+        last_name = validated_data.pop('last_name', None)
+
+        # Update user model fields if provided
+        user = instance.user
+        if first_name is not None:
+            user.first_name = first_name
+        if last_name is not None:
+            user.last_name = last_name
+        user.save()
+
+        # Update profile fields
+        return super().update(instance, validated_data)
 
     # Image validation constants
     MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB

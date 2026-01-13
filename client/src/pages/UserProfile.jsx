@@ -1,8 +1,20 @@
 import { useState, useEffect } from "react";
-import { Box, Grid, GridItem, VStack, Heading, Spinner, Text, Center } from "@chakra-ui/react";
+import {
+  Box,
+  Grid,
+  GridItem,
+  VStack,
+  Heading,
+  Spinner,
+  Text,
+  Center,
+  Tabs
+} from "@chakra-ui/react";
 import { useOutletContext } from "react-router-dom";
 import ProfileCard from "../components/cards/ProfileCard";
-import TicketsTable from "../components/tables/TicketsTable";
+import MyTicketsTab from "../components/tabs/MyTicketsTab";
+import EventsWatchTab from "../components/tabs/EventsWatchTab";
+import AdminTab from "../components/tabs/AdminTab";
 import { fetchUserProfile, fetchUserTickets, uploadProfilePicture } from "../utilities";
 import { showSuccessToast } from "../components/ui/showSuccessToast";
 import { showErrorToast } from "../components/ui/showErrorToast";
@@ -12,6 +24,7 @@ export default function UserProfile() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [activeTab, setActiveTab] = useState("tickets");
   const { user } = useOutletContext();
 
   // Fetch data on mount
@@ -100,6 +113,9 @@ export default function UserProfile() {
     return orderYear < currentYear;
   });
 
+  // Check if user is admin
+  const isAdmin = profileData?.is_admin === true;
+
   // Main content
   return (
     <Box
@@ -115,34 +131,90 @@ export default function UserProfile() {
         templateColumns={{ base: "1fr", lg: "1fr 400px" }}
         gap={0}
       >
-        {/* LEFT COLUMN - Tickets */}
+        {/* LEFT COLUMN - Tabs */}
         <GridItem p={{ base: 4, md: 6 }} pl={{ base: 4, md: 8, lg: 12 }} pr={{ base: 4, lg: 8 }}>
-          <VStack align="stretch" gap={8}>
+          <VStack align="stretch" gap={6}>
             <Heading size="xl" color="white">
-              My Tickets
+              My Profile
             </Heading>
 
-            {/* Active Tickets Section */}
-            <VStack align="stretch" gap={4}>
-              <Heading size="lg" color="forge.gold.400">
-                Active Tickets
-              </Heading>
-              {activeOrders.length > 0 ? (
-                <TicketsTable orders={activeOrders} />
-              ) : (
-                <Text color="gray.400">No active tickets</Text>
-              )}
-            </VStack>
+            <Tabs.Root
+              value={activeTab}
+              onValueChange={(e) => setActiveTab(e.value)}
+              variant="line"
+            >
+              {/* Tab List */}
+              <Tabs.List
+                borderBottomColor="forge.stone.700"
+                mb={6}
+              >
+                <Tabs.Trigger
+                  value="tickets"
+                  color="text.secondary"
+                  _selected={{
+                    color: "forge.gold.400",
+                    borderBottomColor: "forge.gold.400",
+                    borderBottomWidth: "2px"
+                  }}
+                  _hover={{ color: "forge.gold.300" }}
+                  fontWeight="medium"
+                  pb={3}
+                >
+                  My Tickets
+                </Tabs.Trigger>
+                <Tabs.Trigger
+                  value="events"
+                  color="text.secondary"
+                  _selected={{
+                    color: "forge.gold.400",
+                    borderBottomColor: "forge.gold.400",
+                    borderBottomWidth: "2px"
+                  }}
+                  _hover={{ color: "forge.gold.300" }}
+                  fontWeight="medium"
+                  pb={3}
+                >
+                  Events Watch
+                </Tabs.Trigger>
+                {isAdmin && (
+                  <Tabs.Trigger
+                    value="admin"
+                    color="text.secondary"
+                    _selected={{
+                      color: "forge.gold.400",
+                      borderBottomColor: "forge.gold.400",
+                      borderBottomWidth: "2px"
+                    }}
+                    _hover={{ color: "forge.gold.300" }}
+                    fontWeight="medium"
+                    pb={3}
+                  >
+                    Admin
+                  </Tabs.Trigger>
+                )}
+              </Tabs.List>
 
-            {/* History Section */}
-            {historyOrders.length > 0 && (
-              <VStack align="stretch" gap={4}>
-                <Heading size="lg" color="forge.gold.400">
-                  History
-                </Heading>
-                <TicketsTable orders={historyOrders} />
-              </VStack>
-            )}
+              {/* Tab Content */}
+              <Tabs.Content value="tickets">
+                <MyTicketsTab
+                  activeOrders={activeOrders}
+                  historyOrders={historyOrders}
+                />
+              </Tabs.Content>
+
+              <Tabs.Content value="events">
+                <EventsWatchTab
+                  userWishlists={profileData?.event_wishlists || []}
+                  isActive={activeTab === "events"}
+                />
+              </Tabs.Content>
+
+              {isAdmin && (
+                <Tabs.Content value="admin">
+                  <AdminTab isActive={activeTab === "admin"} />
+                </Tabs.Content>
+              )}
+            </Tabs.Root>
           </VStack>
         </GridItem>
 
@@ -161,6 +233,7 @@ export default function UserProfile() {
             user={profileData}
             profilePicUrl={profileData.profile_pic}
             onProfilePicChange={handleProfilePicUpload}
+            onProfileUpdate={setProfileData}
             isUploading={uploading}
           />
         </GridItem>

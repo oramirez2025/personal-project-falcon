@@ -25,3 +25,4 @@ class AddToWishlistSerializer(serializers.Serializer):
         """Check if event exists."""
         if not Event.objects.filter(id=value).exists():
             raise serializers.ValidationError("Event doesn't exist")
+        return value
