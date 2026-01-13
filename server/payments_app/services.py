@@ -40,11 +40,16 @@ def reserve_order_inventory(order):
 
     upgrade_types = {'community', 'master'}
 
-    needs_general = any(t.ticket_type in upgrade_types for t in locked.values())
+    # include explicit general purchases too
+    needs_general = any(
+        t.ticket_type == "general" or t.ticket_type in upgrade_types
+        for t in locked.values()
+    )
     general_tt = None
     if needs_general:
         general_tt = TicketTemplate.objects.select_for_update().get(ticket_type='general')
 
+    # Validate
     for item in items:
         tt = locked[item.ticket_template_id]
         if item.quantity > tt.available_quantity:
@@ -55,14 +60,23 @@ def reserve_order_inventory(order):
                 raise ValidationError("Not enough general tickets available for community lodging.")
 
     # Decrement
+    general_consumed = 0
+
     for item in items:
         tt = locked[item.ticket_template_id]
-        tt.available_quantity -= item.quantity
-        tt.save(update_fields=['available_quantity'])
 
-        if tt.ticket_type in upgrade_types:
-            general_tt.available_quantity -= item.quantity
-            general_tt.save(update_fields=['available_quantity'])
+        if tt.ticket_type != "general":
+            tt.available_quantity -= item.quantity
+            tt.save(update_fields=["available_quantity"])
+
+        if tt.ticket_type in upgrade_types or tt.ticket_type == "general":
+            general_consumed += item.quantity
+
+    if general_tt and general_consumed > 0:
+        if general_consumed > general_tt.available_quantity:
+            raise ValidationError("Not enough general tickets available.")
+        general_tt.available_quantity -= general_consumed
+        general_tt.save(update_fields=["available_quantity"])
     
     order.status = 'reserved'
     order.reserved_until = timezone.now() + timedelta(minutes=hold_minutes)
@@ -74,9 +88,10 @@ def release_order_inventory(order):
 
     order = Order.objects.select_for_update().get(id=order.id)
 
-    if order.status != 'reserved':
-        return order
     if order.status == 'paid':
+        return order
+    
+    if order.status != 'reserved':
         return order
     
     items = list(order.items.select_related('ticket_template'))
@@ -84,19 +99,30 @@ def release_order_inventory(order):
 
     upgrade_types = {'community', 'master'}
 
-    needs_general = any(t.ticket_type in upgrade_types for t in locked.values())
+    # include explicit general purchases too
+    needs_general = any(
+        t.ticket_type == "general" or t.ticket_type in upgrade_types
+        for t in locked.values()
+    )
     general_tt = None
     if needs_general:
         general_tt = TicketTemplate.objects.select_for_update().get(ticket_type='general')
 
+    general_consumed = 0
+
     for item in items:
         tt = locked[item.ticket_template_id]
-        tt.available_quantity += item.quantity
-        tt.save(update_fields=['available_quantity'])
 
-        if tt.ticket_type in upgrade_types:
-            general_tt.available_quantity += item.quantity
-            general_tt.save(update_fields=['available_quantity'])
+        if tt.ticket_type != "general":
+            tt.available_quantity += item.quantity
+            tt.save(update_fields=['available_quantity'])
+
+        if tt.ticket_type in upgrade_types or tt.ticket_type == "general":
+            general_consumed += item.quantity
+
+    if general_tt and general_consumed > 0:
+        general_tt.available_quantity += general_consumed
+        general_tt.save(update_fields=["available_quantity"])
 
     payment = getattr(order, 'payment', None)
     if payment and payment.stripe_payment_intent_id:
@@ -110,7 +136,6 @@ def release_order_inventory(order):
     if payment and payment.status != "paid":
         payment.status = "failed"
         payment.save(update_fields=["status"])
-
 
     order.status = 'expired'
     order.reserved_until = None
