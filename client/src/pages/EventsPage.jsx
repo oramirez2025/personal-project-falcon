@@ -8,7 +8,6 @@ import {
   Button,
 } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
-import { useOutletContext } from "react-router-dom";
 import { Ticket } from "lucide-react";
 
 import ConventionInfo from "../components/ConventionInfo";
@@ -23,8 +22,6 @@ const PAGE_MARGIN = { base: "16px", md: "50px" };
 export default function EventsPage() {
   const [events, setEvents] = useState([]);
   const hasFetched = useRef(false);
-  const { user } = useOutletContext(); // Get user from App.jsx instead of duplicate call
-  const {eventId} = useParams()
 
   useEffect(() => {
     if (hasFetched.current) return;
@@ -126,6 +123,7 @@ export default function EventsPage() {
               <EventCarousel events={events} />
             </VStack>
           </Container>
+          {/* <Outlet/> */}
         </Box>
       </Box>
     </Box>

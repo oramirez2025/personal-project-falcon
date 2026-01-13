@@ -10,6 +10,7 @@ import QuestionsAnswersPage from "./pages/QuestionAnswerPage";
 import EventForumPage from "./pages/EventForumPage";
 import CommentSection from "./components/sections/CommentSection";
 import CommentThreadPage from "./pages/CommentThreadPage";
+import ForumPage from "./pages/ForumPage";
 import NotFoundPage from "./pages/NotFoundPage";
 
 const falconLoader = async () => {
@@ -45,21 +46,21 @@ const router = createBrowserRouter([
             element: <SignUpPage/>
         },
         {
-            path: 'events',
-            element: <EventsPage/>,
+            path: "forum",
+            element: <ForumPage/>,
             children: [
                 {
-                path: ":eventId",
-                element: <EventForumPage/>,
-                children: [{
-                    index: true, 
-                    element: <CommentSection/>
+                    path: "event/:eventId",
+                    element: <EventForumPage/>,
+                    children: [{
+                        index: true, 
+                        element: <CommentSection/>
+                    },
+                    {
+                        path: "comments/:commentId",
+                        element: <CommentThreadPage/>
+                    }]
                 },
-                {
-                    path: "comments/:commentId",
-                    element: <CommentThreadPage/>
-                }]
-                }
             ]
         },
         {

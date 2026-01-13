@@ -9,6 +9,7 @@ import {
   User, 
   LogIn, 
   UserPlus, 
+  MessagesSquare,
   ExternalLink as ExternalLinkIcon,
   Menu,
   X
@@ -216,13 +217,16 @@ const navIcons = {
   Tickets: Ticket,
   FAQ: Scroll,
   'User Profile': User,
+  Forum: MessagesSquare
 }
+
 
 const navRunes = {
   Home: '⚔',
   Tickets: '✧',
   FAQ: '◈',
   'User Profile': '☽',
+  Forum: 'ᚨ',
 }
 
 function GrimoireNavLink({ to, onClick, children }) {
@@ -498,6 +502,7 @@ export default function Bookbar({ user, setUser }) {
                   <GrimoireNavLink to="/tickets" onClick={closeSidebar}>Tickets</GrimoireNavLink>
                   <GrimoireNavLink to="/questions" onClick={closeSidebar}>FAQ</GrimoireNavLink>
                   {user && <GrimoireNavLink to="/profile" onClick={closeSidebar}>User Profile</GrimoireNavLink>}
+                  <GrimoireNavLink to="forum" onClick={closeSidebar}>Forum</GrimoireNavLink>
                 </nav>
               </Box>
 

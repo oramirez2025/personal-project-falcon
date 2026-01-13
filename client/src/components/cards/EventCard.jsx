@@ -10,7 +10,6 @@ import {
 import { Clock, MapPin, MessageCircle } from "lucide-react";
 import BaseCard from "./BaseCard";
 import { Button } from "@chakra-ui/react";
-import { Link } from "react-router-dom";
 
 export default function EventCard({
   id,
