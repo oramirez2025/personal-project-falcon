@@ -4,16 +4,21 @@ import {
   Box,
   Heading,
   Container,
-  Grid,
   VStack,
-  HStack,
+  Button,
 } from "@chakra-ui/react";
-import DaySection from "../components/sections/DaySection";
-import WeatherCard from "../components/cards/WeatherCard";
-import CountdownTimer from "../components/CountdownTimer";
-import TicketsPage from "./TicketsPage";
+import { Link } from "react-router-dom";
+import { useOutletContext } from "react-router-dom";
+import { Ticket } from "lucide-react";
+
+import ConventionInfo from "../components/ConventionInfo";
+import EventCarousel from "../components/EventCarousel";
 import { fetchEvents } from "../utilities";
+import { primaryButtonStyles } from "../theme";
 import HeroicHall from "../assets/HeroicHall.jpeg";
+
+// Consistent page margins to clear sidebar toggle button
+const PAGE_MARGIN = { base: "16px", md: "50px" };
 
 export default function EventsPage() {
   const [events, setEvents] = useState([]);
@@ -22,73 +27,107 @@ export default function EventsPage() {
   const {eventId} = useParams()
 
   useEffect(() => {
-    // Prevent StrictMode double-fetch
     if (hasFetched.current) return;
     hasFetched.current = true;
-    
     fetchEvents(setEvents);
   }, []);
 
-  const eventsByDay = events.reduce((acc, event) => {
-    const day = event.day;
-    if (!acc[day]) acc[day] = [];
-    acc[day].push(event);
-    return acc;
-  }, {});
-
   return (
-    <Box>
-      {
-        !eventId ? (<>
-                {/* Hero */}
-                <Box
-                  bgImage={`url(${HeroicHall})`}
-                  bgSize="cover"
-                  bgPosition="center"
-                  minH="45vh"
-                  display="flex"
-                  alignItems="center"
+    <Box position="relative" minH="100vh">
+      {/* Fixed Full-Page Background */}
+      <Box
+        position="fixed"
+        top="0"
+        left="0"
+        w="100vw"
+        h="100vh"
+        bgImage={`url(${HeroicHall})`}
+        bgSize="cover"
+        bgPosition="center"
+        bgAttachment="fixed"
+        zIndex={0}
+      />
+
+      {/* Dark Overlay for Readability */}
+      <Box
+        position="fixed"
+        top="0"
+        left="0"
+        w="100vw"
+        h="100vh"
+        bg="blackAlpha.700"
+        zIndex={1}
+      />
+
+      {/* Scrollable Content */}
+      <Box position="relative" zIndex={2}>
+        {/* Convention Info Section */}
+        <Box
+          minH="100vh"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          px={PAGE_MARGIN}
+          py={10}
+        >
+          <ConventionInfo />
+        </Box>
+
+        {/* Get Tickets CTA Section */}
+        <Box
+          py={16}
+          px={PAGE_MARGIN}
+          bg="blackAlpha.600"
+          backdropFilter="blur(8px)"
+          textAlign="center"
+        >
+          <Container maxW="container.md">
+            <VStack spacing={6}>
+              <Heading
+                size="lg"
+                color="text.primary"
+                fontFamily="heading"
+              >
+                Ready to Join the Adventure?
+              </Heading>
+              
+              <Link to="/tickets">
+                <Button
+                  size="lg"
+                  {...primaryButtonStyles}
+                  leftIcon={<Ticket size={20} />}
+                  px={8}
+                  py={6}
+                  fontSize="lg"
                 >
-                  <Grid
-                    templateColumns={{ base: "1fr", md: "1fr 1fr" }}
-                    gap={6}
-                    w="100%"
-                    maxW="1200px"
-                    mx="auto"
-                    px={4}
-                  >
-                    <WeatherCard />
-                    <Box textAlign={{ base: "center", md: "right" }}>
-                      <CountdownTimer />
-                    </Box>
-                  </Grid>
-                </Box>
+                  Get Your Tickets
+                </Button>
+              </Link>
+            </VStack>
+          </Container>
+        </Box>
 
-                {/* Tickets */}
-                <TicketsPage/>
-                {/* Events */}
-                <Container maxW="container.xl" py={10}>
-                  <VStack align="stretch" spacing={10}>
-                    {/* Header */}
-                    <HStack justify="space-between">
-                      <Heading size="xl" color="text.primary">
-                        Events
-                      </Heading>
-                    </HStack>
+        {/* Events Section */}
+        <Box
+          py={16}
+          px={PAGE_MARGIN}
+        >
+          <Container maxW="container.xl">
+            <VStack align="stretch" spacing={8}>
+              <Heading 
+                size="xl" 
+                color="text.primary"
+                textAlign="center"
+                fontFamily="heading"
+              >
+                Events
+              </Heading>
 
-                    {/* Days */}
-                    {Object.entries(eventsByDay).map(([day, dayEvents]) => (
-                      <DaySection
-                        key={day}
-                        day={day}
-                        events={dayEvents}
-                      />
-                    ))}
-                  </VStack>
-                </Container>
-        </>): <> </>
-      }
-      <Outlet context={{user}}/>
+              <EventCarousel events={events} />
+            </VStack>
+          </Container>
+        </Box>
+      </Box>
     </Box>
   );
 }

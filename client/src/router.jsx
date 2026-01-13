@@ -10,6 +10,7 @@ import QuestionsAnswersPage from "./pages/QuestionAnswerPage";
 import EventForumPage from "./pages/EventForumPage";
 import CommentSection from "./components/sections/CommentSection";
 import CommentThreadPage from "./pages/CommentThreadPage";
+import NotFoundPage from "./pages/NotFoundPage";
 
 const falconLoader = async () => {
     const token = localStorage.getItem("token")
@@ -77,7 +78,8 @@ const router = createBrowserRouter([
             path: 'questions',
             element: <QuestionsAnswersPage/>
         }
-    ]
+    ],
+        errorElement: <NotFoundPage/>
 }
 ])
 

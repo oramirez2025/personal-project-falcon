@@ -7,6 +7,7 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status as s
 from .models import MyUsers, UserProfile
+from payments_app.services import release_expired_holds
 from .serializers import (
     UserProfileSerializer,
     UserProfileUpdateSerializer,
@@ -229,6 +230,7 @@ class UserTicketsView(User_Auth):
     def get(self, request):
         from payments_app.models import Order
         from payments_app.serializers import OrderSerializer
+        release_expired_holds()
 
         orders = Order.objects.filter(
             user=request.user,
