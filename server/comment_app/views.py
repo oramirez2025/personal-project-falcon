@@ -13,8 +13,17 @@ from rest_framework.status import (
     HTTP_403_FORBIDDEN,
     HTTP_401_UNAUTHORIZED
 )
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 # from .services import build_comment_tree
 from event_app.models import Event
+
+
+class ACommentView(APIView):
+    def get(self,request,comment_id):
+        comment = get_object_or_404(Comment, id=comment_id)
+        ser = CommentSerializer(comment)
+        return Response(ser.data, status=HTTP_200_OK)
 
 
 class CommentView(APIView):
@@ -45,6 +54,16 @@ class CommentView(APIView):
                 if parent and parent.event != event:
                     return Response({"detail": "Parent and child's events must be match up."}, status=HTTP_400_BAD_REQUEST)
                 ser.save(author=request.user, event=event)
+                # Broadcast new comment to the event group
+                channel_layer = get_channel_layer()
+                async_to_sync(channel_layer.group_send)(
+                    f"event_{event.id}",
+                    {
+                        "type": "broadcast_comment",
+                        "comment": ser.data,
+                        "action": "new_comment",
+                    },
+                )
                 return Response(ser.data, status=HTTP_201_CREATED)
             else:
                 return Response(ser.errors, status=HTTP_400_BAD_REQUEST)
@@ -54,18 +73,77 @@ class CommentView(APIView):
     # UPDATE (only the OP)
     def put(self, request, id):
         comment = get_object_or_404(Comment, id=id)
-        if not self.is_OP(request.user, comment) or "parent" in request.data or "event" in request.data:
+        user = request.user
+
+        if not user.is_authenticated:
+            return Response({"detail": "Authentication required"}, status=HTTP_401_UNAUTHORIZED)
+
+        # ---------- LIKE TOGGLE ----------
+        if request.data.get("like") is True:
+            likes = comment.likes or []
+
+            if user.id in likes:
+                likes.remove(user.id)
+            else:
+                likes.append(user.id)
+
+            comment.likes = likes
+            comment.save()
+
+            ser = CommentSerializer(comment)
+
+            channel_layer = get_channel_layer()
+            async_to_sync(channel_layer.group_send)(
+                f"event_{comment.event.id}",
+                {
+                    "type": "broadcast_comment",
+                    "comment": ser.data,
+                    "action": "update_comment",
+                },
+            )
+
+            return Response(ser.data, status=HTTP_200_OK)
+
+        # ---------- TEXT UPDATE ----------
+        if "text" in request.data and not self.is_OP(user, comment):
             return Response({"detail": "Not authorized"}, status=HTTP_403_FORBIDDEN)
+
+        if "parent" in request.data or "event" in request.data:
+            return Response({"detail": "Not authorized"}, status=HTTP_403_FORBIDDEN)
+
         comment_ser = CommentSerializer(comment, data=request.data, partial=True)
         if comment_ser.is_valid():
             comment_ser.save()
+
+            channel_layer = get_channel_layer()
+            async_to_sync(channel_layer.group_send)(
+                f"event_{comment.event.id}",
+                {
+                    "type": "broadcast_comment",
+                    "comment": comment_ser.data,
+                    "action": "update_comment",
+                },
+            )
+
             return Response(comment_ser.data, status=HTTP_200_OK)
+
         return Response(comment_ser.errors, status=HTTP_400_BAD_REQUEST)
+
 
     # DELETE (only OP or admin)
     def delete(self, request, id):
         comment = get_object_or_404(Comment, id=id)
         if not (self.is_OP(request.user, comment) or self.is_admin(request.user)):
             return Response({"detail": "Not authorized"}, status=HTTP_403_FORBIDDEN)
+        # Broadcast delete to the event group before removing
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            f"event_{comment.event.id}",
+            {
+                "type": "broadcast_comment",
+                "comment": {"id": comment.id},
+                "action": "delete_comment",
+            },
+        )
         comment.delete()
         return Response(status=HTTP_204_NO_CONTENT)
