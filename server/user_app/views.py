@@ -224,6 +224,39 @@ class AdminPromotionView(User_Auth):
         }, status=s.HTTP_200_OK)
 
 
+class UserSearchView(User_Auth):
+    """
+    Search users endpoint - ADMIN ONLY.
+    Returns list of users matching email query with admin status.
+    """
+    def get(self, request):
+        if not request.user.is_admin:
+            return Response(
+                {"error": "Only admins can search users"},
+                status=s.HTTP_403_FORBIDDEN
+            )
+
+        query = request.query_params.get('q', '').strip()
+
+        # Filter by email if query provided, otherwise return all
+        users = MyUsers.objects.all()
+        if query:
+            users = users.filter(email__icontains=query)
+
+        # Limit results for performance
+        users = users[:20]
+
+        return Response([
+            {
+                'email': user.email,
+                'full_name': user.full_name,
+                'is_admin': user.is_admin,
+                'is_superuser': user.is_admin
+            }
+            for user in users
+        ], status=s.HTTP_200_OK)
+
+
 class UserTicketsView(User_Auth):
     """Get user's paid ticket orders."""
     def get(self, request):

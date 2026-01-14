@@ -13,6 +13,9 @@ class EventView(APIView):
     - CREATE/UPDATE/DELETE: Admin only (is_staff=True)
     - READ: Anyone
     """
+    # Allow token auth for admin operations, but don't require auth (GET is public)
+    authentication_classes = [TokenAuthentication]
+
     def is_admin(self, user):
         return user.is_authenticated and user.is_staff
 
@@ -96,18 +99,20 @@ class EventWishlistView(APIView):
             status=s.HTTP_201_CREATED
         )
     
-    def delete(self, request):
+    def delete(self, request, event_id=None):
         """Remove an event from watchlist."""
-        event_id = request.data.get('event_id')
-        
+        # Support both URL parameter and request body
+        if event_id is None:
+            event_id = request.data.get('event_id')
+
         if not event_id:
-            return Response({"error": "event_id is required"},status=s.HTTP_400_BAD_REQUEST)
+            return Response({"error": "event_id is required"}, status=s.HTTP_400_BAD_REQUEST)
         try:
             wishlist_item = EventWishlist.objects.get(
                 user=request.user,
                 event_id=event_id
             )
             wishlist_item.delete()
-            return Response({"message": "Event removed from wishlist"},status=s.HTTP_204_NO_CONTENT)
+            return Response({"message": "Event removed from wishlist"}, status=s.HTTP_204_NO_CONTENT)
         except EventWishlist.DoesNotExist:
-            return Response({"error": "Event not in wishlist"},status=s.HTTP_404_NOT_FOUND)
+            return Response({"error": "Event not in wishlist"}, status=s.HTTP_404_NOT_FOUND)

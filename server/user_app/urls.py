@@ -6,6 +6,7 @@ from .views import (
     Log_out,
     UserAccountView,
     AdminPromotionView,
+    UserSearchView,
     UserTicketsView,
 )
 
@@ -24,4 +25,7 @@ urlpatterns = [
 
     # Admin management endpoint
     path('admin-stat/', AdminPromotionView.as_view(), name='admin_access'),
+
+    # User search endpoint (superuser only)
+    path('search/', UserSearchView.as_view(), name='user_search'),
 ]
