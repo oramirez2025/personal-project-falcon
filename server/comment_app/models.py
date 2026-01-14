@@ -18,15 +18,10 @@ class Comment(models.Model):
         on_delete=models.CASCADE, 
         related_name="replies"
     )
-    
-    
+      
     text = models.TextField()
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="comments")
-    
     likes = models.PositiveIntegerField(default=0)
-    
-    
-    
     
     def __str__(self):
         return f"{self.author} on {self.event} said {self.text[:50]}..."

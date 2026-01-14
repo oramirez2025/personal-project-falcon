@@ -3,7 +3,7 @@ import { userConfirmation } from "./utilities";
 import App from "./App";
 import UserProfile from "./pages/UserProfile";
 import SignUpPage from "./pages/SignUpPage";
-import EventsPage from "./pages/EventsPage";
+import HomePage from "./pages/HomePage";
 import LogInPage from "./pages/LogInPage";
 import TicketsPage from "./pages/TicketsPage";
 import QuestionsAnswersPage from "./pages/QuestionAnswerPage";
@@ -41,24 +41,26 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <EventsPage />,
+        element: <HomePage />,
       },
       {
         path: "signup",
         element: <SignUpPage />,
       },
-      {
-        path: "events",
-        element: <EventsPage />,
-      },
+      // condensed to homepage
+      // {
+      //   path: "events",
+      //   element: <EventsPage />,
+      // },
       {
         path: "logIn",
         element: <LogInPage />,
       },
-      {
-        path: "tickets",
-        element: <TicketsPage />,
-      },
+      // condensed to homepage
+      // {
+      //   path: "tickets",
+      //   element: <TicketsPage />,
+      // },
       {
         path: "profile",
         element: <UserProfile />,
