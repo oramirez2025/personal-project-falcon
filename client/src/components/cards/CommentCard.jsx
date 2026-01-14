@@ -27,6 +27,7 @@ export default function CommentCard({
   onEdit,
   onReply,
   onLike,
+  styling
 }) {
   const { id, author, time, text, likes = [], replies = [] } = comment;
 
@@ -50,7 +51,7 @@ export default function CommentCard({
   return (
     <Box pl={`${indent}em`} mt={4}>
       <MotionBox {...cardHover}>
-        <BaseCard>
+        <BaseCard {...styling}>
           <VStack align="stretch" spacing={3}>
             {/* Author + Time */}
             <Text fontWeight="600">

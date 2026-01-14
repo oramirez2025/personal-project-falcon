@@ -9,6 +9,9 @@ import {
 } from "../utilities";
 import EventCard from "../components/cards/EventCard";
 import { useMatch } from "react-router-dom";
+import { MotionBox } from "../components/Motion";
+import { staggerContainer } from "../components/animations/fffAnimations";
+import { Container } from "@chakra-ui/react";
 
 export default function EventForumPage() {
   const { eventId, commentId } = useParams();
@@ -122,9 +125,19 @@ export default function EventForumPage() {
     deleteComment(null, id);
 
   const isCommentRoute = useMatch("/forum/event/:eventId/comments/:commentId")
+  console.log(event)
   return (
     <>
-      {!isCommentRoute && event && <EventCard event={event} detailed={true}/>
+      {!isCommentRoute && event && 
+                                  <Container maxW="container.lg" py={10}>
+                                    <MotionBox
+                                      variants={staggerContainer}
+                                      initial="hidden"
+                                      animate="visible"
+                                    >
+                                      <EventCard {...event}/>
+                                    </MotionBox>
+                                  </Container>
       }
       <Outlet
         context={{

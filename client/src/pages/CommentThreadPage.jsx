@@ -1,5 +1,5 @@
 import { useParams, useOutletContext, Link } from "react-router-dom";
-import { Box, Heading, Button} from "@chakra-ui/react";
+import { Container, Heading, Button} from "@chakra-ui/react";
 import CommentCard from "../components/cards/CommentCard";
 import { MotionBox } from "../components/Motion";
 import { staggerContainer } from "../components/animations/fffAnimations";
@@ -21,19 +21,24 @@ export default function CommentThreadPage() {
   const thread = findCommentById(comments, commentId);
 
   if (!thread) return null;
-
+  <Container maxW="container.lg" py={10}></Container>
   return (
-    <Box py={6}>
+    <Container maxW="container.lg" py={10}>
       <Button
         as={Link}
         to={`/forum/event/${eventId}`}
         variant="ghost"
         mb={4}
+        color="forge.gold.500"
       >
         ← Back to discussion
       </Button>
 
-      <Heading size="md" mb={6}>
+      <Heading 
+        size="lg"
+        color="text.primary"
+        fontFamily="heading"
+      >
         Thread
       </Heading>
 
@@ -48,6 +53,11 @@ export default function CommentThreadPage() {
             depth={0}
             user={user}
             {...handlers}
+            styling={{
+              border:"1px solid",
+              boxShadow:"0 8px 30px rgba(245, 158, 11, 0.2)",
+              borderColor:"forge.gold.600",
+            }}
           />
 
           {/* <Stack spacing={8} divider={<Separator />}>
@@ -64,6 +74,6 @@ export default function CommentThreadPage() {
             ))}
           </Stack> */}
         </MotionBox>
-    </Box>
+    </Container>
   );
 }
