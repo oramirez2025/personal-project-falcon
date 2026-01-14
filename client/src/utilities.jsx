@@ -112,7 +112,7 @@ export const grabWeather = async () => {
 
 export const fetchEvent = async (setEvent, eventId) => {
   try {
-    const response = await api.get(`event/${eventId}`)
+    const response = await api.get(`event/${eventId}/`)
     setEvent(response.data)
   } catch (e) {
     console.error(e)

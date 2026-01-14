@@ -41,7 +41,7 @@ export default function CommentCard({
   const isOP = user?.id === author;
   const isAdmin = user?.is_admin;
 
-  const INLINE_DEPTH_LIMIT = 1; // Can be changed but for now 1 
+  const INLINE_DEPTH_LIMIT = 3; // Can be changed but for now 1 
   const canExpandInline = depth < INLINE_DEPTH_LIMIT;
   const replyCount = replies.length;
 
@@ -138,7 +138,7 @@ export default function CommentCard({
               ) : (
                 <Button
                   as={Link}
-                  to={`/events/${eventId}/comments/${id}`}
+                  to={`/forum/event/${eventId}/comments/${id}`}
                   size="xs"
                   variant="ghost"
                   alignSelf="flex-start"

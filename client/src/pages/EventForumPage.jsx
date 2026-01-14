@@ -8,6 +8,7 @@ import {
   fetchEvent,
 } from "../utilities";
 import EventCard from "../components/cards/EventCard";
+import { useMatch } from "react-router-dom";
 
 export default function EventForumPage() {
   const { eventId, commentId } = useParams();
@@ -119,9 +120,11 @@ export default function EventForumPage() {
 
   const handleDelete = (id) =>
     deleteComment(null, id);
+
+  const isCommentRoute = useMatch("/forum/event/:eventId/comments/:commentId")
   return (
     <>
-      {!commentId && event && <EventCard event={event} detailed={true}/>
+      {!isCommentRoute && event && <EventCard event={event} detailed={true}/>
       }
       <Outlet
         context={{

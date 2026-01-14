@@ -26,7 +26,7 @@ export default function CommentThreadPage() {
     <Box py={6}>
       <Button
         as={Link}
-        to={`/events/${eventId}`}
+        to={`/forum/event/${eventId}`}
         variant="ghost"
         mb={4}
       >

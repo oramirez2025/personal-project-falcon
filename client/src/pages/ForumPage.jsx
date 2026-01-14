@@ -26,7 +26,9 @@ export default function ForumPage() {
     fetchEvents(setEvents);
   }, []);
 
-  const isEventRoute = useMatch("/forum/event/:eventId");
+  const eventMatch = useMatch("/forum/event/:eventId");
+  const commentMatch = useMatch("/forum/event/:eventId/comments/:commentId");
+  const isEventRoute = !!(eventMatch || commentMatch);
 
   return (
     <>

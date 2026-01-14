@@ -501,8 +501,8 @@ export default function Bookbar({ user, setUser }) {
                   <GrimoireNavLink to="/" onClick={closeSidebar}>Home</GrimoireNavLink>
                   <GrimoireNavLink to="/tickets" onClick={closeSidebar}>Tickets</GrimoireNavLink>
                   <GrimoireNavLink to="/questions" onClick={closeSidebar}>FAQ</GrimoireNavLink>
-                  {user && <GrimoireNavLink to="/profile" onClick={closeSidebar}>User Profile</GrimoireNavLink>}
                   <GrimoireNavLink to="forum" onClick={closeSidebar}>Forum</GrimoireNavLink>
+                  {user && <GrimoireNavLink to="/profile" onClick={closeSidebar}>User Profile</GrimoireNavLink>}
                 </nav>
               </Box>
 
