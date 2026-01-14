@@ -86,11 +86,11 @@ const router = createBrowserRouter([
                 path: "general",
                 element: <TavernPage />,
               },
+              {
+                path: "event/:eventId",
+                element: <EventForumPage />,
+              },
             ],
-          },
-          {
-            path: "event/:eventId",
-            element: <EventForumPage />,
           },
         ],
       },

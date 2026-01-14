@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Box, Container, VStack, HStack, Text, Button } from "@chakra-ui/react";
 import { ScrollText, Beer, Feather, MessageCircle } from "lucide-react";
@@ -11,6 +11,7 @@ import EditCommentModal from "../components/modals/EditCommentModal";
 import DeleteCommentModal from "../components/modals/DeleteCommentModal";
 import { MotionBox } from "../components/Motion";
 import { staggerContainer, staggerItem, fadeInUp } from "../components/animations/fffAnimations";
+import { addReply, updateRecursive, deleteRecursive, useEventComments} from "../components/forum/ForumHelpers";
 
 // Sample general discussion comments
 const tavernComments = [
@@ -52,6 +53,9 @@ const tavernComments = [
  */
 export default function TavernPage() {
   const { year } = useParams();
+
+  const wsRef = useRef()
+  const EC = useEventComments()
   
   // Modal state
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -63,18 +67,42 @@ export default function TavernPage() {
   // Mock current user
   const currentUserId = 110;
 
-  // Comment handlers
-  const handleCreateComment = (data) => {
-    console.log("Create comment:", data);
-  };
+  const [comments, setComments] = useState([])
+
+  useEffect(() => {
+    const socket = new WebSocket(
+      `ws://localhost:8001/ws/comments/general/${year}/`
+    );
+    wsRef.current = socket;
+
+    socket.onmessage = (e) => {
+      const { type, comment } = JSON.parse(e.data);
+
+      setComments((prev) => {
+        switch (type) {
+          case "new_comment":
+            return comment.parent
+              ? addReply(prev, comment.parent, comment)
+              : [...prev, comment];
+
+          case "update_comment":
+            return updateRecursive(prev, comment);
+
+          case "delete_comment":
+            return deleteRecursive(prev, comment.id);
+
+          default:
+            return prev;
+        }
+      });
+    };
+
+    return () => socket.close();
+  }, [year]);
 
   const handleReply = (comment) => {
     setSelectedComment(comment);
     setShowReplyModal(true);
-  };
-
-  const handleReplySubmit = (data) => {
-    console.log("Reply to:", selectedComment?.id, data);
   };
 
   const handleEdit = (comment) => {
@@ -82,21 +110,9 @@ export default function TavernPage() {
     setShowEditModal(true);
   };
 
-  const handleEditSubmit = (data) => {
-    console.log("Edit comment:", data);
-  };
-
   const handleDelete = (commentId) => {
     setSelectedComment({ id: commentId });
     setShowDeleteModal(true);
-  };
-
-  const handleDeleteConfirm = (commentId) => {
-    console.log("Delete comment:", commentId);
-  };
-
-  const handleLike = (commentId) => {
-    console.log("Like comment:", commentId);
   };
 
   return (
@@ -212,7 +228,7 @@ export default function TavernPage() {
                   onReply={handleReply}
                   onEdit={handleEdit}
                   onDelete={handleDelete}
-                  onLike={handleLike}
+                  onLike={EC.like}
                 />
               </MotionBox>
             ))}
@@ -224,7 +240,7 @@ export default function TavernPage() {
       <CreateCommentModal
         show={showCreateModal}
         handleClose={() => setShowCreateModal(false)}
-        handleSave={handleCreateComment}
+        handleSave={EC.create}
       />
 
       <ReplyCommentModal
@@ -233,7 +249,7 @@ export default function TavernPage() {
           setShowReplyModal(false);
           setSelectedComment(null);
         }}
-        handleSave={handleReplySubmit}
+        handleSave={EC.reply}
         parentComment={selectedComment}
       />
 
@@ -243,7 +259,7 @@ export default function TavernPage() {
           setShowEditModal(false);
           setSelectedComment(null);
         }}
-        handleSave={handleEditSubmit}
+        handleSave={EC.edit}
         comment={selectedComment}
       />
 
@@ -253,7 +269,7 @@ export default function TavernPage() {
           setShowDeleteModal(false);
           setSelectedComment(null);
         }}
-        handleDelete={handleDeleteConfirm}
+        handleDelete={EC.remove}
         commentId={selectedComment?.id}
       />
     </Box>

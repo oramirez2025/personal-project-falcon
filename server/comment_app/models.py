@@ -25,7 +25,7 @@ class Comment(models.Model):
     
     
     text = models.TextField()
-    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="comments")
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="comments", null=True)
     
     # List of user_ids of those who liked this comment
     likes = ArrayField(

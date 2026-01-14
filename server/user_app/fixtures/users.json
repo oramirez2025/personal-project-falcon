@@ -1,0 +1,8 @@
+[
+  { "model": "user_app.myusers", "pk": 101, "fields": { "email": "dm_mike@example.com", "username": "DungeonMaster_Mike", "is_active": true } },
+  { "model": "user_app.myusers", "pk": 102, "fields": { "email": "rogue@example.com", "username": "RogueKnight42", "is_active": true } },
+  { "model": "user_app.myusers", "pk": 103, "fields": { "email": "wizard@example.com", "username": "WizardOfOz", "is_active": true } },
+  { "model": "user_app.myusers", "pk": 104, "fields": { "email": "luna@example.com", "username": "ElfWizard_Luna", "is_active": true } },
+  { "model": "user_app.myusers", "pk": 105, "fields": { "email": "paladin@example.com", "username": "VeteranPaladin", "is_active": true } },
+  { "model": "user_app.myusers", "pk": 106, "fields": { "email": "barbarian@example.com", "username": "BarbarianBob", "is_active": true } }
+]

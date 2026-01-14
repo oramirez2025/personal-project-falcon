@@ -7,6 +7,7 @@ class Event(models.Model):
     start_time = models.TimeField(null=False) 
     end_time = models.TimeField(null=False)
     location = models.CharField(max_length=255)
+    is_general_discussion = models.BooleanField(default=False)
     description = models.TextField()
 
     def __str__(self):

@@ -1,19 +1,17 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
-import socket
-import os
 
 
 class CommentConsumer(AsyncWebsocketConsumer):
-    async def connect(self):  
+    async def connect(self):
         self.event_id = self.scope["url_route"]["kwargs"]["event_id"]
         self.room_group_name = f"event_{self.event_id}"
 
+        await self.accept()
         await self.channel_layer.group_add(
             self.room_group_name,
             self.channel_name
         )
-        await self.accept()
 
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(
@@ -26,3 +24,6 @@ class CommentConsumer(AsyncWebsocketConsumer):
             "type": event["action"],
             "comment": event["comment"],
         }))
+
+
+

@@ -1,0 +1,79 @@
+[
+  {
+    "model": "comment_app.comment",
+    "pk": 1,
+    "fields": {
+      "author": 101,
+      "event": 1,
+      "parent": null,
+      "text": "Excited to announce we'll have a special guest this year at the opening ceremony!",
+      "likes": [102, 103, 104, 105, 106]
+    }
+  },
+  {
+    "model": "comment_app.comment",
+    "pk": 2,
+    "fields": {
+      "author": 102,
+      "event": 1,
+      "parent": 1,
+      "text": "THE HYPE IS REAL! Is it Matt Mercer?? Please tell me it's Matt Mercer!",
+      "likes": [101, 103, 104, 105, 106]
+    }
+  },
+  {
+    "model": "comment_app.comment",
+    "pk": 3,
+    "fields": {
+      "author": 101,
+      "event": 1,
+      "parent": 2,
+      "text": "My lips are sealed! 🤐 But I will say... bring your Player's Handbook.",
+      "likes": [102, 103, 104]
+    }
+  },
+  {
+    "model": "comment_app.comment",
+    "pk": 4,
+    "fields": {
+      "author": 103,
+      "event": 1,
+      "parent": 1,
+      "text": "I'm freaking out right now! This is going to be the best FalCON yet!",
+      "likes": [101, 102]
+    }
+  },
+  {
+    "model": "comment_app.comment",
+    "pk": 5,
+    "fields": {
+      "author": 104,
+      "event": 1,
+      "parent": null,
+      "text": "First time attending FalCON and I'm SO nervous! Any tips for newbies?",
+      "likes": [101, 105, 106]
+    }
+  },
+  {
+    "model": "comment_app.comment",
+    "pk": 6,
+    "fields": {
+      "author": 105,
+      "event": 1,
+      "parent": 5,
+      "text": "Welcome! Seating is first-come-first-serve — and bring snacks!",
+      "likes": [104, 101]
+    }
+  },
+  {
+    "model": "comment_app.comment",
+    "pk": 7,
+    "fields": {
+      "author": 106,
+      "event": 1,
+      "parent": null,
+      "text": "Will there be coffee available this early? Some of us are rolling with a -2 to initiative.",
+      "likes": [101, 102, 103, 104, 105]
+    }
+  }
+]

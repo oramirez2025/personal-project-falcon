@@ -110,6 +110,15 @@ export const grabWeather = async () => {
 
 // ============= EVENTS =============
 
+export const fetchEvent = async (setEvent, eventId) => {
+  try {
+    const response = await api.get(`event/${eventId}`)
+    setEvent(response.data)
+  } catch (e) {
+    console.error(e)
+  }
+}
+
 export const fetchEvents = async (setEvents) => {
   try {
     const response = await api.get("event/")
@@ -258,5 +267,55 @@ export const searchUsers = async (query = '') => {
   } catch (err) {
     console.error("Failed to search users:", err);
     throw err;
+  }
+};
+
+
+
+// ================ COMMENTS ==================
+export const fetchComments = async (setComments, event) => {
+  try {
+    const response = await api.get(`comment/events/${event}/`)
+    setComments(response.data)
+  }
+  catch (e) {
+    console.error(e)
+  }
+}
+
+export const createComments = async (eventId, data) => {
+  try {
+    const response = await api.post(`comment/events/${eventId}/`, data);
+    return response.data;
+  } catch (e) {
+    console.error(e);
+    return null;
+  }
+};
+
+
+export const deleteRecursive = (comments, id) => {
+  return comments
+    .filter(c => c.id !== id)
+    .map(c => ({
+      ...c,
+      replies: deleteRecursive(c.replies || [], id),
+    }));
+};
+
+
+export const deleteComment = async (_setComments, id) => {
+  try {
+    await api.delete(`comment/${id}/`);
+  } catch (e) {
+    console.error(e);
+  }
+}
+export const updateComment = async (_setComments, _event, id, data) => {
+  try {
+    const response = await api.put(`comment/${id}/`, data);
+    return response.data; 
+  } catch (e) {
+    console.error(e);
   }
 };
