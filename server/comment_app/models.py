@@ -1,7 +1,11 @@
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from event_app.models import Event
 # updated to correct path
 from user_app.models import MyUsers
+from .validators import validate_id
+from django.core import validators as v
+
 
 class Comment(models.Model):
     author = models.ForeignKey(
@@ -20,8 +24,17 @@ class Comment(models.Model):
     )
       
     text = models.TextField()
-    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="comments")
-    likes = models.PositiveIntegerField(default=0)
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="comments", null=True)
+    
+    # List of user_ids of those who liked this comment
+    likes = ArrayField(
+        models.IntegerField(validators=[validate_id]),
+        null=True,
+        blank=True,
+        default=list
+    )
+
+    general = models.BooleanField(default=False)
     
     def __str__(self):
         return f"{self.author} on {self.event} said {self.text[:50]}..."

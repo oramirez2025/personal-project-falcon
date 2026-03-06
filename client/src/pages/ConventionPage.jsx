@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { Outlet, useParams } from "react-router-dom";
 import { Box, Container, VStack, HStack, Text } from "@chakra-ui/react";
 import { ScrollText, Calendar, MapPin, Flame } from "lucide-react";
 import Particles from "../components/forum/Particles";
@@ -7,6 +7,7 @@ import TavernCard from "../components/cards/TavernCard";
 import ForumDaySection from "../components/sections/ForumDaySection";
 import { MotionBox } from "../components/Motion";
 import { fadeInUp } from "../components/animations/fffAnimations";
+import { useState, useRef, useEffect } from "react";
 
 // Sample data - replace with API calls
 import { 
@@ -20,7 +21,7 @@ import {
  * Shows The Tavern (general discussion) and day sections with events
  */
 export default function ConventionPage() {
-  const { year } = useParams();
+  const { year, eventId } = useParams();
   
   // Get convention info and events
   const convention = getConventionByYear(year);
@@ -38,6 +39,113 @@ export default function ConventionPage() {
       </Box>
     );
   }
+
+  const [comments, setComments] = useState([]);
+  const wsRef = useRef(null);
+
+  // ======================
+  // Tree helpers
+  // ======================
+  const addReply = (comments, parentId, reply) =>
+    comments.map((c) =>
+      c.id === parentId
+        ? { ...c, replies: [...(c.replies || []), reply] }
+        : { ...c, replies: addReply(c.replies || [], parentId, reply) }
+    );
+
+  const updateRecursive = (comments, updated) =>
+    comments.map((c) =>
+      c.id === updated.id
+        ? { ...c, ...updated }
+        : { ...c, replies: updateRecursive(c.replies || [], updated) }
+    );
+
+  const deleteRecursive = (comments, id) =>
+    comments
+      .filter((c) => c.id !== id)
+      .map((c) => ({
+        ...c,
+        replies: deleteRecursive(c.replies || [], id),
+      }));
+  // ======================
+  // Initial fetch
+  // ======================
+  useEffect(() => {
+    if (!eventId) return;
+
+    let mounted = true;
+    setLoading(true);
+    setHasFetched(false);
+
+    fetchEvent(setEvent, eventId)
+
+    fetchComments((data) => {
+      if (!mounted) return;
+      setComments(data);
+      setLoading(false);
+      setHasFetched(true);
+    }, eventId);
+
+    return () => {
+      mounted = false;
+    };
+  }, [eventId]);
+
+  // ======================
+  // WebSocket
+  // ======================
+  useEffect(() => {
+    if (!eventId) return;
+
+    const socket = new WebSocket(
+      `ws://localhost:8001/ws/comments/${eventId}/`
+    );
+    wsRef.current = socket;
+
+    socket.onmessage = (e) => {
+      const { type, comment } = JSON.parse(e.data);
+
+      setComments((prev) => {
+        switch (type) {
+          case "new_comment":
+            return comment.parent
+              ? addReply(prev, comment.parent, comment)
+              : [...prev, comment];
+
+          case "update_comment":
+            return updateRecursive(prev, comment);
+
+          case "delete_comment":
+            return deleteRecursive(prev, comment.id);
+
+          default:
+            return prev;
+        }
+      });
+    };
+
+    return () => socket.close();
+  }, [eventId]);
+
+  // ======================
+  // Handler
+  // ======================
+  const handleCreate = (data) =>
+    createComments(eventId, data);
+
+  const handleReply = (parentId, data) =>
+    createComments(eventId, { ...data, parent: parentId });
+
+  const handleEdit = (id, text) =>
+    updateComment(null, eventId, id, { text });
+
+  const handleLike = (id) =>
+    updateComment(null, eventId, id, { like: true });
+
+  const handleDelete = (id) =>
+    deleteComment(null, id);
+
+
 
   return (
     <Box minH="100vh" bg="forge.stone.900" position="relative">

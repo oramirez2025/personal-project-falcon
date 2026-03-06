@@ -25,8 +25,11 @@ export default function CommentCard({
 }) {
   const [showReplies, setShowReplies] = useState(depth < 2);
   const hasReplies = comment.replies && comment.replies.length > 0;
+
+  // these aren't working and I'm guessing it's because
   const isOwner = currentUserId && comment.authorId === currentUserId;
   const isLiked = currentUserId && comment.likes?.includes(currentUserId);
+
   const likeCount = comment.likes?.length || 0;
 
   // Limit nesting depth for readability

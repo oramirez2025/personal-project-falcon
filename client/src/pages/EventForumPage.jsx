@@ -1,4 +1,4 @@
-import { useState } from "react";
+import {useState} from "react";
 import { useParams } from "react-router-dom";
 import { Box, Container, VStack, HStack, Text, Button } from "@chakra-ui/react";
 import { ScrollText, Feather, MessageCircle } from "lucide-react";
@@ -10,11 +10,12 @@ import CreateCommentModal from "../components/modals/CreateCommentModal";
 import ReplyCommentModal from "../components/modals/ReplyCommentModal";
 import EditCommentModal from "../components/modals/EditCommentModal";
 import DeleteCommentModal from "../components/modals/DeleteCommentModal";
+import { useOutletContext } from "react-router-dom";
 import { MotionBox } from "../components/Motion";
 import { staggerContainer, staggerItem } from "../components/animations/fffAnimations";
 
-// Sample data - replace with API calls
-import { getEventById, sampleComments } from "../data/sampleForumData";
+import { useEventComments, useEvent}  from "../components/forum/ForumHelpers"
+
 
 /**
  * Event Forum Page
@@ -22,36 +23,32 @@ import { getEventById, sampleComments } from "../data/sampleForumData";
  */
 export default function EventForumPage() {
   const { eventId } = useParams();
-  
+
   // Get event data
-  const event = getEventById(eventId);
-  
+  const event = useEvent(eventId);
+
   // Modal state
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showReplyModal, setShowReplyModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  
+
   // Selected comment for actions
   const [selectedComment, setSelectedComment] = useState(null);
-  
-  // Mock current user (replace with auth context)
-  const currentUserId = 104; // ElfWizard_Luna for testing
 
+  const { user } = useOutletContext();
+  const currentUserId = user?.id;
+
+
+  const {comments, create, reply, edit, like, remove} = useEventComments(eventId, null)
+
+
+  // ======================
   // Comment handlers
-  const handleCreateComment = (data) => {
-    console.log("Create comment:", data);
-    // API call to create comment
-  };
-
+  // ======================
   const handleReply = (comment) => {
     setSelectedComment(comment);
     setShowReplyModal(true);
-  };
-
-  const handleReplySubmit = (data) => {
-    console.log("Reply to:", selectedComment?.id, data);
-    // API call to create reply
   };
 
   const handleEdit = (comment) => {
@@ -59,24 +56,9 @@ export default function EventForumPage() {
     setShowEditModal(true);
   };
 
-  const handleEditSubmit = (data) => {
-    console.log("Edit comment:", data);
-    // API call to update comment
-  };
-
   const handleDelete = (commentId) => {
     setSelectedComment({ id: commentId });
     setShowDeleteModal(true);
-  };
-
-  const handleDeleteConfirm = (commentId) => {
-    console.log("Delete comment:", commentId);
-    // API call to delete comment
-  };
-
-  const handleLike = (commentId) => {
-    console.log("Like comment:", commentId);
-    // API call to toggle like
   };
 
   if (!event) {
@@ -90,7 +72,7 @@ export default function EventForumPage() {
       </Box>
     );
   }
-
+  const year = new Date(event.day).getFullYear()
   return (
     <Box minH="100vh" bg="forge.stone.900" position="relative">
       {/* Floating Particles */}
@@ -101,7 +83,7 @@ export default function EventForumPage() {
         <Breadcrumb
           items={[
             { label: "Quest Board", to: "/forum", icon: ScrollText },
-            { label: `FalCON ${event.conventionYear}`, to: `/forum/convention/${event.conventionYear}` },
+            { label: `FalCON ${year}`, to: `/forum/convention/${year}` },
             { label: event.title },
           ]}
         />
@@ -131,7 +113,7 @@ export default function EventForumPage() {
               fontSize="sm"
               color="forge.tan.500"
             >
-              ({sampleComments.length} comments)
+              ({comments.length} discussions)
             </Text>
           </HStack>
 
@@ -163,15 +145,15 @@ export default function EventForumPage() {
           animate="visible"
         >
           <VStack align="stretch" gap={4}>
-            {sampleComments.map((comment) => (
-              <MotionBox key={comment.id} variants={staggerItem}>
+            {comments.map((comment) => (
+              <MotionBox key={comment.id} variants={staggerItem} initial="hidden" animate="visible">
                 <CommentCard
                   comment={comment}
                   currentUserId={currentUserId}
                   onReply={handleReply}
                   onEdit={handleEdit}
                   onDelete={handleDelete}
-                  onLike={handleLike}
+                  onLike={like}
                 />
               </MotionBox>
             ))}
@@ -179,7 +161,7 @@ export default function EventForumPage() {
         </MotionBox>
 
         {/* Empty State */}
-        {sampleComments.length === 0 && (
+        {comments.length === 0 && (
           <Box
             bg="forge.stone.800"
             border="1px solid"
@@ -207,7 +189,7 @@ export default function EventForumPage() {
       <CreateCommentModal
         show={showCreateModal}
         handleClose={() => setShowCreateModal(false)}
-        handleSave={handleCreateComment}
+        handleSave={create}
       />
 
       <ReplyCommentModal
@@ -216,7 +198,7 @@ export default function EventForumPage() {
           setShowReplyModal(false);
           setSelectedComment(null);
         }}
-        handleSave={handleReplySubmit}
+        handleSave={reply}
         parentComment={selectedComment}
       />
 
@@ -226,7 +208,7 @@ export default function EventForumPage() {
           setShowEditModal(false);
           setSelectedComment(null);
         }}
-        handleSave={handleEditSubmit}
+        handleSave={edit}
         comment={selectedComment}
       />
 
@@ -236,7 +218,7 @@ export default function EventForumPage() {
           setShowDeleteModal(false);
           setSelectedComment(null);
         }}
-        handleDelete={handleDeleteConfirm}
+        handleDelete={remove}
         commentId={selectedComment?.id}
       />
     </Box>

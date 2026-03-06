@@ -111,7 +111,7 @@ export default function ForumDaySection({
  */
 function ForumEventItem({ event }) {
   return (
-    <Link to={`/forum/event/${event.id}`} style={{ textDecoration: "none" }}>
+    <Link to={`event/${event.id}`} style={{ textDecoration: "none" }}>
       <MotionBox
         bg="forge.stone.800"
         border="1px solid"

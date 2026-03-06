@@ -19,7 +19,7 @@ export default function ReplyCommentModal({
 
   const onSave = () => {
     if (!text.trim()) return;
-    handleSave({ text });
+    handleSave(parentComment.id, { text });
     setText("");
     handleClose();
   };

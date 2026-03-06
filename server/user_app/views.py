@@ -125,6 +125,7 @@ class Info(User_Auth):
     """Quick user info endpoint."""
     def get(self, request):
         return Response({
+            "id": request.user.id,
             "email": request.user.email,
             "is_admin": request.user.is_admin,
             "is_staff": request.user.is_staff,

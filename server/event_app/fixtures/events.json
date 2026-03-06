@@ -1,0 +1,63 @@
+[
+  {
+    "model": "event_app.event",
+    "pk": 1,
+    "fields": {
+      "title": "The Tavern",
+      "day": "2026-08-14",
+      "start_time": "00:00",
+      "end_time": "23:59",
+      "location": "General Discussion",
+      "description": "General discussion, questions & announcements for FalCON 2026"
+    }
+  },
+
+  {
+    "model": "event_app.event",
+    "pk": 2,
+    "fields": {
+      "title": "Opening Ceremony",
+      "day": "2026-08-14",
+      "start_time": "10:00",
+      "end_time": "11:30",
+      "location": "Main Hall",
+      "description": "Join us as we kick off FalCON 2026!"
+    }
+  },
+  {
+    "model": "event_app.event",
+    "pk": 3,
+    "fields": {
+      "title": "Welcome Feast",
+      "day": "2026-08-14",
+      "start_time": "12:00",
+      "end_time": "14:00",
+      "location": "Tavern",
+      "description": "Gather around the table for a hearty meal fit for heroes."
+    }
+  },
+  {
+    "model": "event_app.event",
+    "pk": 4,
+    "fields": {
+      "title": "Dragon's Lair: Session Zero",
+      "day": "2026-08-14",
+      "start_time": "14:00",
+      "end_time": "18:00",
+      "location": "Gaming Hall A",
+      "description": "Create your character and learn the basics of our weekend-long campaign."
+    }
+  },
+  {
+    "model": "event_app.event",
+    "pk": 5,
+    "fields": {
+      "title": "Tavern Games Night",
+      "day": "2026-08-14",
+      "start_time": "20:00",
+      "end_time": "23:00",
+      "location": "Tavern",
+      "description": "Unwind with card games, dice games, and friendly competition."
+    }
+  }
+]
