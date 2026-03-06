@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
-import { Box, Heading, HStack, VStack, Text } from '@chakra-ui/react';
+import { useState, useEffect } from 'react';
+import { Box, HStack, VStack, Text } from '@chakra-ui/react';
 import { MotionBox, MotionHeading } from './Motion';
 import { fadeInUp } from './animations/fffAnimations';
+import { CONVENTION } from '../constants/Convention';
 
 // Pulse animation for event-time heading
 const pulseAnimation = {
@@ -17,28 +18,32 @@ const pulseAnimation = {
 };
 
 /**
- * CountdownTimer component displays a countdown to August 14th
- * Shows "So it begins" message during the event period (Aug 14-16)
+ * CountdownTimer component displays a countdown to convention start
+ * Shows "So it begins" message during the event period
  * @param {boolean} compact - If true, renders a smaller version for embedding
  */
 export default function CountdownTimer({ compact = false }) {
   const [timeRemaining, setTimeRemaining] = useState(null);
   const [isEventTime, setIsEventTime] = useState(false);
-  const hasInitialized = useRef(false);
 
   useEffect(() => {
-    // Prevent StrictMode double-init
-    if (hasInitialized.current) return;
-    hasInitialized.current = true;
-
     const calculateTimeRemaining = () => {
       const now = new Date();
+      
+      // Get event dates from constants
+      // Create new Date objects for current year comparison
       const currentYear = now.getFullYear();
+      const eventStartMonth = CONVENTION.startDate.getMonth();
+      const eventStartDay = CONVENTION.startDate.getDate();
+      const eventEndMonth = CONVENTION.endDate.getMonth();
+      const eventEndDay = CONVENTION.endDate.getDate();
+      
+      // Build this year's event dates
+      const eventStart = new Date(currentYear, eventStartMonth, eventStartDay);
+      const eventEnd = new Date(currentYear, eventEndMonth, eventEndDay, 23, 59, 59);
+      const resetDate = new Date(currentYear, eventEndMonth, eventEndDay + 1);
 
-      const eventStart = new Date(currentYear, 7, 14); // August 14th
-      const eventEnd = new Date(currentYear, 7, 16, 23, 59, 59); // August 16th end of day
-      const resetDate = new Date(currentYear, 7, 17); // August 17th
-
+      // Check if we're currently within the event period
       if (now >= eventStart && now <= eventEnd) {
         setIsEventTime(true);
         setTimeRemaining(null);
@@ -47,13 +52,17 @@ export default function CountdownTimer({ compact = false }) {
 
       setIsEventTime(false);
 
+      // Determine target date: this year's event or next year's
       let targetDate;
       if (now >= resetDate) {
-        targetDate = new Date(currentYear + 1, 7, 14);
+        // After event ends, countdown to next year
+        targetDate = new Date(currentYear + 1, eventStartMonth, eventStartDay);
       } else {
-        targetDate = new Date(currentYear, 7, 14);
+        // Before event, countdown to this year
+        targetDate = new Date(currentYear, eventStartMonth, eventStartDay);
       }
 
+      // Calculate time difference
       const difference = targetDate - now;
       const days = Math.floor(difference / (1000 * 60 * 60 * 24));
       const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -63,8 +72,13 @@ export default function CountdownTimer({ compact = false }) {
       setTimeRemaining({ days, hours, minutes, seconds });
     };
 
+    // Calculate immediately
     calculateTimeRemaining();
+    
+    // Update every second
     const interval = setInterval(calculateTimeRemaining, 1000);
+    
+    // Cleanup on unmount
     return () => clearInterval(interval);
   }, []);
 
@@ -150,33 +164,39 @@ export default function CountdownTimer({ compact = false }) {
     );
   }
 
-  // Full version
+  // Full version - Hero centerpiece
   return (
     <MotionBox 
       {...fadeInUp} 
       display="flex" 
       flexDirection="column" 
       alignItems="center" 
-      justifyContent="center" 
-      p={8} 
-      textAlign="center"
+      justifyContent="center"
     >
-      <Heading size="xl" mb={8} fontWeight="bold" color="text.primary">
-        Countdown to August 14th
-      </Heading>
-      
-      <HStack spacing={8} flexWrap="wrap" justifyContent="center">
+      <HStack gap={{ base: 4, md: 8 }} flexWrap="wrap" justifyContent="center">
         {[
           { value: timeRemaining.days, label: 'Days' },
           { value: timeRemaining.hours, label: 'Hours' },
           { value: timeRemaining.minutes, label: 'Minutes' },
           { value: timeRemaining.seconds, label: 'Seconds' },
         ].map((item, i) => (
-          <VStack key={i} minW="80px">
-            <Text fontSize="5xl" fontWeight="bold" color="forge.gold.500">
-              {item.value}
+          <VStack key={i} gap={1}>
+            <Text 
+              fontSize={{ base: "4xl", md: "6xl", lg: "7xl" }} 
+              fontWeight="bold" 
+              fontFamily="heading"
+              color="forge.gold.400"
+              textShadow="0 0 30px rgba(245, 158, 11, 0.5)"
+              lineHeight={1}
+            >
+              {String(item.value).padStart(2, '0')}
             </Text>
-            <Text fontSize="md" color="text.muted" textTransform="uppercase" mt={2}>
+            <Text 
+              fontSize={{ base: "xs", md: "sm" }} 
+              color="forge.stone.500" 
+              textTransform="uppercase" 
+              letterSpacing="2px"
+            >
               {item.label}
             </Text>
           </VStack>

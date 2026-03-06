@@ -4,7 +4,6 @@ import {
   Text,
   Stack,
   Separator,
-  Box,
   HStack,
 } from "@chakra-ui/react";
 import { Clock, MapPin, MessageCircle } from "lucide-react";
@@ -51,11 +50,13 @@ export default function EventCard({
             </Text>
           </HStack>
 
-          {/* Location */}
-          <HStack gap={2} color="text.muted" fontSize="sm">
-            <MapPin size={14} />
-            <Text>{location}</Text>
-          </HStack>
+          {/* Location - Optional */}
+          {location && (
+            <HStack gap={2} color="text.muted" fontSize="sm">
+              <MapPin size={14} />
+              <Text>{location}</Text>
+            </HStack>
+          )}
 
           <Separator borderColor="forge.stone.700" />
 

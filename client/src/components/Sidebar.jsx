@@ -560,7 +560,7 @@ export default function Sidebar({ user, setUser }) {
                 <SectionDivider label="Navigate" />
                 <nav>
                   <GrimoireNavLink to="/" onClick={closeSidebar}>Home</GrimoireNavLink>
-                  <GrimoireNavLink to="/tickets" onClick={closeSidebar}>Tickets</GrimoireNavLink>
+                  {/* <GrimoireNavLink to="/tickets" onClick={closeSidebar}>Tickets</GrimoireNavLink> */}
                   <GrimoireNavLink to="/forum" onClick={closeSidebar}>Quest Board</GrimoireNavLink>
                   <GrimoireNavLink to="/questions" onClick={closeSidebar}>FAQ</GrimoireNavLink>
                   {user && <GrimoireNavLink to="/profile" onClick={closeSidebar}>User Profile</GrimoireNavLink>}

@@ -8,7 +8,7 @@ import { Box } from "@chakra-ui/react";
  */
 export default function VideoAnimations({ src, overlay = true }) {
   return (
-    <Box position="absolute" top={0} left={0} w="100%" h="100%" overflow="hidden" zIndex={0}>
+    <Box position="fixed" inset={0} overflow="hidden" zIndex={0}>
       {/* Video Background */}
       <video
         autoPlay
@@ -35,7 +35,7 @@ export default function VideoAnimations({ src, overlay = true }) {
           left={0}
           w="100%"
           h="100%"
-          bg="blackAlpha.600"
+          bg="blackAlpha.500"
         />
       )}
     </Box>

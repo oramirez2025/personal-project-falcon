@@ -22,8 +22,7 @@ class Comment(models.Model):
         on_delete=models.CASCADE, 
         related_name="replies"
     )
-    
-    
+      
     text = models.TextField()
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="comments", null=True)
     
