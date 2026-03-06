@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
+    'channels',
     'user_app',
     'ticket_app',
     'weather_app',
@@ -98,6 +99,17 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'falcon_proj.wsgi.application'
 
+ASGI_APPLICATION = 'falcon_proj.asgi.application'
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
+}
+
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
@@ -108,6 +120,7 @@ DATABASES = {
         'NAME': 'falconforge_db',
     }
 }
+
 
 
 # Password validation
@@ -149,12 +162,3 @@ STATIC_URL = 'static/'
 # Media files (User uploads)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-
-"""
-    Account: 
-        - a@gmail.com
-        - pass
-
-
-"""
