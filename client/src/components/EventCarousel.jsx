@@ -12,6 +12,10 @@ export default function EventCarousel({ events = [] }) {
   const [visibleCount, setVisibleCount] = useState(3);
   const intervalRef = useRef(null);
 
+  const getEventYear = (event) => {
+    return event.day.match(/^(\d{4})-/)[1]
+  }
+
   // responsive visible count
   useEffect(() => {
     const handleResize = () => {
@@ -122,7 +126,7 @@ export default function EventCarousel({ events = [] }) {
                 >
                   <EventCard
                     {...event}
-                    forumLink={`/forum/event/${event.id}`}
+                    forumLink={`/forum/convention/${getEventYear(event)}/event/${event.id}`}
                   />
                 </motion.div>
               ))}
